@@ -4,26 +4,30 @@ pragma solidity 0.8.28;
 /// @title Akmena Agent Registry
 /// @notice Canonical registry of protocol agents.
 contract AgentRegistry {
-    /// -----------------------------------------------------------------------
-    /// Errors
-    /// -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Errors
+    // -------------------------------------------------------------------------
+
+    error Unauthorized();
     error AgentNotFound();
     error AgentAlreadyExists();
     error OwnerAlreadyRegistered();
     error ZeroAddress();
     error InvalidMetadata();
 
-    /// -----------------------------------------------------------------------
-    /// Events
-    /// -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Events
+    // -------------------------------------------------------------------------
 
     event RegistryInitialized(address indexed owner);
 
     event AgentRegistered(bytes32 indexed id, address indexed owner, string metadataURI);
 
-    /// -----------------------------------------------------------------------
-    /// Storage
-    /// -----------------------------------------------------------------------
+    event MetadataUpdated(bytes32 indexed id, string metadataURI, uint32 version);
+
+    // -------------------------------------------------------------------------
+    // Storage
+    // -------------------------------------------------------------------------
 
     struct Agent {
         bytes32 id;
@@ -44,9 +48,9 @@ contract AgentRegistry {
 
     uint256 internal agentCount;
 
-    /// -----------------------------------------------------------------------
-    /// Constructor
-    /// -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
 
     constructor() {
         registryOwner = msg.sender;
@@ -54,9 +58,9 @@ contract AgentRegistry {
         emit RegistryInitialized(msg.sender);
     }
 
-    /// -----------------------------------------------------------------------
-    /// Registration
-    /// -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Registration
+    // -------------------------------------------------------------------------
 
     function register(bytes32 id, string calldata metadataURI) external {
         if (msg.sender == address(0)) {
@@ -95,9 +99,35 @@ contract AgentRegistry {
         emit AgentRegistered(id, msg.sender, metadataURI);
     }
 
-    /// -----------------------------------------------------------------------
-    /// Views
-    /// -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Metadata
+    // -------------------------------------------------------------------------
+
+    function updateMetadata(bytes32 id, string calldata metadataURI) external {
+        if (!exists(id)) {
+            revert AgentNotFound();
+        }
+
+        if (bytes(metadataURI).length == 0) {
+            revert InvalidMetadata();
+        }
+
+        Agent storage agent = agents[id];
+
+        if (agent.owner != msg.sender) {
+            revert Unauthorized();
+        }
+
+        agent.metadataURI = metadataURI;
+        agent.updatedAt = uint64(block.timestamp);
+        agent.version++;
+
+        emit MetadataUpdated(id, metadataURI, agent.version);
+    }
+
+    // -------------------------------------------------------------------------
+    // Views
+    // -------------------------------------------------------------------------
 
     function totalAgents() external view returns (uint256) {
         return agentCount;
