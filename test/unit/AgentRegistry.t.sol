@@ -7,6 +7,9 @@ import "../../src/registry/AgentRegistry.sol";
 contract AgentRegistryTest is Test {
     AgentRegistry registry;
 
+    address internal alice = address(0xA11CE);
+    address internal bob = address(0xB0B);
+
     bytes32 internal constant AGENT_ID = keccak256("agent-1");
 
     string internal constant INITIAL_URI = "ipfs://akmena-agent";
@@ -39,7 +42,6 @@ contract AgentRegistryTest is Test {
         AgentRegistry.Agent memory agent = registry.getAgent(AGENT_ID);
 
         assertEq(agent.metadataURI, UPDATED_URI);
-
         assertEq(agent.version, 2);
     }
 
@@ -55,5 +57,65 @@ contract AgentRegistryTest is Test {
         vm.expectRevert(AgentRegistry.InvalidMetadata.selector);
 
         registry.updateMetadata(AGENT_ID, "");
+    }
+
+    // -------------------------------------------------------------------------
+    // Verification
+    // -------------------------------------------------------------------------
+
+    function testRegistryOwnerCanVerifyAgent() public {
+        vm.prank(alice);
+        registry.register(AGENT_ID, INITIAL_URI);
+
+        registry.setVerification(AGENT_ID, true);
+
+        assertTrue(registry.isVerified(AGENT_ID));
+    }
+
+    function testNonOwnerCannotVerifyAgent() public {
+        vm.prank(alice);
+        registry.register(AGENT_ID, INITIAL_URI);
+
+        vm.prank(bob);
+
+        vm.expectRevert(AgentRegistry.Unauthorized.selector);
+
+        registry.setVerification(AGENT_ID, true);
+    }
+
+    function testVerificationStateUpdates() public {
+        vm.prank(alice);
+        registry.register(AGENT_ID, INITIAL_URI);
+
+        registry.setVerification(AGENT_ID, true);
+
+        assertTrue(registry.isVerified(AGENT_ID));
+
+        registry.setVerification(AGENT_ID, false);
+
+        assertFalse(registry.isVerified(AGENT_ID));
+    }
+
+    function testCannotVerifyUnknownAgent() public {
+        vm.expectRevert(AgentRegistry.AgentNotFound.selector);
+
+        registry.setVerification(keccak256("missing-agent"), true);
+    }
+
+    // -------------------------------------------------------------------------
+    // ownerOf
+    // -------------------------------------------------------------------------
+
+    function testOwnerOfReturnsCorrectOwner() public {
+        vm.prank(alice);
+        registry.register(AGENT_ID, INITIAL_URI);
+
+        assertEq(registry.ownerOf(AGENT_ID), alice);
+    }
+
+    function testOwnerOfUnknownAgentReverts() public {
+        vm.expectRevert(AgentRegistry.AgentNotFound.selector);
+
+        registry.ownerOf(keccak256("missing-agent"));
     }
 }

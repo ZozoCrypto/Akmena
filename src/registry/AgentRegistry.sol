@@ -25,6 +25,8 @@ contract AgentRegistry {
 
     event MetadataUpdated(bytes32 indexed id, string metadataURI, uint32 version);
 
+    event VerificationUpdated(bytes32 indexed id, bool verified);
+
     // -------------------------------------------------------------------------
     // Storage
     // -------------------------------------------------------------------------
@@ -43,7 +45,6 @@ contract AgentRegistry {
     address public immutable registryOwner;
 
     mapping(bytes32 => Agent) internal agents;
-
     mapping(address => bytes32) internal ownerToAgent;
 
     uint256 internal agentCount;
@@ -126,6 +127,27 @@ contract AgentRegistry {
     }
 
     // -------------------------------------------------------------------------
+    // Verification
+    // -------------------------------------------------------------------------
+
+    function setVerification(bytes32 id, bool verified) external {
+        if (!exists(id)) {
+            revert AgentNotFound();
+        }
+
+        if (msg.sender != registryOwner) {
+            revert Unauthorized();
+        }
+
+        Agent storage agent = agents[id];
+
+        agent.verified = verified;
+        agent.updatedAt = uint64(block.timestamp);
+
+        emit VerificationUpdated(id, verified);
+    }
+
+    // -------------------------------------------------------------------------
     // Views
     // -------------------------------------------------------------------------
 
@@ -139,6 +161,22 @@ contract AgentRegistry {
 
     function agentOf(address owner) external view returns (bytes32) {
         return ownerToAgent[owner];
+    }
+
+    function ownerOf(bytes32 id) external view returns (address) {
+        if (!exists(id)) {
+            revert AgentNotFound();
+        }
+
+        return agents[id].owner;
+    }
+
+    function isVerified(bytes32 id) external view returns (bool) {
+        if (!exists(id)) {
+            revert AgentNotFound();
+        }
+
+        return agents[id].verified;
     }
 
     function getAgent(bytes32 id) external view returns (Agent memory) {

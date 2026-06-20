@@ -26,4 +26,8 @@ contract AgentRegistryInvariantTest is Test {
     function invariant_TotalAgentsNeverZero() public view {
         assertGe(registry.totalAgents(), 1);
     }
+
+    function invariant_OwnerLookupMatchesAgentRecord() public view {
+        assertEq(registry.ownerOf(AGENT_ID), registry.getAgent(AGENT_ID).owner);
+    }
 }
