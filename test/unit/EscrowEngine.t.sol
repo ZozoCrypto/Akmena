@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import "forge-std/Test.sol";
+import "../../src/escrow/EscrowEngine.sol";
+
+contract EscrowEngineTest is Test {
+    EscrowEngine escrow;
+
+    bytes32 internal constant ESCROW_ID = keccak256("escrow-1");
+
+    address internal constant PAYER = address(0x100);
+
+    address internal constant PAYEE = address(0x200);
+
+    uint256 internal constant AMOUNT = 1 ether;
+
+    function setUp() public {
+        escrow = new EscrowEngine();
+    }
+
+    function testCreateEscrow() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        assertTrue(escrow.exists(ESCROW_ID));
+    }
+
+    function testCannotCreateDuplicateEscrow() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        vm.expectRevert(EscrowEngine.EscrowAlreadyExists.selector);
+
+        vm.prank(PAYER);
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+    }
+
+    function testGetUnknownEscrowReverts() public {
+        vm.expectRevert(EscrowEngine.EscrowNotFound.selector);
+
+        escrow.getEscrow(ESCROW_ID);
+    }
+
+    function testEscrowStoredCorrectly() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        IEscrowEngine.Escrow memory e = escrow.getEscrow(ESCROW_ID);
+
+        assertEq(e.id, ESCROW_ID);
+
+        assertEq(e.payer, PAYER);
+
+        assertEq(e.payee, PAYEE);
+
+        assertEq(e.amount, AMOUNT);
+
+        assertFalse(e.released);
+
+        assertFalse(e.refunded);
+    }
+
+    function testEscrowStartsFunded() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        assertEq(address(escrow).balance, AMOUNT);
+    }
+
+    function testReleaseEscrow() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        uint256 beforeBalance = PAYEE.balance;
+
+        escrow.release(ESCROW_ID);
+
+        IEscrowEngine.Escrow memory e = escrow.getEscrow(ESCROW_ID);
+
+        assertTrue(e.released);
+
+        assertEq(PAYEE.balance, beforeBalance + AMOUNT);
+    }
+
+    function testCannotReleaseTwice() public {
+        vm.deal(PAYER, 10 ether);
+
+        vm.prank(PAYER);
+
+        escrow.createEscrow{value: AMOUNT}(ESCROW_ID, PAYEE);
+
+        escrow.release(ESCROW_ID);
+
+        vm.expectRevert(EscrowEngine.EscrowAlreadyReleased.selector);
+
+        escrow.release(ESCROW_ID);
+    }
+
+    function testExistsReturnsFalseForUnknownEscrow() public view {
+        assertFalse(escrow.exists(keccak256("unknown-escrow")));
+    }
+}
