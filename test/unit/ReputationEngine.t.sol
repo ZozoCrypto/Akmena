@@ -24,7 +24,6 @@ contract ReputationEngineTest is Test {
 
     function testPenaltyDecreasesScore() public {
         engine.reward(AGENT_ID, 100);
-
         engine.penalize(AGENT_ID, 40);
 
         IReputationEngine.Reputation memory reputation = engine.getReputation(AGENT_ID);
@@ -34,7 +33,6 @@ contract ReputationEngineTest is Test {
 
     function testPenaltyCannotUnderflow() public {
         engine.reward(AGENT_ID, 50);
-
         engine.penalize(AGENT_ID, 100);
 
         IReputationEngine.Reputation memory reputation = engine.getReputation(AGENT_ID);
@@ -60,7 +58,7 @@ contract ReputationEngineTest is Test {
         assertEq(reputation.completedAgreements, 3);
     }
 
-    function testUnknownAgentStartsAtZero() public {
+    function testUnknownAgentStartsAtZero() public view {
         IReputationEngine.Reputation memory reputation = engine.getReputation(AGENT_ID);
 
         assertEq(reputation.score, 0);
@@ -71,7 +69,6 @@ contract ReputationEngineTest is Test {
 
     function testRewardThenPenaltyProducesExpectedScore() public {
         engine.reward(AGENT_ID, 100);
-
         engine.penalize(AGENT_ID, 25);
 
         IReputationEngine.Reputation memory reputation = engine.getReputation(AGENT_ID);
@@ -81,7 +78,6 @@ contract ReputationEngineTest is Test {
 
     function testZeroPointRewardReverts() public {
         vm.expectRevert(ReputationEngine.InvalidPoints.selector);
-
         engine.reward(AGENT_ID, 0);
     }
 }
