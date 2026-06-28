@@ -1,9 +1,22 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
 /// @title IAKMAuthorization
-/// @notice ERC3009 authorization extension interface for AKM.
+/// @notice ERC-3009 inspired authorization interface for AKM autonomous payments.
 interface IAKMAuthorization {
+    struct Authorization {
+        address from;
+        address to;
+        uint256 value;
+        uint256 validAfter;
+        uint256 validBefore;
+        bytes32 nonce;
+    }
+
+    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+
+    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
+
     function transferWithAuthorization(
         address from,
         address to,
