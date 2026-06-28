@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /// @title AKMAuthorization
 /// @notice Authorization engine powering AKM autonomous commerce.
 /// @dev Foundation for ERC-3009 and future AKM payment protocols.
-abstract contract AKMAuthorization is EIP712 {
+abstract contract AKMAuthorization {
     using ECDSA for bytes32;
 
     // =============================================================
@@ -49,16 +48,9 @@ abstract contract AKMAuthorization is EIP712 {
     event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
 
     // =============================================================
-    //                        CONSTRUCTOR
-    // =============================================================
-
-    constructor() EIP712("Akmena Authorization", "1") {}
-
-    // =============================================================
     //                      TIME ABSTRACTION
     // =============================================================
 
-    /// @dev Wrapped for improved testing and future extensibility.
     function _currentTime() internal view virtual returns (uint256) {
         return block.timestamp;
     }
@@ -75,27 +67,27 @@ abstract contract AKMAuthorization is EIP712 {
     //                    INTERNAL FUNCTIONS
     // =============================================================
 
-    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+    function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
         if (_authorizationUsed[authorizer][nonce]) {
             revert AuthorizationAlreadyUsed();
         }
+    }
 
+    function _markAuthorizationAsUsed(address authorizer, bytes32 nonce) internal {
         _authorizationUsed[authorizer][nonce] = true;
 
         emit AuthorizationUsed(authorizer, nonce);
     }
 
     function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
-        if (_authorizationUsed[authorizer][nonce]) {
-            revert AuthorizationAlreadyUsed();
-        }
+        _requireUnusedAuthorization(authorizer, nonce);
 
         _authorizationUsed[authorizer][nonce] = true;
 
         emit AuthorizationCanceled(authorizer, nonce);
     }
 
-    function _requireValidTimeWindow(uint256 validAfter, uint256 validBefore) internal view {
+    function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
         uint256 currentTime = _currentTime();
 
         if (currentTime <= validAfter) {

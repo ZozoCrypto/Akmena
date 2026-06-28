@@ -4,14 +4,16 @@ pragma solidity 0.8.28;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
+import {IAKMToken} from "../../interfaces/IAKMToken.sol";
+import {AKMPayments} from "../extensions/AKMPayments.sol";
+
 /// @title AkmenaToken
 /// @notice Native settlement asset for the Akmena Protocol.
-/// @dev Fixed-supply ERC20 with ERC2612 permit support.
-contract AkmenaToken is ERC20, ERC20Permit {
-    /// @notice Maximum fixed supply.
+/// @dev Fixed-supply ERC20 with ERC2612 Permit and ERC3009 authorization support.
+contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
+    /// @notice Maximum immutable supply.
     uint256 public constant MAX_SUPPLY = 1_000_000_000 ether;
 
-    /// @notice Zero address provided as initial holder.
     error InvalidInitialHolder();
 
     constructor(address initialHolder) ERC20("Akmena Token", "AKM") ERC20Permit("Akmena Token") {
@@ -20,5 +22,20 @@ contract AkmenaToken is ERC20, ERC20Permit {
         }
 
         _mint(initialHolder, MAX_SUPPLY);
+    }
+
+    /// @notice Returns the immutable maximum AKM supply.
+    function maxSupply() external pure returns (uint256) {
+        return MAX_SUPPLY;
+    }
+
+    /// @inheritdoc AKMPayments
+    function _transferTokens(address from, address to, uint256 amount) internal override {
+        _transfer(from, to, amount);
+    }
+
+    /// @inheritdoc AKMPayments
+    function _authorizationDigest(bytes32 structHash) internal view override returns (bytes32) {
+        return _hashTypedDataV4(structHash);
     }
 }
