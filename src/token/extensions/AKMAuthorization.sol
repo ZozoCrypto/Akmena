@@ -2,11 +2,12 @@
 pragma solidity ^0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {IAKMAuthorization} from "../../interfaces/IAKMAuthorization.sol";
 
 /// @title AKMAuthorization
-/// @notice Authorization engine powering AKM autonomous commerce.
-/// @dev Foundation for ERC-3009 and future AKM payment protocols.
-abstract contract AKMAuthorization {
+/// @notice Authorization engine powering AKM payment authorizations.
+/// @dev Foundation for ERC-3009 payment operations.
+abstract contract AKMAuthorization is IAKMAuthorization {
     using ECDSA for bytes32;
 
     // =============================================================
@@ -14,12 +15,12 @@ abstract contract AKMAuthorization {
     // =============================================================
 
     error AuthorizationAlreadyUsed();
-    error InvalidSignature();
     error AuthorizationExpired();
     error AuthorizationNotYetValid();
+    error InvalidSignature();
 
     // =============================================================
-    //                        TYPE HASHES
+    //                        EIP-3009 TYPEHASHES
     // =============================================================
 
     bytes32 internal constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256(
@@ -37,7 +38,7 @@ abstract contract AKMAuthorization {
     //                          STORAGE
     // =============================================================
 
-    mapping(address => mapping(bytes32 => bool)) internal _authorizationUsed;
+    mapping(address => mapping(bytes32 => bool)) internal _authorizationStates;
 
     // =============================================================
     //                           EVENTS
@@ -48,7 +49,15 @@ abstract contract AKMAuthorization {
     event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
 
     // =============================================================
-    //                      TIME ABSTRACTION
+    //                           VIEWS
+    // =============================================================
+
+    function authorizationState(address authorizer, bytes32 nonce) public view virtual override returns (bool) {
+        return _authorizationStates[authorizer][nonce];
+    }
+
+    // =============================================================
+    //                    INTERNAL TIME SOURCE
     // =============================================================
 
     function _currentTime() internal view virtual returns (uint256) {
@@ -56,25 +65,17 @@ abstract contract AKMAuthorization {
     }
 
     // =============================================================
-    //                      VIEW FUNCTIONS
-    // =============================================================
-
-    function authorizationState(address authorizer, bytes32 nonce) public view returns (bool) {
-        return _authorizationUsed[authorizer][nonce];
-    }
-
-    // =============================================================
-    //                    INTERNAL FUNCTIONS
+    //                 INTERNAL AUTHORIZATION LOGIC
     // =============================================================
 
     function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
-        if (_authorizationUsed[authorizer][nonce]) {
+        if (_authorizationStates[authorizer][nonce]) {
             revert AuthorizationAlreadyUsed();
         }
     }
 
-    function _markAuthorizationAsUsed(address authorizer, bytes32 nonce) internal {
-        _authorizationUsed[authorizer][nonce] = true;
+    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+        _authorizationStates[authorizer][nonce] = true;
 
         emit AuthorizationUsed(authorizer, nonce);
     }
@@ -82,22 +83,26 @@ abstract contract AKMAuthorization {
     function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
         _requireUnusedAuthorization(authorizer, nonce);
 
-        _authorizationUsed[authorizer][nonce] = true;
+        _authorizationStates[authorizer][nonce] = true;
 
         emit AuthorizationCanceled(authorizer, nonce);
     }
 
     function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
-        uint256 currentTime = _currentTime();
+        uint256 timestamp = _currentTime();
 
-        if (currentTime <= validAfter) {
+        if (timestamp <= validAfter) {
             revert AuthorizationNotYetValid();
         }
 
-        if (currentTime >= validBefore) {
+        if (timestamp >= validBefore) {
             revert AuthorizationExpired();
         }
     }
+
+    // =============================================================
+    //                 SIGNATURE VERIFICATION
+    // =============================================================
 
     function _recoverSigner(bytes32 digest, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
         return ECDSA.recover(digest, v, r, s);

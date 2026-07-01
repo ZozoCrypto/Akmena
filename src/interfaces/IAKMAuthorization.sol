@@ -2,21 +2,12 @@
 pragma solidity ^0.8.28;
 
 /// @title IAKMAuthorization
-/// @notice ERC-3009 inspired authorization interface for AKM autonomous payments.
+/// @notice ERC-3009 authorization interface for AKM.
 interface IAKMAuthorization {
-    struct Authorization {
-        address from;
-        address to;
-        uint256 value;
-        uint256 validAfter;
-        uint256 validBefore;
-        bytes32 nonce;
-    }
+    /// @notice Returns whether an authorization nonce has been used.
+    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
 
-    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
-
-    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
-
+    /// @notice Executes a signed transfer authorization.
     function transferWithAuthorization(
         address from,
         address to,
@@ -29,6 +20,7 @@ interface IAKMAuthorization {
         bytes32 s
     ) external;
 
+    /// @notice Executes a signed transfer where the recipient submits the authorization.
     function receiveWithAuthorization(
         address from,
         address to,
@@ -41,7 +33,6 @@ interface IAKMAuthorization {
         bytes32 s
     ) external;
 
+    /// @notice Cancels an unused authorization.
     function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external;
-
-    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
 }
