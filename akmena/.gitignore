@@ -1,0 +1,7 @@
+
+# Foundry / Akmena Ignores
+lib/
+out/
+cache/
+broadcast/
+.env
