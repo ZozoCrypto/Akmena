@@ -6,6 +6,7 @@ import {AKMErrors} from "../lib/AKMErrors.sol";
 import {AKMConstants} from "../lib/AKMConstants.sol";
 
 abstract contract AkmenaAuthorization {
+    uint256 public constant MAX_TASK_DURATION = 30 days;
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
     event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
@@ -24,11 +25,29 @@ abstract contract AkmenaAuthorization {
         bytes32 r,
         bytes32 s
     ) public virtual {
-        if (block.timestamp <= validAfter || block.timestamp >= validBefore) revert AKMErrors.AuthorizationExpired();
+        // Safety: Enforce relative duration limit
+        if (validBefore <= validAfter || (validBefore - validAfter) > MAX_TASK_DURATION) {
+            revert AKMErrors.InvalidDuration();
+        }
+
+        // Safety: Enforce temporal window
+        // forge-ignore-warning block-timestamp
+        if (block.timestamp <= validAfter || block.timestamp >= validBefore) {
+            revert AKMErrors.AuthorizationExpired();
+        }
+
         if (authorizationState[from][nonce]) revert AKMErrors.AuthorizationUsed();
 
         bytes32 structHash = keccak256(
-            abi.encode(AKMConstants.TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)
+            abi.encode(
+                AKMConstants.TRANSFER_WITH_AUTHORIZATION_TYPEHASH, 
+                from, 
+                to, 
+                value, 
+                validAfter, 
+                validBefore, 
+                nonce
+            )
         );
 
         bytes32 hash = _domainHash(structHash);

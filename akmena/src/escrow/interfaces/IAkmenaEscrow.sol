@@ -9,7 +9,8 @@ interface IAkmenaEscrow {
         address seller;
         address arbiter;
         uint256 amount;
-        uint256 deadline;
+        uint256 createdAt;
+        uint256 duration;
         Status status;
     }
 
