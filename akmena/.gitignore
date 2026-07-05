@@ -1,7 +1,16 @@
-
-# Foundry / Akmena Ignores
-lib/
-out/
+# Compiler and build artifacts
 cache/
+out/
 broadcast/
+
+# Node modules (if using npm/yarn for any tooling)
+node_modules/
+
+# Environment Variables - THIS KEEPS YOUR KEYS SAFE
 .env
+.env.local
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
