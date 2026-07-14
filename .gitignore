@@ -1,34 +1,31 @@
-# Compiler files
-cache/
+# ==========================
+# Akmena .gitignore
+# ==========================
+
 # Foundry
 cache/
 out/
 broadcast/
 
+# Ignore local Anvil broadcasts only
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
 # Environment
 .env
 .env.*
+!.env.example
 
 # VS Code
 .vscode/
 
 # OS
 .DS_Store
-Thumbs.dbout/
+Thumbs.db
 
-# Commonly ignored directories
-.logs/
-.ignore/
+# Local logs
+logs/
 
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
-
-# Docs
-docs/
-
-# Dotenv file
-.env
-.env.*
-!.env.example
+# Generated review archives
+*.zip
+review/
