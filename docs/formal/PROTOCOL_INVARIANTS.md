@@ -1,295 +1,113 @@
-# Akmena Protocol Invariants
+# Protocol Invariants
 
-Version: 1.0
+**Classification:** Formal
 
-Status: Draft
+These invariants are mathematical truths of the Akmena Protocol.
 
-Authority: Constitutional Specification
-
-Classification: Normative
+Violation of any invariant constitutes a protocol failure.
 
 ---
 
-# Purpose
+# Identity Invariants
 
-Protocol Invariants define properties that SHALL remain true for every valid implementation of the Akmena Protocol.
+## INV-ID-001
 
-These invariants exist above implementation.
+One participant SHALL possess exactly one canonical identity.
 
-They exist above standards.
+## INV-ID-002
 
-They exist above software.
-
-No implementation may violate an invariant while claiming protocol compliance.
+A canonical identity SHALL never be duplicated.
 
 ---
 
-# Invariant 001
+# Economic Invariants
 
-## Identity is Immutable
+## INV-ECO-001
 
-A protocol identity SHALL remain permanently unique.
+TotalSupply = Treasury + ParticipantBalances + Escrow
 
-Identity ownership may change.
+This relationship SHALL hold after every successful state transition.
 
-Identity itself shall not.
+## INV-ECO-002
 
----
+Settlement SHALL NEVER create value.
 
-# Invariant 002
+## INV-ECO-003
 
-## Authorization is Explicit
-
-Every protocol action SHALL derive from explicit authorization.
-
-Authority SHALL never be inferred.
+Settlement SHALL NEVER destroy value except through protocol-authorized burn mechanisms.
 
 ---
 
-# Invariant 003
+# Escrow Invariants
 
-## Trust Never Grants Authority
+## INV-ESC-001
 
-Trust influences participant decisions.
+EscrowValue = LockedValue
 
-Trust SHALL NEVER directly grant protocol permissions.
+## INV-ESC-002
 
----
+EscrowValue SHALL NEVER exceed LockedValue.
 
-# Invariant 004
+## INV-ESC-003
 
-## Reputation Never Grants Authority
-
-Historical behavior SHALL remain descriptive.
-
-Reputation SHALL NOT imply protocol privilege.
+ReleasedValue + RefundedValue SHALL NEVER exceed LockedValue.
 
 ---
 
-# Invariant 005
+# Trust Invariants
 
-## Verification Precedes Trust
+## INV-TRUST-001
 
-Protocol claims SHALL be verifiable before participants establish trust.
+Verification SHALL NOT imply authority.
 
-Verification produces evidence.
+## INV-TRUST-002
 
-Trust interprets evidence.
+Reputation SHALL NOT modify balances.
 
----
+## INV-TRUST-003
 
-# Invariant 006
-
-## Agreements Create Obligations
-
-Only explicit agreements create protocol obligations.
-
-Intent alone SHALL NOT create obligations.
+Attestations SHALL remain immutable once finalized.
 
 ---
 
-# Invariant 007
+# Governance Invariants
 
-## Settlement is Final
+## INV-GOV-001
 
-Successful settlement represents protocol finality.
+Delegation SHALL NOT create voting power.
 
-Completed settlements SHALL remain immutable.
+## INV-GOV-002
 
----
+TotalVotingPower SHALL remain conserved.
 
-# Invariant 008
+## INV-GOV-003
 
-## Escrow is Conditional Settlement
-
-Escrow SHALL temporarily restrict value.
-
-Escrow SHALL NOT create value.
-
-Escrow SHALL NOT destroy value.
+A proposal outcome SHALL be reproducible from recorded votes.
 
 ---
 
-# Invariant 009
+# Memory Invariants
 
-## Value is Conserved
+## INV-MEM-001
 
-Protocol execution SHALL NOT create or destroy value except where explicitly defined by protocol monetary policy.
+Historical memory SHALL remain immutable forever.
 
----
+## INV-MEM-002
 
-# Invariant 010
-
-## History is Append-Only
-
-Historical protocol events SHALL remain immutable.
-
-Corrections SHALL append history.
-
-Corrections SHALL NOT rewrite history.
+Recorded memory SHALL preserve chronological ordering.
 
 ---
 
-# Invariant 011
+# Global Invariants
 
-## Memory Describes Reality
+## INV-GLOBAL-001
 
-Memory SHALL represent completed protocol events.
+Protocol behavior SHALL remain deterministic.
 
-Memory SHALL NOT represent predictions.
+## INV-GLOBAL-002
 
----
+Failed operations SHALL NOT modify state.
 
-# Invariant 012
+## INV-GLOBAL-003
 
-## Skills Describe Capability
-
-Skills SHALL describe reusable capabilities.
-
-Skills SHALL NOT imply competence.
-
-Competence is evaluated independently.
-
----
-
-# Invariant 013
-
-## Services Execute Agreements
-
-Services perform work.
-
-Agreements define obligations.
-
-These responsibilities SHALL remain separate.
-
----
-
-# Invariant 014
-
-## Organizations are Participants
-
-Organizations SHALL remain protocol participants.
-
-Organizations SHALL NOT receive implicit protocol privilege.
-
----
-
-# Invariant 015
-
-## Protocol Layers are One-Way
-
-Lower protocol layers SHALL NOT depend upon higher layers.
-
-Dependency direction SHALL remain:
-
-Identity
-
-↓
-
-Economics
-
-↓
-
-Trust
-
-↓
-
-Coordination
-
-↓
-
-Autonomous Economy
-
-Never the reverse.
-
----
-
-# Invariant 016
-
-## Implementations are Replaceable
-
-Protocol behavior SHALL remain independent of implementation language.
-
-Solidity is one implementation.
-
-It is not the protocol.
-
----
-
-# Invariant 017
-
-## Learning is Local
-
-Participant learning SHALL occur outside protocol consensus.
-
-Consensus records outcomes.
-
-Participants determine learning.
-
----
-
-# Invariant 018
-
-## Deterministic Consensus
-
-Consensus SHALL remain deterministic.
-
-Equivalent protocol state SHALL always produce equivalent protocol results.
-
----
-
-# Invariant 019
-
-## Every Requirement is Traceable
-
-Every protocol requirement SHALL reference its normative source.
-
-Books
-
-↓
-
-APS
-
-↓
-
-ADR
-
-↓
-
-RFC
-
-↓
-
-Implementation
-
----
-
-# Invariant 020
-
-## The Protocol Leads
-
-The protocol specification defines behavior.
-
-Implementations SHALL conform to the specification.
-
-Implementations SHALL NOT redefine protocol behavior.
-
----
-
-# Constitutional Rule
-
-If any implementation violates one or more Protocol Invariants, it SHALL NOT be considered an implementation of the Akmena Protocol.
-
----
-
-# References
-
-Books I–XI
-
-Governance Corpus
-
-APS Corpus
-
-ADR Corpus
-
-RFC Corpus
+Every successful state transition SHALL be externally observable through events.
