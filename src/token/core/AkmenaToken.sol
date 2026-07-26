@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
@@ -42,7 +42,7 @@ contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
     }
 
     // =============================================================
-    //                  ERC-3009 INTERFACE OVERRIDES
+    //                    ERC-3009 INTERFACE OVERRIDES
     // =============================================================
 
     function transferWithAuthorization(
@@ -55,7 +55,7 @@ contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public override(AKMPayments, IAKMToken) {
+    ) public override {
         super.transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
     }
 
@@ -69,13 +69,13 @@ contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public override(AKMPayments, IAKMToken) {
+    ) public override {
         super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
     }
 
     function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
         public
-        override(AKMPayments, IAKMToken)
+        override
     {
         super.cancelAuthorization(authorizer, nonce, v, r, s);
     }
