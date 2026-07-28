@@ -7,76 +7,54 @@ pragma solidity ^0.8.28;
 /// @dev Human, Machine, and Organization identities SHALL implement
 ///      this interface.
 interface IIdentity {
+    /// -----------------------------------------------------------------------
+    /// Identity Types
+    /// -----------------------------------------------------------------------
+    enum IdentityType {
+        Human,
+        Machine,
+        Organization
+    }
 
-/// -----------------------------------------------------------------------
-/// Identity Types
-/// -----------------------------------------------------------------------
+    /// -----------------------------------------------------------------------
+    /// Core Identity
+    /// -----------------------------------------------------------------------
 
-enum IdentityType {
-    Human,
-    Machine,
-    Organization
-}
+    /// @notice Returns the immutable protocol identity ID.
+    function identityId() external view returns (uint256);
 
-/// -----------------------------------------------------------------------
-/// Core Identity
-/// -----------------------------------------------------------------------
+    /// @notice Returns the canonical owner/controller.
+    function owner() external view returns (address);
 
-/// @notice Returns the immutable protocol identity ID.
-function identityId() external view returns (uint256);
+    /// @notice Returns the identity classification.
+    function identityType() external view returns (IdentityType);
 
-/// @notice Returns the canonical owner/controller.
-function owner() external view returns (address);
+    /// -----------------------------------------------------------------------
+    /// Lifecycle
+    /// -----------------------------------------------------------------------
 
-/// @notice Returns the identity classification.
-function identityType()
-    external
-    view
-    returns (IdentityType);
+    /// @notice Returns true if the identity is active.
+    function isActive() external view returns (bool);
 
-/// -----------------------------------------------------------------------
-/// Lifecycle
-/// -----------------------------------------------------------------------
+    /// @notice Returns the protocol version implemented.
+    function protocolVersion() external pure returns (string memory);
 
-/// @notice Returns true if the identity is active.
-function isActive()
-    external
-    view
-    returns (bool);
+    /// -----------------------------------------------------------------------
+    /// Metadata
+    /// -----------------------------------------------------------------------
 
-/// @notice Returns the protocol version implemented.
-function protocolVersion()
-    external
-    pure
-    returns (string memory);
+    /// @notice Returns the metadata URI.
+    function metadataURI() external view returns (string memory);
 
-/// -----------------------------------------------------------------------
-/// Metadata
-/// -----------------------------------------------------------------------
+    /// -----------------------------------------------------------------------
+    /// Events
+    /// -----------------------------------------------------------------------
 
-/// @notice Returns the metadata URI.
-function metadataURI()
-    external
-    view
-    returns (string memory);
+    event IdentityActivated(uint256 indexed identityId);
 
-/// -----------------------------------------------------------------------
-/// Events
-/// -----------------------------------------------------------------------
+    event IdentityDeactivated(uint256 indexed identityId);
 
-event IdentityActivated(uint256 indexed identityId);
+    event MetadataUpdated(uint256 indexed identityId, string metadataURI);
 
-event IdentityDeactivated(uint256 indexed identityId);
-
-event MetadataUpdated(
-    uint256 indexed identityId,
-    string metadataURI
-);
-
-event OwnershipTransferred(
-    uint256 indexed identityId,
-    address indexed previousOwner,
-    address indexed newOwner
-);
-
+    event OwnershipTransferred(uint256 indexed identityId, address indexed previousOwner, address indexed newOwner);
 }

@@ -4,11 +4,9 @@ pragma solidity ^0.8.28;
 import "../identity/IIdentity.sol";
 
 /// @title IRegistry
-/// @notice Canonical identity registry for the Akmena Protocol.
-/// @dev Allocates immutable protocol identity IDs and indexes deployed identities.
-///      Identity IDs are never reused or reassigned.
+/// @notice Canonical registry interface for Akmena identities.
+/// @dev The Registry is the sole allocator of protocol identity IDs.
 interface IRegistry {
-
     // ---------------------------------------------------------------------
     // Errors
     // ---------------------------------------------------------------------
@@ -16,48 +14,41 @@ interface IRegistry {
     error IdentityAlreadyRegistered();
     error IdentityNotFound();
     error InvalidIdentity();
-    error IdentityZeroReserved();
 
     // ---------------------------------------------------------------------
     // Events
     // ---------------------------------------------------------------------
 
-    event IdentityRegistered(
-        uint256 indexed identityId,
-        address indexed identity,
-        IIdentity.IdentityType identityType
-    );
+    event IdentityRegistered(uint256 indexed identityId, address indexed identity, IIdentity.IdentityType identityType);
+
+    event IdentityRemoved(uint256 indexed identityId, address indexed identity);
 
     // ---------------------------------------------------------------------
-    // Registration
+    // Identity Allocation
     // ---------------------------------------------------------------------
 
-    /// @notice Registers a newly deployed identity.
-    /// @dev Called by the IdentityFactory.
-    function registerIdentity(address identity) external;
-
-    // ---------------------------------------------------------------------
-    // Resolution
-    // ---------------------------------------------------------------------
-
-    /// @notice Returns the deployed identity contract.
-    function identityAddress(
-        uint256 identityId
-    ) external view returns (address);
-
-    /// @notice Returns the immutable protocol identity ID.
-    function identityId(
-        address identity
-    ) external view returns (uint256);
-
-    /// @notice Returns whether the identity exists.
-    function exists(
-        uint256 identityId
-    ) external view returns (bool);
+    /// @notice Allocates the next canonical protocol identity ID.
+    /// @dev Only the IdentityFactory should call this.
+    function allocateIdentityId() external returns (uint256);
 
     /// @notice Returns the next identity ID that will be allocated.
-    function nextIdentityId()
-        external
-        view
-        returns (uint256);
+    function nextIdentityId() external view returns (uint256);
+
+    // ---------------------------------------------------------------------
+    // Registry
+    // ---------------------------------------------------------------------
+
+    function registerIdentity(address identity) external;
+
+    function removeIdentity(uint256 identityId) external;
+
+    // ---------------------------------------------------------------------
+    // Views
+    // ---------------------------------------------------------------------
+
+    function identityAddress(uint256 identityId) external view returns (address);
+
+    function identityId(address identity) external view returns (uint256);
+
+    function exists(uint256 identityId) external view returns (bool);
 }

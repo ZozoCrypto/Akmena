@@ -7,185 +7,152 @@ import "./StorageNamespaces.sol";
 /// @notice Canonical storage access library for the Akmena Protocol.
 /// @dev All protocol modules SHALL access state exclusively through this library.
 library LibStorage {
+    // -------------------------------------------------------------------------
+    // Identity
+    // -------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------
-// Identity
-// -------------------------------------------------------------------------
+    /// @notice Canonical protocol identity storage.
+    /// @dev Single source of truth for protocol identities.
+    ///      Identity IDs are immutable.
+    ///      Identity ID 0 is permanently reserved.
+    struct IdentityStorage {
+        /// @notice Next identity ID to allocate.
+        /// @dev Starts at 1.
+        uint256 nextIdentityId;
 
-struct IdentityStorage {
-    uint256 nextIdentityId;
+        /// @notice Maps immutable identity ID => deployed identity contract.
+        mapping(uint256 => address) identityAddress;
 
-    mapping(uint256 => address) identityAddress;
-
-    mapping(address => uint256) identityId;
-
-    mapping(address => bool) exists;
-}
-
-// -------------------------------------------------------------------------
-// Registry
-// -------------------------------------------------------------------------
-
-struct RegistryStorage {
-    mapping(bytes32 => address) modules;
-
-    mapping(bytes32 => bool) enabled;
-
-    mapping(bytes32 => string) version;
-}
-
-// -------------------------------------------------------------------------
-// Authorization
-// -------------------------------------------------------------------------
-
-struct AuthorizationStorage {
-    mapping(address => mapping(bytes32 => bool)) capabilities;
-
-    mapping(address => mapping(address => bool)) delegates;
-}
-
-// -------------------------------------------------------------------------
-// Treasury
-// -------------------------------------------------------------------------
-
-struct TreasuryStorage {
-    uint256 totalSupply;
-
-    uint256 circulatingSupply;
-
-    uint256 treasuryBalance;
-}
-
-// -------------------------------------------------------------------------
-// Escrow
-// -------------------------------------------------------------------------
-
-struct EscrowStorage {
-    uint256 nextEscrowId;
-}
-
-// -------------------------------------------------------------------------
-// Marketplace
-// -------------------------------------------------------------------------
-
-struct MarketplaceStorage {
-    uint256 nextListingId;
-}
-
-// -------------------------------------------------------------------------
-// Reputation
-// -------------------------------------------------------------------------
-
-struct ReputationStorage {
-    mapping(address => uint256) score;
-}
-
-// -------------------------------------------------------------------------
-// Memory
-// -------------------------------------------------------------------------
-
-struct MemoryStorage {
-    mapping(bytes32 => bytes32) root;
-}
-
-// -------------------------------------------------------------------------
-// Storage Accessors
-// -------------------------------------------------------------------------
-
-function identity()
-    internal
-    pure
-    returns (IdentityStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.IDENTITY;
-
-    assembly {
-        ds.slot := slot
+        /// @notice Maps deployed identity contract => immutable identity ID.
+        mapping(address => uint256) addressToIdentityId;
     }
-}
 
-function registry()
-    internal
-    pure
-    returns (RegistryStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.REGISTRY;
+    // -------------------------------------------------------------------------
+    // Registry
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct RegistryStorage {
+        mapping(bytes32 => address) modules;
+        mapping(bytes32 => bool) enabled;
+        mapping(bytes32 => string) version;
     }
-}
 
-function authorization()
-    internal
-    pure
-    returns (AuthorizationStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.AUTHORIZATION;
+    // -------------------------------------------------------------------------
+    // Authorization
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct AuthorizationStorage {
+        mapping(address => mapping(bytes32 => bool)) capabilities;
+        mapping(address => mapping(address => bool)) delegates;
     }
-}
 
-function treasury()
-    internal
-    pure
-    returns (TreasuryStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.TREASURY;
+    // -------------------------------------------------------------------------
+    // Treasury
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct TreasuryStorage {
+        uint256 totalSupply;
+        uint256 circulatingSupply;
+        uint256 treasuryBalance;
     }
-}
 
-function escrow()
-    internal
-    pure
-    returns (EscrowStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.ESCROW;
+    // -------------------------------------------------------------------------
+    // Escrow
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct EscrowStorage {
+        uint256 nextEscrowId;
     }
-}
 
-function marketplace()
-    internal
-    pure
-    returns (MarketplaceStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.MARKETPLACE;
+    // -------------------------------------------------------------------------
+    // Marketplace
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct MarketplaceStorage {
+        uint256 nextListingId;
     }
-}
 
-function reputation()
-    internal
-    pure
-    returns (ReputationStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.REPUTATION;
+    // -------------------------------------------------------------------------
+    // Reputation
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct ReputationStorage {
+        mapping(address => uint256) score;
     }
-}
 
-function memoryStorage()
-    internal
-    pure
-    returns (MemoryStorage storage ds)
-{
-    bytes32 slot = StorageNamespaces.MEMORY;
+    // -------------------------------------------------------------------------
+    // Memory
+    // -------------------------------------------------------------------------
 
-    assembly {
-        ds.slot := slot
+    struct MemoryStorage {
+        mapping(bytes32 => bytes32) root;
     }
-}
 
+    // -------------------------------------------------------------------------
+    // Storage Accessors
+    // -------------------------------------------------------------------------
+
+    function identity() internal pure returns (IdentityStorage storage ds) {
+        bytes32 slot = StorageNamespaces.IDENTITY;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function registry() internal pure returns (RegistryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.REGISTRY;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function authorization() internal pure returns (AuthorizationStorage storage ds) {
+        bytes32 slot = StorageNamespaces.AUTHORIZATION;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function treasury() internal pure returns (TreasuryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.TREASURY;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function escrow() internal pure returns (EscrowStorage storage ds) {
+        bytes32 slot = StorageNamespaces.ESCROW;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function marketplace() internal pure returns (MarketplaceStorage storage ds) {
+        bytes32 slot = StorageNamespaces.MARKETPLACE;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function reputation() internal pure returns (ReputationStorage storage ds) {
+        bytes32 slot = StorageNamespaces.REPUTATION;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
+
+    function memoryStorage() internal pure returns (MemoryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.MEMORY;
+
+        assembly {
+            ds.slot := slot
+        }
+    }
 }

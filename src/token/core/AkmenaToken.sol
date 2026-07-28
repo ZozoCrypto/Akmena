@@ -73,10 +73,7 @@ contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
         super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
     }
 
-    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
-        public
-        override
-    {
+    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) public override {
         super.cancelAuthorization(authorizer, nonce, v, r, s);
     }
 }

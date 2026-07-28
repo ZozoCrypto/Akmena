@@ -7,7 +7,6 @@ import "./IdentityBase.sol";
 /// @notice Canonical immutable identity implementation for the Akmena Protocol.
 /// @dev Deployed as an ERC-1167 clone through the IdentityFactory.
 contract Identity is IdentityBase {
-
     IdentityType private _type;
 
     function initialize(
@@ -15,7 +14,10 @@ contract Identity is IdentityBase {
         address owner_,
         IdentityType identityType_,
         string calldata metadataURI_
-    ) external initializer {
+    )
+        external
+        initializer
+    {
         __IdentityBase_init(
             identityId_,
             owner_,
@@ -25,7 +27,12 @@ contract Identity is IdentityBase {
         _type = identityType_;
     }
 
-    function identityType() external view override returns (IdentityType) {
+    function identityType()
+        external
+        view
+        override
+        returns (IdentityType)
+    {
         return _type;
     }
 }
