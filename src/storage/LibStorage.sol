@@ -3,9 +3,6 @@ pragma solidity ^0.8.28;
 
 import "./StorageNamespaces.sol";
 
-/// @title LibStorage
-/// @notice Canonical storage access library for the Akmena Protocol.
-/// @dev All protocol modules SHALL access state exclusively through this library.
 library LibStorage {
     struct IdentityStorage {
         uint256 nextIdentityId;
@@ -32,59 +29,46 @@ library LibStorage {
         uint256 treasuryBalance;
     }
 
+    struct EscrowData {
+        address buyer;
+        address seller;
+        uint256 amount;
+        uint8 status;
+    }
+
     struct EscrowStorage {
         uint256 nextEscrowId;
+        mapping(uint256 => EscrowData) escrows;
     }
 
-    struct MarketplaceStorage {
-        uint256 nextListingId;
+    struct SettlementData {
+        address payer;
+        address payee;
+        uint256 amount;
+        uint256 timestamp;
     }
 
-    struct ReputationStorage {
-        mapping(address => uint256) score;
+    struct SettlementStorage {
+        mapping(bytes32 => SettlementData) records;
     }
 
-    struct MemoryStorage {
-        mapping(bytes32 => bytes32) root;
+    struct PaymentsStorage {
+        uint256 totalProcessedVolume;
+        mapping(address => uint256) spentNonces;
     }
 
-    function identity() internal pure returns (IdentityStorage storage ds) {
-        bytes32 slot = StorageNamespaces.IDENTITY;
-        assembly { ds.slot := slot }
-    }
+    struct MarketplaceStorage { uint256 nextListingId; }
+    struct ReputationStorage { mapping(address => uint256) score; }
+    struct MemoryStorage { mapping(bytes32 => bytes32) root; }
 
-    function registry() internal pure returns (RegistryStorage storage ds) {
-        bytes32 slot = StorageNamespaces.REGISTRY;
-        assembly { ds.slot := slot }
-    }
-
-    function authorization() internal pure returns (AuthorizationStorage storage ds) {
-        bytes32 slot = StorageNamespaces.AUTHORIZATION;
-        assembly { ds.slot := slot }
-    }
-
-    function treasury() internal pure returns (TreasuryStorage storage ds) {
-        bytes32 slot = StorageNamespaces.TREASURY;
-        assembly { ds.slot := slot }
-    }
-
-    function escrow() internal pure returns (EscrowStorage storage ds) {
-        bytes32 slot = StorageNamespaces.ESCROW;
-        assembly { ds.slot := slot }
-    }
-
-    function marketplace() internal pure returns (MarketplaceStorage storage ds) {
-        bytes32 slot = StorageNamespaces.MARKETPLACE;
-        assembly { ds.slot := slot }
-    }
-
-    function reputation() internal pure returns (ReputationStorage storage ds) {
-        bytes32 slot = StorageNamespaces.REPUTATION;
-        assembly { ds.slot := slot }
-    }
-
-    function memoryStorage() internal pure returns (MemoryStorage storage ds) {
-        bytes32 slot = StorageNamespaces.MEMORY;
-        assembly { ds.slot := slot }
-    }
+    function identity() internal pure returns (IdentityStorage storage ds) { bytes32 slot = StorageNamespaces.IDENTITY; assembly { ds.slot := slot } }
+    function registry() internal pure returns (RegistryStorage storage ds) { bytes32 slot = StorageNamespaces.REGISTRY; assembly { ds.slot := slot } }
+    function authorization() internal pure returns (AuthorizationStorage storage ds) { bytes32 slot = StorageNamespaces.AUTHORIZATION; assembly { ds.slot := slot } }
+    function treasury() internal pure returns (TreasuryStorage storage ds) { bytes32 slot = StorageNamespaces.TREASURY; assembly { ds.slot := slot } }
+    function escrow() internal pure returns (EscrowStorage storage ds) { bytes32 slot = StorageNamespaces.ESCROW; assembly { ds.slot := slot } }
+    function settlement() internal pure returns (SettlementStorage storage ds) { bytes32 slot = StorageNamespaces.SETTLEMENT; assembly { ds.slot := slot } }
+    function payments() internal pure returns (PaymentsStorage storage ds) { bytes32 slot = StorageNamespaces.PAYMENTS; assembly { ds.slot := slot } }
+    function marketplace() internal pure returns (MarketplaceStorage storage ds) { bytes32 slot = StorageNamespaces.MARKETPLACE; assembly { ds.slot := slot } }
+    function reputation() internal pure returns (ReputationStorage storage ds) { bytes32 slot = StorageNamespaces.REPUTATION; assembly { ds.slot := slot } }
+    function memoryStorage() internal pure returns (MemoryStorage storage ds) { bytes32 slot = StorageNamespaces.MEMORY; assembly { ds.slot := slot } }
 }
