@@ -12,4 +12,6 @@ library StorageNamespaces {
     bytes32 public constant MARKETPLACE = keccak256("akmena.storage.marketplace");
     bytes32 public constant REPUTATION = keccak256("akmena.storage.reputation");
     bytes32 public constant MEMORY = keccak256("akmena.storage.memory");
+    bytes32 public constant DISCOVERY = keccak256("akmena.storage.discovery");
+    bytes32 public constant AGREEMENT = keccak256("akmena.storage.agreement");
 }
