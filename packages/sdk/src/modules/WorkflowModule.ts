@@ -1,16 +1,7 @@
-import { encodeFunctionData, decodeEventLog } from 'viem';
+import { decodeEventLog } from 'viem';
 import { AkmenaClient } from '../client/AkmenaClient';
 import { translateContractError } from '../errors';
-
-// Mocking ABI import - in reality, imported from generated Foundry artifacts
-const WORKFLOW_ABI = [
-    {
-        type: "function", name: "advanceToCompletion",
-        inputs: [{ name: "workflowId", type: "bytes32" }, { name: "settlementData", type: "bytes" }, { name: "memoryData", type: "bytes" }, { name: "reputationData", type: "bytes" }],
-        outputs: [], stateMutability: "nonpayable"
-    },
-    { type: "event", name: "WorkflowAdvanced", inputs: [{ indexed: true, name: "workflowId", type: "bytes32" }, { indexed: false, name: "step", type: "uint8" }] }
-] as const;
+import { WorkflowEngineABI } from '../abis/WorkflowEngine';
 
 export interface WorkflowCompletionResult {
     workflowId: `0x${string}`;
@@ -18,7 +9,6 @@ export interface WorkflowCompletionResult {
     gasUsed: bigint;
     events: {
         workflowAdvanced?: boolean;
-        settlementRecorded?: boolean;
     };
 }
 
@@ -34,7 +24,9 @@ export class WorkflowModule {
 
         try {
             const { request } = await this.client.publicClient.simulateContract({
-                address, abi: WORKFLOW_ABI, functionName: 'advanceToCompletion',
+                address, 
+                abi: WorkflowEngineABI, 
+                functionName: 'advanceToCompletion',
                 args: [workflowId, data.settlement, data.memory, data.reputation],
                 account: this.client.walletClient.account
             });
@@ -42,13 +34,12 @@ export class WorkflowModule {
             const txHash = await this.client.walletClient.writeContract(request);
             const receipt = await this.client.publicClient.waitForTransactionReceipt({ hash: txHash });
 
-            // Typed Event Parsing
             const parsedEvents: WorkflowCompletionResult['events'] = {};
             for (const log of receipt.logs) {
                 try {
-                    const decoded = decodeEventLog({ abi: WORKFLOW_ABI, data: log.data, topics: log.topics });
+                    const decoded = decodeEventLog({ abi: WorkflowEngineABI, data: log.data, topics: log.topics });
                     if (decoded.eventName === 'WorkflowAdvanced') parsedEvents.workflowAdvanced = true;
-                } catch { /* Ignore logs from other contracts */ }
+                } catch { /* Ignore non-matching logs */ }
             }
 
             return {

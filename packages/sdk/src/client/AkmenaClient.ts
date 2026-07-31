@@ -1,13 +1,10 @@
-import { createPublicClient, http, PublicClient, WalletClient, getContract, keccak256, toHex } from 'viem';
+import { createPublicClient, http, PublicClient, WalletClient, getContract } from 'viem';
 import { base } from 'viem/chains';
 import { UnsupportedProtocolVersionError, ModuleUnavailableError } from '../errors';
+import { MODULE_KEYS } from '../constants/modules';
+import { HealthStatus, ModuleInfo } from '../types/protocol';
+import { AkmenaCoreABI } from '../abis/AkmenaCore';
 import { WorkflowModule } from '../modules/WorkflowModule';
-
-const CORE_ABI = [
-    { type: "function", name: "PROTOCOL_VERSION", inputs: [], outputs: [{ type: "string" }], stateMutability: "view" },
-    { type: "function", name: "getModule", inputs: [{ name: "key", type: "bytes32" }], outputs: [{ type: "address" }, { type: "bool" }, { type: "string" }], stateMutability: "view" },
-    { type: "function", name: "isPaused", inputs: [], outputs: [{ type: "bool" }], stateMutability: "view" }
-] as const;
 
 export interface ClientConfig {
     coreAddress: `0x${string}`;
@@ -20,61 +17,61 @@ export class AkmenaClient {
     public walletClient?: WalletClient;
     public coreAddress: `0x${string}`;
     
-    private addressCache: Record<string, `0x${string}`> = {};
+    private addressCache: Record<string, ModuleInfo> = {};
     private versionVerified = false;
 
-    // Dedicated Module Wrappers
     public readonly workflow: WorkflowModule;
 
     constructor(config: ClientConfig) {
         this.coreAddress = config.coreAddress;
         this.walletClient = config.wallet;
         this.publicClient = createPublicClient({ chain: base, transport: http(config.rpcUrl) });
-        
         this.workflow = new WorkflowModule(this);
     }
 
     public withWallet(wallet: WalletClient): AkmenaClient {
-        return new AkmenaClient({ coreAddress: this.coreAddress, rpcUrl: this.publicClient.transport.url, wallet });
+        return new AkmenaClient({ coreAddress: this.coreAddress, rpcUrl: this.publicClient.transport?.url, wallet });
     }
 
     private async verifyProtocolVersion(): Promise<void> {
         if (this.versionVerified) return;
-        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
+        const core = getContract({ address: this.coreAddress, abi: AkmenaCoreABI, client: this.publicClient });
         const version = await core.read.PROTOCOL_VERSION().catch(() => "unknown");
         if (!version.startsWith("2.")) throw new UnsupportedProtocolVersionError("2.x", version);
         this.versionVerified = true;
     }
 
-    public async resolveModule(moduleName: string): Promise<`0x${string}`> {
+    public async resolveModule(moduleName: keyof typeof MODULE_KEYS): Promise<`0x${string}`> {
         await this.verifyProtocolVersion();
-        if (this.addressCache[moduleName]) return this.addressCache[moduleName];
+        if (this.addressCache[moduleName]?.address) return this.addressCache[moduleName].address;
 
-        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
-        // Universal encoding (no Node Buffer)
-        const key = keccak256(toHex(`akmena.module.${moduleName}`));
+        const core = getContract({ address: this.coreAddress, abi: AkmenaCoreABI, client: this.publicClient });
+        const key = MODULE_KEYS[moduleName];
         
-        const [addr, isEnabled] = await core.read.getModule([key]);
+        const [addr, isEnabled, version] = await core.read.getModule([key]);
         if (!isEnabled || addr === "0x0000000000000000000000000000000000000000") {
             throw new ModuleUnavailableError(moduleName);
         }
 
-        this.addressCache[moduleName] = addr;
+        this.addressCache[moduleName] = { address: addr, enabled: isEnabled, version };
         return addr;
     }
 
-    public async health() {
-        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
-        const [version, paused] = await Promise.all([
+    public async health(): Promise<HealthStatus> {
+        const core = getContract({ address: this.coreAddress, abi: AkmenaCoreABI, client: this.publicClient });
+        const [version, paused, chainId] = await Promise.all([
             core.read.PROTOCOL_VERSION().catch(() => "unknown"),
-            core.read.isPaused().catch(() => false)
+            core.read.isPaused().catch(() => false),
+            this.publicClient.getChainId()
         ]);
         
         return {
-            network: await this.publicClient.getChainId(),
+            healthy: !paused && version.startsWith("2."),
+            network: chainId,
+            coreAddress: this.coreAddress,
             protocolVersion: version,
-            isPaused: paused,
-            cachedModules: Object.keys(this.addressCache),
+            paused: paused,
+            modules: this.addressCache,
             readOnly: !this.walletClient
         };
     }

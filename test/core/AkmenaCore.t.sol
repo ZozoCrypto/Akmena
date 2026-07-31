@@ -3,9 +3,6 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {AkmenaCore} from "../../src/core/AkmenaCore.sol";
-import {LibStorage} from "../../src/storage/LibStorage.sol";
-
-// Import engines that take 0 arguments in constructor
 import {TreasuryEngine} from "../../src/economics/TreasuryEngine.sol";
 import {MarketplaceEngine} from "../../src/autonomous/MarketplaceEngine.sol";
 
@@ -31,8 +28,9 @@ contract AkmenaCoreTest is Test {
     }
 
     function test_RegisterModules() public {
-        vm.expectEmit(true, true, true, true);
-        emit AkmenaCore.ModuleRegistered(TREASURY_KEY, address(treasuryEngine));
+        // Updated to include the new 'version' string parameter
+        vm.expectEmit(true, true, false, true);
+        emit AkmenaCore.ModuleRegistered(TREASURY_KEY, address(treasuryEngine), "v2.0.0");
 
         core.registerModule(TREASURY_KEY, address(treasuryEngine), "v2.0.0");
         core.registerModule(MARKETPLACE_KEY, address(marketplaceEngine), "v2.0.0");
