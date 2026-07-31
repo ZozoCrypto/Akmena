@@ -1,76 +1,81 @@
-import { createPublicClient, http, PublicClient, WalletClient, getContract } from 'viem';
+import { createPublicClient, http, PublicClient, WalletClient, getContract, keccak256, toHex } from 'viem';
 import { base } from 'viem/chains';
-import { Agent } from '../agent/Agent';
+import { UnsupportedProtocolVersionError, ModuleUnavailableError } from '../errors';
+import { WorkflowModule } from '../modules/WorkflowModule';
 
-// Minimal ABI for AkmenaCore router discovery
 const CORE_ABI = [
-    {
-        type: "function",
-        name: "getModule",
-        inputs: [{ name: "key", type: "bytes32" }],
-        outputs: [
-            { name: "moduleAddress", type: "address" },
-            { name: "isEnabled", type: "bool" },
-            { name: "version", type: "string" }
-        ],
-        stateMutability: "view"
-    }
+    { type: "function", name: "PROTOCOL_VERSION", inputs: [], outputs: [{ type: "string" }], stateMutability: "view" },
+    { type: "function", name: "getModule", inputs: [{ name: "key", type: "bytes32" }], outputs: [{ type: "address" }, { type: "bool" }, { type: "string" }], stateMutability: "view" },
+    { type: "function", name: "isPaused", inputs: [], outputs: [{ type: "bool" }], stateMutability: "view" }
 ] as const;
 
 export interface ClientConfig {
     coreAddress: `0x${string}`;
     rpcUrl?: string;
+    wallet?: WalletClient;
 }
 
 export class AkmenaClient {
     public publicClient: PublicClient;
+    public walletClient?: WalletClient;
     public coreAddress: `0x${string}`;
-    public modules: Record<string, `0x${string}`> = {};
-    private walletClient?: WalletClient;
+    
+    private addressCache: Record<string, `0x${string}`> = {};
+    private versionVerified = false;
+
+    // Dedicated Module Wrappers
+    public readonly workflow: WorkflowModule;
 
     constructor(config: ClientConfig) {
         this.coreAddress = config.coreAddress;
-        this.publicClient = createPublicClient({
-            chain: base,
-            transport: http(config.rpcUrl)
-        });
-    }
-
-    /**
-     * Discovers and caches all protocol module addresses exactly once.
-     */
-    public async init(): Promise<void> {
-        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
+        this.walletClient = config.wallet;
+        this.publicClient = createPublicClient({ chain: base, transport: http(config.rpcUrl) });
         
-        // Example discovery keys
-        const keys = {
-            identity: "0x" + Buffer.from("akmena.module.identity").toString('hex').padEnd(64, '0'),
-            workflow: "0x" + Buffer.from("akmena.module.workflow").toString('hex').padEnd(64, '0')
-        } as const;
+        this.workflow = new WorkflowModule(this);
+    }
 
-        const [idData, wfData] = await Promise.all([
-            core.read.getModule([keys.identity]),
-            core.read.getModule([keys.workflow])
+    public withWallet(wallet: WalletClient): AkmenaClient {
+        return new AkmenaClient({ coreAddress: this.coreAddress, rpcUrl: this.publicClient.transport.url, wallet });
+    }
+
+    private async verifyProtocolVersion(): Promise<void> {
+        if (this.versionVerified) return;
+        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
+        const version = await core.read.PROTOCOL_VERSION().catch(() => "unknown");
+        if (!version.startsWith("2.")) throw new UnsupportedProtocolVersionError("2.x", version);
+        this.versionVerified = true;
+    }
+
+    public async resolveModule(moduleName: string): Promise<`0x${string}`> {
+        await this.verifyProtocolVersion();
+        if (this.addressCache[moduleName]) return this.addressCache[moduleName];
+
+        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
+        // Universal encoding (no Node Buffer)
+        const key = keccak256(toHex(`akmena.module.${moduleName}`));
+        
+        const [addr, isEnabled] = await core.read.getModule([key]);
+        if (!isEnabled || addr === "0x0000000000000000000000000000000000000000") {
+            throw new ModuleUnavailableError(moduleName);
+        }
+
+        this.addressCache[moduleName] = addr;
+        return addr;
+    }
+
+    public async health() {
+        const core = getContract({ address: this.coreAddress, abi: CORE_ABI, client: this.publicClient });
+        const [version, paused] = await Promise.all([
+            core.read.PROTOCOL_VERSION().catch(() => "unknown"),
+            core.read.isPaused().catch(() => false)
         ]);
-
-        this.modules['identity'] = idData[0] as `0x${string}`;
-        this.modules['workflow'] = wfData[0] as `0x${string}`;
-    }
-
-    /**
-     * Upgrades the read-only client to a write-enabled client.
-     */
-    public connect(wallet: WalletClient): AkmenaClient {
-        const connectedClient = new AkmenaClient({ coreAddress: this.coreAddress });
-        connectedClient.modules = this.modules;
-        connectedClient.walletClient = wallet;
-        return connectedClient;
-    }
-
-    /**
-     * Initializes an object-oriented Agent wrapper for high-level operations.
-     */
-    public getAgent(identityId: `0x${string}`): Agent {
-        return new Agent(this, identityId, this.walletClient);
+        
+        return {
+            network: await this.publicClient.getChainId(),
+            protocolVersion: version,
+            isPaused: paused,
+            cachedModules: Object.keys(this.addressCache),
+            readOnly: !this.walletClient
+        };
     }
 }

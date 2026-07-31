@@ -1,18 +1,20 @@
 {
   "name": "@akmena/sdk",
   "version": "2.0.0-beta.1",
-  "description": "The official TypeScript SDK for the Akmena Protocol",
+  "description": "The official Universal TypeScript SDK for the Akmena Protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "docs": "typedoc --out docs src/index.ts"
   },
   "dependencies": {
     "viem": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "typedoc": "^0.25.0"
   }
 }
