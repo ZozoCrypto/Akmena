@@ -28,4 +28,5 @@ logs/
 
 # Generated review archives
 *.zip
-review/
+review/packages/sdk/node_modules/
+packages/sdk/dist/
