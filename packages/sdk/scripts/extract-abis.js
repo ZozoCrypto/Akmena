@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const OUT_DIR = path.join(__dirname, '../../../out');
 const ABI_DIR = path.join(__dirname, '../src/abis');
-const contracts = ['AkmenaCore', 'WorkflowEngine'];
+const contracts = ['AkmenaCore', 'WorkflowEngine', 'AgentRegistry', 'EscrowEngine', 'PaymentsEngine'];
 
 if (!fs.existsSync(ABI_DIR)) fs.mkdirSync(ABI_DIR, { recursive: true });
 
