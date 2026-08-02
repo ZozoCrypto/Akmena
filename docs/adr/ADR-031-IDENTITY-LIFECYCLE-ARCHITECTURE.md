@@ -2,39 +2,11 @@
 
 **Status:** Accepted
 
-**Version:** Protocol V2
-
-**Date:** 2026-07-25
-
-**Supersedes:** None
-
-**Related Documents**
-
-* Book I — Identity
-* APS-001
-* RFC-101 Identity
-* RFC-102 Identity Registry
-* RFC-103 Identity Factory
-* V2 Domain Architecture
-* V2 Contract Map
-* V2 Storage Architecture
-* V2 Deployment Architecture
+**Date:** 2026-08-01
 
 ---
 
-# Purpose
-
-This ADR defines the canonical lifecycle of every identity within the Akmena Protocol.
-
-It establishes ownership boundaries, deployment responsibilities, identifier semantics, and the relationship between protocol identities and Ethereum addresses.
-
-This ADR is normative.
-
-Future implementations SHALL conform to this architecture.
-
----
-
-# Motivation
+# Context
 
 Earlier protocol drafts distributed responsibility for identity creation, numbering, ownership, and registration across multiple components.
 
@@ -48,7 +20,6 @@ Akmena V2 adopts a strict separation of responsibilities that mirrors mature dis
 
 The canonical lifecycle SHALL be:
 
-```
 Registry
 
 ↓
@@ -62,6 +33,7 @@ Identity Factory
 ↓
 
 Deploy ERC-1167 Clone
+
 
 ↓
 
