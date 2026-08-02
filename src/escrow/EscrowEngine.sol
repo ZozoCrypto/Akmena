@@ -2,10 +2,11 @@
 pragma solidity 0.8.28;
 
 import "../interfaces/IEscrowEngine.sol";
+import "../../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
 /// @title Akmena Escrow Engine
 /// @notice Manages escrowed payments between protocol participants.
-contract EscrowEngine is IEscrowEngine {
+contract EscrowEngine is IEscrowEngine, ReentrancyGuard {
     // -------------------------------------------------------------------------
     // Errors
     // -------------------------------------------------------------------------
@@ -16,6 +17,7 @@ contract EscrowEngine is IEscrowEngine {
     error InvalidAmount();
     error EscrowAlreadyReleased();
     error EscrowAlreadyRefunded();
+    error TransferFailed();
 
     // -------------------------------------------------------------------------
     // Storage
@@ -51,7 +53,7 @@ contract EscrowEngine is IEscrowEngine {
     // Lifecycle
     // -------------------------------------------------------------------------
 
-    function release(bytes32 escrowId) external {
+    function release(bytes32 escrowId) external nonReentrant {
         if (!exists(escrowId)) {
             revert EscrowNotFound();
         }
@@ -68,12 +70,13 @@ contract EscrowEngine is IEscrowEngine {
 
         escrow.released = true;
 
-        payable(escrow.payee).transfer(escrow.amount);
+        (bool success, ) = escrow.payee.call{value: escrow.amount}("");
+        if (!success) revert TransferFailed();
 
         emit EscrowReleased(escrowId);
     }
 
-    function refund(bytes32 escrowId) external {
+    function refund(bytes32 escrowId) external nonReentrant {
         if (!exists(escrowId)) {
             revert EscrowNotFound();
         }
@@ -90,7 +93,8 @@ contract EscrowEngine is IEscrowEngine {
 
         escrow.refunded = true;
 
-        payable(escrow.payer).transfer(escrow.amount);
+        (bool success, ) = escrow.payer.call{value: escrow.amount}("");
+        if (!success) revert TransferFailed();
 
         emit EscrowRefunded(escrowId);
     }
