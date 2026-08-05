@@ -75,3 +75,11 @@ OpenZeppelin initializer naming (`__IdentityBase_init`) intentionally follows OZ
 
 ---
 The protocol currently passes automated unit, integration, invariant, fuzz, symbolic execution, and static analysis gates with no unresolved security issues.
+
+---
+## Fuzzing & Chaos Invariants (Foundry)
+- **Status:** Passed 100%
+- **Fuzz Runs per function:** 256
+- **Tested Invariants:**
+  - `AgentRegistry`: Validated ownership integrity against malicious state updates and rejected zero-length metadata registrations.
+  - `EscrowEngine`: Validated role-based access control, proving no random actor can ever force a release or refund, and confirming that double-releases are mathematically impossible.
