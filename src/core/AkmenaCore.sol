@@ -6,7 +6,7 @@ import {LibStorage} from "../storage/LibStorage.sol";
 /// @title AkmenaCore
 /// @notice Central protocol registry and module discovery layer.
 /// @dev Upper protocol layers depend on Core. Core knows nothing about them.
-contract AkmenaCore is IAkmenaCore {
+contract AkmenaCore {
 
     string public constant PROTOCOL_VERSION = "2.0.0";
 
