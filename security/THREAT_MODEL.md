@@ -1,139 +1,467 @@
-# Akmena Protocol Threat Model
+# THREAT_MODEL.md
 
-## Purpose
+Version: v2.0.0-rc.1
 
-This document describes the security goals, trust assumptions, protected assets, and expected attack surfaces for the Akmena Agent Registry.
-
-It is intended to evolve alongside the protocol and provide auditors and contributors with a shared understanding of the system.
+Status: Canonical
 
 ---
 
-# Scope
+# Purpose
 
-Current module:
+This document defines the canonical threat model for the Akmena Protocol.
 
-* AgentRegistry
-* IAgentRegistry
+Its purpose is to identify:
 
-Out of scope:
+* protocol assets,
+* trust boundaries,
+* attacker capabilities,
+* security assumptions,
+* invariants,
+* accepted risks,
+* mitigation strategies.
 
-* Agreement Engine
-* Trust Engine
-* Treasury
-* Memory Engine
-* SDK/API integrations
+This document is normative.
+
+Future protocol changes SHALL remain consistent with this threat model unless superseded by a future ADR.
 
 ---
 
-# Security Goals
+# Security Philosophy
 
-The registry must guarantee:
+Akmena follows the Engineering Constitution.
 
-1. Every registered agent has exactly one owner.
-2. Agent identifiers are unique.
-3. An owner cannot register multiple agents.
-4. Metadata updates can only be performed by the owner.
-5. Registry state remains internally consistent after any valid transaction.
+Core principles include:
+
+* Trust nothing by default.
+* Lower protocol layers never trust upper layers.
+* Money never depends on AI.
+* Identity is immutable.
+* Every state transition is explicit.
+* Every critical transition is testable.
+* Every privileged action is observable.
+
+Security is achieved through isolation rather than complexity.
 
 ---
 
 # Protected Assets
 
-## Ownership
+The protocol protects the following assets.
 
-The mapping between an agent identifier and its owner must remain correct.
+## User Funds
+
+Held within:
+
+* EscrowEngine
+* SettlementEngine
+
+Requirements:
+
+* Cannot be stolen
+* Cannot be double-spent
+* Cannot become permanently locked
+* Cannot bypass settlement rules
+
+---
 
 ## Identity
 
-Each agent identifier must be unique.
+Every participant possesses one immutable protocol identity.
 
-## Metadata
+Identity guarantees:
 
-Metadata should only be modifiable by the owning account.
+* uniqueness
+* immutability
+* permanent historical reference
+
+---
+
+## Reputation
+
+Reputation must satisfy:
+
+* deterministic updates
+* append-only history
+* resistance to arbitrary manipulation
+
+---
+
+## Memory
+
+Agent memories represent historical protocol facts.
+
+Memory records:
+
+* cannot silently disappear
+* cannot be rewritten
+* remain permanently auditable
+
+---
+
+## Governance
+
+Governance controls protocol evolution.
+
+Governance must never allow:
+
+* instant upgrades
+* hidden upgrades
+* privilege escalation
+* parameter modification outside protocol rules
+
+---
+
+# Trust Boundaries
+
+## Layer 1
+
+Identity
+
+No dependencies.
+
+---
+
+## Layer 2
+
+Authorization
+
+Depends only on Identity.
+
+---
+
+## Layer 3
+
+Marketplace
+
+Depends on Identity and Authorization.
+
+---
+
+## Layer 4
+
+Agreements
+
+Cannot bypass Authorization.
+
+---
+
+## Layer 5
+
+Escrow
+
+Never trusts Marketplace.
+
+Escrow only trusts Agreements.
+
+---
+
+## Layer 6
+
+Settlement
+
+Never trusts Workflow.
+
+Settlement only trusts Escrow state.
+
+---
+
+## Layer 7
+
+Memory
+
+Records protocol facts.
+
+Never changes protocol state.
+
+---
+
+## Layer 8
+
+Reputation
+
+Consumes protocol events.
+
+Never controls protocol execution.
+
+---
+
+## Layer 9
+
+Workflow Engine
+
+Acts only as an orchestrator.
+
+Owns:
+
+* no funds
+* no permissions
+* no protocol authority
+
+---
+
+## SDK
+
+Never trusted.
+
+SDK exists only for developer convenience.
+
+Every SDK request must satisfy the same on-chain validation.
 
 ---
 
 # Threat Actors
 
-## Malicious User
+## External Attacker
 
-Attempts to:
+Capabilities:
 
-* register duplicate agents
-* overwrite another user's metadata
-* spam the registry
+* arbitrary transactions
+* frontrunning
+* replay attempts
+* malicious calldata
 
-## Compromised Frontend
+Cannot:
 
-Displays incorrect information or tricks users into submitting unintended transactions.
-
-The smart contract should remain the source of truth.
-
-## External Integrator Bugs
-
-Third-party applications may misuse the interface or make incorrect assumptions.
-
-The protocol should fail safely.
+* bypass authorization
+* forge identities
+* violate protocol invariants
 
 ---
 
-# Trust Assumptions
+## Malicious Agent
+
+Capabilities:
+
+* valid protocol identity
+* valid wallet
+* malicious intent
+
+Cannot:
+
+* steal escrow
+* forge governance
+* impersonate another identity
+
+---
+
+## Compromised Workflow Engine
+
+Capabilities:
+
+* malformed orchestration
+
+Cannot:
+
+* bypass module authorization
+* bypass settlement
+* bypass escrow
+* bypass governance
+
+---
+
+## Malicious Governor
+
+Governance proposals remain subject to:
+
+* voting
+* timelock
+* guardian veto (before sunset)
+
+---
+
+# Security Assumptions
 
 The protocol assumes:
 
-* Ethereum/Base consensus is functioning correctly.
-* Solidity compiler version 0.8.28 behaves as expected.
-* OpenZeppelin dependencies are trusted and unmodified.
-* Users control their own private keys.
+Ethereum cryptography remains secure.
+
+ECDSA remains secure.
+
+Base consensus remains secure.
+
+OpenZeppelin dependencies remain trustworthy.
+
+Users protect private keys.
+
+No assumption is made regarding:
+
+SDK correctness.
+
+Frontend correctness.
+
+RPC correctness.
+
+These components are untrusted.
 
 ---
 
-# Known Attack Surfaces
+# Critical Invariants
 
-## Registration
+The following properties must never fail.
 
-Attackers may attempt duplicate registrations or malformed metadata.
+## Identity
 
-Mitigations:
-
-* unique identifier checks
-* owner uniqueness checks
-* metadata validation
-
-## Metadata Updates
-
-Attackers may attempt unauthorized updates.
-
-Mitigation:
-
-* strict ownership verification
+Every identity owns exactly one immutable ID.
 
 ---
 
-# Current Security Controls
+## Escrow
 
-* Custom errors
-* Unit tests
-* Fuzz tests
-* Invariant tests
-* Explicit interface definition
-* Immutable registry owner
+Funds may only move through:
 
----
+Created
 
-# Future Reviews
+↓
 
-Before AgentRegistry v1.0 release:
+Funded
 
-* Storage layout review
-* Gas review
-* Static analysis
-* External audit
-* Documentation review
-* Continuous integration verification
+↓
+
+Released
+
+or
+
+Refunded
+
+No alternate path exists.
 
 ---
 
-# Version
+## Settlement
 
-Draft: AgentRegistry v1.0 Preparation
+Settlement cannot execute twice.
+
+---
+
+## Workflow
+
+Workflow owns no protocol authority.
+
+---
+
+## Governance
+
+Every governance action passes through:
+
+Proposal
+
+↓
+
+Vote
+
+↓
+
+Timelock
+
+↓
+
+Execution
+
+No bypass exists.
+
+---
+
+## Registry
+
+Protocol identifiers are immutable.
+
+---
+
+# Attack Surface
+
+Externally callable contracts:
+
+* AkmenaCore
+* AgentRegistry
+* IdentityFactory
+* EscrowEngine
+* WorkflowEngine
+* Governance
+* Timelock
+
+Every public function must enforce:
+
+* authorization
+* validation
+* invariant preservation
+
+---
+
+# Mitigations
+
+Current mitigations include:
+
+* explicit state machines
+* immutable protocol IDs
+* ERC-7201 storage isolation
+* stateless orchestration
+* module isolation
+* typed governance actions
+* timelocked upgrades
+* fuzz testing
+* invariant testing
+* symbolic execution
+* static analysis
+
+---
+
+# Accepted Risks
+
+The protocol intentionally accepts:
+
+Low-level ETH transfer via call()
+
+Canonical ERC-1167 deployment assembly
+
+Upgradeable OpenZeppelin compiler ranges
+
+These risks are documented in SECURITY_REPORT.md.
+
+---
+
+# Incident Response
+
+If a critical vulnerability is discovered before Guardian sunset:
+
+1. Pause affected modules if supported.
+2. Guardian veto pending governance proposals.
+3. Publish incident disclosure.
+4. Deploy patched implementation.
+5. Execute governed upgrade.
+
+After Guardian sunset:
+
+Only governance may modify protocol behavior.
+
+---
+
+# Verification
+
+Security validation currently includes:
+
+* Unit Tests
+* Integration Tests
+* Stateful Invariants
+* Fuzz Testing
+* Chaos Testing
+* Symbolic Execution
+* Slither Static Analysis
+
+Additional external audits are planned before mainnet deployment.
+
+---
+
+# Conclusion
+
+The Akmena Protocol security model relies on:
+
+* minimal trust,
+* strict layer separation,
+* immutable identity,
+* explicit state machines,
+* deterministic governance,
+* and comprehensive automated verification.
+
+Protocol correctness derives from independently secure modules rather than privileged orchestration layers.
+
+This threat model is adopted as the canonical security model for Akmena Protocol V2.
