@@ -3,7 +3,7 @@ pragma solidity 0.8.28;
 
 /// @title Akmena Agent Registry
 /// @notice Canonical registry of protocol agents.
-contract AgentRegistry {
+contract AgentRegistry is IAgentRegistry {
     // -------------------------------------------------------------------------
     // Errors
     // -------------------------------------------------------------------------
