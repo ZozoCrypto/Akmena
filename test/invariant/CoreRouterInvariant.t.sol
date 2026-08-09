@@ -15,17 +15,11 @@ contract CoreRouterInvariant is StdInvariant, Test {
     address internal immutable DEPLOYER = address(this);
 
     function setUp() public {
-
         core = new AkmenaCore();
-
         handler = new CoreRouterHandler(core);
 
         targetContract(address(handler));
     }
-
-    /// -----------------------------------------------------------------------
-    /// Core invariants
-    /// -----------------------------------------------------------------------
 
     function invariant_protocolVersionConstant() public view {
         assertEq(core.PROTOCOL_VERSION(), "2.0.0");
@@ -35,18 +29,15 @@ contract CoreRouterInvariant is StdInvariant, Test {
         assertEq(core.deployer(), DEPLOYER);
     }
 
-    function invariant_getModuleNeverReturnsEnabledZeroAddress(bytes32 key)
-        public
-        view
-    {
-        (
-            address module,
-            bool enabled,
+    function invariant_getModuleNeverReturnsEnabledZeroAddress() public view {
+        uint256 length = handler.registeredKeysLength();
+        for (uint256 i = 0; i < length; ++i) {
+            bytes32 k = handler.registeredKeys(i);
+            (address moduleAddress, bool isEnabled, string memory version) = core.getModule(k);
 
-        ) = core.getModule(key);
-
-        if (enabled) {
-            assertTrue(module != address(0));
+            if (isEnabled) {
+                assertTrue(moduleAddress != address(0));
+            }
         }
     }
 }

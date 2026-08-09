@@ -6,6 +6,9 @@ import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
 contract CoreRouterHandler {
     AkmenaCore public core;
 
+    bytes32[] public registeredKeys;
+    mapping(bytes32 => bool) public isRegistered;
+
     constructor(AkmenaCore _core) {
         core = _core;
     }
@@ -18,8 +21,11 @@ contract CoreRouterHandler {
         if (module == address(0)) return;
 
         try core.registerModule(key, module, version) {
-        } catch {
-        }
+            if (!isRegistered[key]) {
+                registeredKeys.push(key);
+                isRegistered[key] = true;
+            }
+        } catch {}
     }
 
     function toggleModule(
@@ -27,13 +33,15 @@ contract CoreRouterHandler {
         bool enabled
     ) public {
         try core.setModuleStatus(key, enabled) {
-        } catch {
-        }
+        } catch {}
     }
 
     function pause(bool state) public {
         try core.setPaused(state) {
-        } catch {
-        }
+        } catch {}
+    }
+
+    function registeredKeysLength() external view returns (uint256) {
+        return registeredKeys.length;
     }
 }
