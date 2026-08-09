@@ -238,3 +238,15 @@ Akmena Protocol V2 successfully satisfies the project's internal security gate f
 Remaining findings consist exclusively of accepted engineering tradeoffs, standards-compliant implementation details, or documented informational observations.
 
 No unresolved security findings currently block progression toward the Beta release.
+
+## Protocol Invariant Verification
+
+Completed protocol invariants:
+
+- ✅ RegistryInvariant
+  - Identity IDs are strictly monotonic.
+  - Identity ID 0 remains permanently reserved.
+  - Registry state remains internally consistent under invariant fuzzing.
+
+Status:
+PASS

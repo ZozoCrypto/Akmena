@@ -36,7 +36,7 @@ contract LiveIntegration is Script {
         // -----------------------------------------
         // 3. Release the Escrow (escrowId, caller)
         // -----------------------------------------
-        escrow.releaseEscrow(escrowId, deployerAddress);
+        escrow.releaseEscrow(escrowId);
         console.log("3. Success! Escrow Released.");
 
         vm.stopBroadcast();

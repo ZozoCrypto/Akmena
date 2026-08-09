@@ -41,7 +41,7 @@ contract EscrowHandler is Test {
         if (isActive[id]) {
             address buyer = escrow.getEscrow(id).buyer;
             vm.prank(buyer);
-            escrow.releaseEscrow(id, buyer);
+            escrow.releaseEscrow(id);
             
             expectedActiveVolume -= escrowAmounts[id];
             isActive[id] = false;
@@ -56,7 +56,7 @@ contract EscrowHandler is Test {
         if (isActive[id]) {
             address seller = escrow.getEscrow(id).seller;
             vm.prank(seller);
-            escrow.refundEscrow(id, seller);
+            escrow.refundEscrow(id);
             
             expectedActiveVolume -= escrowAmounts[id];
             isActive[id] = false;

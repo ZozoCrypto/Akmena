@@ -31,7 +31,7 @@ contract AkmenaChaosTest is Test {
         uint256 id = escrow.createEscrow(buyer, seller, amount);
 
         vm.expectRevert(); 
-        escrow.releaseEscrow(id, randomActor);
+        escrow.releaseEscrow(id);
     }
 
     function testFuzz_CannotRefundUnlessSeller(
@@ -47,7 +47,7 @@ contract AkmenaChaosTest is Test {
         uint256 id = escrow.createEscrow(buyer, seller, amount);
 
         vm.expectRevert(); 
-        escrow.refundEscrow(id, randomActor);
+        escrow.refundEscrow(id);
     }
 
     function testFuzz_CannotDoubleRelease(address buyer, address seller, uint256 amount) public {
@@ -56,10 +56,10 @@ contract AkmenaChaosTest is Test {
 
         uint256 id = escrow.createEscrow(buyer, seller, amount);
 
-        escrow.releaseEscrow(id, buyer);
+        escrow.releaseEscrow(id);
 
         vm.expectRevert(); 
-        escrow.releaseEscrow(id, buyer);
+        escrow.releaseEscrow(id);
     }
 
     // ==========================================

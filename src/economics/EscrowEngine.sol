@@ -10,12 +10,12 @@ contract EscrowEngine is IEscrowEngine {
         if (amount == 0) revert InvalidAmount();
 
         LibStorage.EscrowStorage storage ds = LibStorage.escrow();
-        
+
         // Initialize ID at 1 for the first escrow
         if (ds.nextEscrowId == 0) ds.nextEscrowId = 1;
-        
+
         uint256 currentId = ds.nextEscrowId;
-        
+
         ds.escrows[currentId] = LibStorage.EscrowData({
             buyer: buyer,
             seller: seller,
@@ -29,26 +29,26 @@ contract EscrowEngine is IEscrowEngine {
         return currentId;
     }
 
-    function releaseEscrow(uint256 escrowId, address caller) external override {
+    function releaseEscrow(uint256 escrowId) external override {
         LibStorage.EscrowStorage storage ds = LibStorage.escrow();
         LibStorage.EscrowData storage target = ds.escrows[escrowId];
 
         if (target.buyer == address(0)) revert EscrowNotFound();
         if (target.status != 1) revert EscrowNotActive();
-        if (caller != target.buyer) revert UnauthorizedAccess();
+        if (msg.sender != target.buyer) revert UnauthorizedAccess();
 
         target.status = 2; // 2 = Released
 
         emit EscrowReleased(escrowId);
     }
 
-    function refundEscrow(uint256 escrowId, address caller) external override {
+    function refundEscrow(uint256 escrowId) external override {
         LibStorage.EscrowStorage storage ds = LibStorage.escrow();
         LibStorage.EscrowData storage target = ds.escrows[escrowId];
 
         if (target.buyer == address(0)) revert EscrowNotFound();
         if (target.status != 1) revert EscrowNotActive();
-        if (caller != target.seller) revert UnauthorizedAccess();
+        if (msg.sender != target.seller) revert UnauthorizedAccess();
 
         target.status = 3; // 3 = Refunded
 

@@ -35,7 +35,7 @@ contract EscrowEngineTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IEscrowEngine.EscrowReleased(id);
 
-        engine.releaseEscrow(id, buyer);
+        engine.releaseEscrow(id);
         
         LibStorage.EscrowData memory data = engine.getEscrow(id);
         assertEq(data.status, 2, "Status should be Released");
@@ -47,7 +47,7 @@ contract EscrowEngineTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IEscrowEngine.EscrowRefunded(id);
 
-        engine.refundEscrow(id, seller); // Only seller can authorize refund
+        engine.refundEscrow(id); // Only seller can authorize refund
         
         LibStorage.EscrowData memory data = engine.getEscrow(id);
         assertEq(data.status, 3, "Status should be Refunded");
@@ -57,6 +57,6 @@ contract EscrowEngineTest is Test {
         uint256 id = engine.createEscrow(buyer, seller, 500);
 
         vm.expectRevert(IEscrowEngine.UnauthorizedAccess.selector);
-        engine.releaseEscrow(id, seller); // Seller cannot release to themselves
+        engine.releaseEscrow(id); // Seller cannot release to themselves
     }
 }

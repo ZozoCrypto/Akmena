@@ -15,7 +15,7 @@ interface IEscrowEngine {
     error UnauthorizedAccess();
 
     function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256);
-    function releaseEscrow(uint256 escrowId, address caller) external;
-    function refundEscrow(uint256 escrowId, address caller) external;
+    function releaseEscrow(uint256 escrowId) external;
+    function refundEscrow(uint256 escrowId) external;
     function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory);
 }
