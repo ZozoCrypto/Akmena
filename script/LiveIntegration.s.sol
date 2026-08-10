@@ -1,44 +1,42 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
-import "forge-std/Script.sol";
-import "../src/registry/AgentRegistry.sol";
-import "../src/economics/EscrowEngine.sol";
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
+import {AkmenaCore} from "../src/core/AkmenaCore.sol";
+import {EscrowEngine} from "../src/economics/EscrowEngine.sol";
+import {AgreementEngine} from "../src/autonomous/AgreementEngine.sol";
+import {AgentRegistry} from "../src/registry/AgentRegistry.sol";
 
-contract LiveIntegration is Script {
+contract LiveIntegrationScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployerAddress = vm.addr(deployerPrivateKey);
+        address deployer = vm.addr(deployerPrivateKey);
         
+        console.log("Deploying Akmena V2 Masterpiece from:", deployer);
+
         vm.startBroadcast(deployerPrivateKey);
 
-        // Bind to our live verified Base Sepolia contracts
-        AgentRegistry registry = AgentRegistry(0x940b6260Df7eBD78CB6484791F4B4f2Ccf9109D2);
-        EscrowEngine escrow = EscrowEngine(0x7A3C240a3FfB054d1C588355C928Ed9118A18c63);
+        // 1. Deploy Core Router (Nuclear-Hardened Registry)
+        AkmenaCore core = new AkmenaCore();
+        console.log("AkmenaCore deployed at:", address(core));
 
-        console.log("Starting Live Integration on Base Sepolia as:", deployerAddress);
+        // 2. Deploy Protocol Engines
+        EscrowEngine escrowEngine = new EscrowEngine();
+        console.log("EscrowEngine deployed at:", address(escrowEngine));
 
-        // -----------------------------------------
-        // 1. Register a Live Agent Identity
-        // -----------------------------------------
-        bytes32 agentId = keccak256(abi.encodePacked("AkmenaAgentMasterpiece", block.timestamp));
-        registry.register(agentId, "ipfs://QmAkmenaMasterpieceV1");
-        console.log("1. Success! Agent Registered with ID:");
-        console.logBytes32(agentId);
+        AgreementEngine agreementEngine = new AgreementEngine();
+        console.log("AgreementEngine deployed at:", address(agreementEngine));
 
-        // -----------------------------------------
-        // 2. Create a Live Escrow (buyer, seller, amount) -> returns escrowId
-        // -----------------------------------------
-        uint256 amount = 100; // Protocol unit amount
-        uint256 escrowId = escrow.createEscrow(deployerAddress, deployerAddress, amount);
-        console.log("2. Success! Escrow Created with ID:", escrowId);
+        AgentRegistry agentRegistry = new AgentRegistry();
+        console.log("AgentRegistry deployed at:", address(agentRegistry));
 
-        // -----------------------------------------
-        // 3. Release the Escrow (escrowId, caller)
-        // -----------------------------------------
-        escrow.releaseEscrow(escrowId);
-        console.log("3. Success! Escrow Released.");
+        // 3. Register Modules into Core Router (ERC-8109 Introspection Compliant)
+        core.registerModule(bytes32("ESCROW_ENGINE"), address(escrowEngine), "2.0.0");
+        core.registerModule(bytes32("AGREEMENT_ENGINE"), address(agreementEngine), "2.0.0");
+        core.registerModule(bytes32("AGENT_REGISTRY"), address(agentRegistry), "2.0.0");
 
         vm.stopBroadcast();
+        console.log("Akmena V2 Live Integration Handshake Complete.");
     }
 }
