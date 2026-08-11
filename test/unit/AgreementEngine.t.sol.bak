@@ -2,7 +2,7 @@
 pragma solidity 0.8.28;
 
 import "forge-std/Test.sol";
-import "../../src/agreements/AgreementEngine.sol";
+import "../../src/autonomous/AgreementEngine.sol";
 
 contract AgreementEngineTest is Test {
     AgreementEngine engine;

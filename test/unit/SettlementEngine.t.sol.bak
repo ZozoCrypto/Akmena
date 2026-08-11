@@ -2,8 +2,8 @@
 pragma solidity 0.8.28;
 
 import "forge-std/Test.sol";
-import "../../src/settlement/SettlementEngine.sol";
-import "../../src/interfaces/ISettlementEngine.sol";
+import "../../src/economics/SettlementEngine.sol";
+import "../../src/economics/ISettlementEngine.sol";
 
 contract SettlementEngineTest is Test {
     SettlementEngine engine;

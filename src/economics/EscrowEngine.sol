@@ -6,6 +6,7 @@ import {LibStorage} from "../storage/LibStorage.sol";
 
 contract EscrowEngine is IEscrowEngine {
     function createEscrow(address buyer, address seller, uint256 amount) external override returns (uint256) {
+        if (msg.sender != buyer) revert UnauthorizedAccess();
         if (buyer == address(0) || seller == address(0)) revert InvalidAddress();
         if (amount == 0) revert InvalidAmount();
 

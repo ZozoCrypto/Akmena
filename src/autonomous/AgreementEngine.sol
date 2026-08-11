@@ -32,6 +32,7 @@ contract AgreementEngine is IAgreementEngine {
 
         if (msg.sender != agreementData.partyB) revert UnauthorizedAccess();
         if (block.timestamp > agreementData.validUntil) revert AgreementExpired();
+        if (agreementData.isExecuted) revert("AgreementAlreadyExecuted");
 
         agreementData.isExecuted = true;
 
