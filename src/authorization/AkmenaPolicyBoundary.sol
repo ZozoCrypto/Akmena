@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {AkmenaCore} from "../core/AkmenaCore.sol";
 import {IEscrowEngine} from "../economics/IEscrowEngine.sol";
+import {LibStorage} from "../storage/LibStorage.sol";
 
 /// @title AkmenaPolicyBoundary
 /// @notice The deterministic gateway between AI Agent execution and protocol liquidity.
@@ -52,12 +53,13 @@ contract AkmenaPolicyBoundary {
         uint256 amountToSpend,
         uint256 targetEscrowId
     ) external returns (bool) {
+        if (msg.sender != agent) revert UnauthorizedAgent();
+
         SpendingPolicy storage policy = agentPolicies[operator][agent];
         
         if (policy.maxSpendPerTransaction == 0) revert UnauthorizedAgent();
         if (amountToSpend > policy.maxSpendPerTransaction) revert PolicyExceeded();
         
-        // Reset daily limit if 24 hours have passed
         if (block.timestamp > policy.lastResetTimestamp + 1 days) {
             policy.totalSpentToday = 0;
             policy.lastResetTimestamp = block.timestamp;
@@ -70,9 +72,9 @@ contract AkmenaPolicyBoundary {
             (address escrowAddr, bool active, ) = core.getModule(bytes32("ESCROW_ENGINE"));
             require(active, "Escrow Engine Offline");
             
-            // Reverts if the escrow is missing or not authorized
-            IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
-            // Further logic to verify escrow status == 1 (Funded) would go here
+            // [PATCH ZERO-DAY]: Strictly enforce the escrow status is FUNDED (1)
+            LibStorage.EscrowData memory target = IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
+            if (target.status != 1) revert EscrowPrerequisiteFailed();
         }
 
         policy.totalSpentToday += amountToSpend;

@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: akmena-sdk
+Version: 2.1.0
+Summary: The official Python SDK for the Akmena AI Agent Protocol
+Requires-Python: >=3.8
+Requires-Dist: web3>=6.0.0
+Requires-Dist: eth-account>=0.8.0
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

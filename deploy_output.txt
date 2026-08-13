@@ -1,0 +1,32 @@
+No files changed, compilation skipped
+Script ran successfully.
+
+== Logs ==
+  AkmenaCore deployed at: 0x8296EEdE24d5c26e7A3fd1CD0fF6D8095F17Ef4d
+  EscrowEngine deployed at: 0xDe69dF816F437C36ea46f2a457D097e9F658030a
+  EscrowEngine registered to Core
+  AkmenaPolicyBoundary deployed at: 0x9505575Ca05213D00D59E93Ec4E4374F15A132b9
+
+## Setting up 1 EVM.
+
+==========================
+
+Chain 84532
+
+Estimated gas price: 0.015159224 gwei
+
+Estimated total gas used for script: 2337412
+
+Estimated amount required: 0.000035433352088288 ETH
+
+==========================
+
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+
+Transactions saved to: /home/cryptzozo/projects/akmena/broadcast/DeployCoreArchitecture.s.sol/84532/run-latest.json
+
+Sensitive values saved to: /home/cryptzozo/projects/akmena/cache/DeployCoreArchitecture.s.sol/84532/run-latest.json
+

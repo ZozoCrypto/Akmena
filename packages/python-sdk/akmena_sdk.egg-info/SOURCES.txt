@@ -1,0 +1,10 @@
+setup.py
+akmena/__init__.py
+akmena/client.py
+akmena/modules/__init__.py
+akmena/modules/policy.py
+akmena_sdk.egg-info/PKG-INFO
+akmena_sdk.egg-info/SOURCES.txt
+akmena_sdk.egg-info/dependency_links.txt
+akmena_sdk.egg-info/requires.txt
+akmena_sdk.egg-info/top_level.txt
