@@ -5,9 +5,6 @@ import {AkmenaCore} from "../core/AkmenaCore.sol";
 import {IEscrowEngine} from "../economics/IEscrowEngine.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
 
-/// @title AkmenaPolicyBoundary
-/// @notice The deterministic gateway between AI Agent execution and protocol liquidity.
-/// @dev Prevents AI agents from exceeding human-defined economic policies.
 contract AkmenaPolicyBoundary {
     AkmenaCore public immutable core;
     
@@ -19,18 +16,17 @@ contract AkmenaPolicyBoundary {
         bool requireActiveEscrow;
     }
 
-    // Mapping: Human Operator -> AI Agent -> SpendingPolicy
     mapping(address => mapping(address => SpendingPolicy)) public agentPolicies;
 
     error PolicyExceeded();
     error EscrowPrerequisiteFailed();
     error UnauthorizedAgent();
+    error ExecutionFailed();
 
     constructor(address _core) {
         core = AkmenaCore(_core);
     }
 
-    /// @notice Human operator sets the strict mathematical bounds for their AI agent.
     function setAgentPolicy(
         address agent, 
         uint256 maxSpend, 
@@ -46,14 +42,16 @@ contract AkmenaPolicyBoundary {
         });
     }
 
-    /// @notice The hook called by AgentKit/x402 before executing a Base transaction.
-    function validateAgentExecution(
+    /// @notice ATOMIC EXECUTION: Validates policy and executes payload in one EVM frame.
+    function executeAgentCall(
         address operator,
-        address agent,
+        address targetContract,
         uint256 amountToSpend,
-        uint256 targetEscrowId
-    ) external returns (bool) {
-        if (msg.sender != agent) revert UnauthorizedAgent();
+        uint256 targetEscrowId,
+        bytes calldata payload
+    ) external returns (bytes memory) {
+        address agent = msg.sender;
+        if (agent == address(0)) revert UnauthorizedAgent();
 
         SpendingPolicy storage policy = agentPolicies[operator][agent];
         
@@ -67,17 +65,27 @@ contract AkmenaPolicyBoundary {
         
         if (policy.totalSpentToday + amountToSpend > policy.dailyLimit) revert PolicyExceeded();
 
-        // Cross-Module Deterministic Check
         if (policy.requireActiveEscrow) {
             (address escrowAddr, bool active, ) = core.getModule(bytes32("ESCROW_ENGINE"));
             require(active, "Escrow Engine Offline");
             
-            // [PATCH ZERO-DAY]: Strictly enforce the escrow status is FUNDED (1)
-            LibStorage.EscrowData memory target = IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
-            if (target.status != 1) revert EscrowPrerequisiteFailed();
+            LibStorage.EscrowData memory targetData = IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
+            if (targetData.status != 1) revert EscrowPrerequisiteFailed();
         }
 
+        // Optimistic accounting update
         policy.totalSpentToday += amountToSpend;
-        return true;
+
+        // ATOMIC PROXY: Call the target contract with the payload.
+        // If this fails, the EVM reverts the entire transaction, rolling back the totalSpentToday.
+        (bool success, bytes memory returnData) = targetContract.call(payload);
+        if (!success) {
+            // Bubble up the revert reason from the target contract
+            assembly {
+                revert(add(returnData, 32), mload(returnData))
+            }
+        }
+
+        return returnData;
     }
 }

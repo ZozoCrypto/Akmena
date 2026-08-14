@@ -30,10 +30,14 @@ contract AttackWave3_PolicyBoundaryTest is Test {
     function test_Attack_UnauthorizedCallerCannotConsumeVictimDailyLimit() public {
         vm.prank(attacker);
 
-        // EXPLOIT ATTEMPT: Attacker tries to consume victim's daily limit
-        // PATCH VERIFICATION: Must revert with UnauthorizedAgent
         vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedAgent.selector);
-        boundary.validateAgentExecution(operator, agent, 100 ether, 0);
+        boundary.executeAgentCall(
+            operator,
+            address(this), // Dummy target
+            100 ether,
+            0,
+            "" // Empty payload
+        );
     }
 
     function test_Attack_EscrowRequirementCannotBeSatisfiedByMissingEscrow() public {
@@ -41,18 +45,14 @@ contract AttackWave3_PolicyBoundaryTest is Test {
         boundary.setAgentPolicy(agent, 100 ether, 1_000 ether, true);
 
         vm.prank(agent);
-        // Exceeds boundaries or calls fake escrow, expects to revert
-        // depending on strict escrow verification logic in EscrowEngine
         vm.expectRevert();
-        boundary.validateAgentExecution(operator, agent, 1 ether, 999999);
+        boundary.executeAgentCall(operator, address(this), 1 ether, 999999, "");
     }
 
     function test_Attack_ArbitraryCallerCanSubmitVictimIdentity() public {
         vm.prank(attacker);
 
-        // EXPLOIT ATTEMPT: Attacker attempts to hijack the policy context
-        // PATCH VERIFICATION: Must revert with UnauthorizedAgent
         vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedAgent.selector);
-        boundary.validateAgentExecution(operator, agent, 1 ether, 0);
+        boundary.executeAgentCall(operator, address(this), 1 ether, 0, "");
     }
 }
