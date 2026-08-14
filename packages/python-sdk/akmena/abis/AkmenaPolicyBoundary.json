@@ -69,6 +69,45 @@
   },
   {
     "type": "function",
+    "name": "executeAgentCall",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "targetContract",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amountToSpend",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "targetEscrowId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "payload",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "setAgentPolicy",
     "inputs": [
       {
@@ -96,42 +135,13 @@
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "validateAgentExecution",
-    "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "agent",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "amountToSpend",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "targetEscrowId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable"
+    "type": "error",
+    "name": "EscrowPrerequisiteFailed",
+    "inputs": []
   },
   {
     "type": "error",
-    "name": "EscrowPrerequisiteFailed",
+    "name": "ExecutionFailed",
     "inputs": []
   },
   {

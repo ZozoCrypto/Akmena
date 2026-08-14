@@ -24,3 +24,19 @@ class PolicyModule:
             "last_reset": raw_policy[3],
             "requires_escrow": raw_policy[4]
         }
+
+    def build_execute_call(self, operator: str, target: str, amount: int, escrow_id: int, payload: bytes) -> dict:
+        """Builds the raw transaction for the atomic executeAgentCall."""
+        op_checksum = self.client.w3.to_checksum_address(operator)
+        target_checksum = self.client.w3.to_checksum_address(target)
+        
+        return self.contract.functions.executeAgentCall(
+            op_checksum,
+            target_checksum,
+            amount,
+            escrow_id,
+            payload
+        ).build_transaction({
+            'from': self.client.get_agent_address(),
+            'nonce': self.client.w3.eth.get_transaction_count(self.client.get_agent_address())
+        })
