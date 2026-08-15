@@ -1,73 +1,85 @@
 import os
-import json
-import secrets
-from web3 import Web3
-from eth_account import Account
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.tools import StructuredTool
+from pydantic import BaseModel, Field
+from langgraph.prebuilt import create_react_agent
 
-# Initialize connection to Base Sepolia
-RPC_URL = "http://127.0.0.1:8545"
-w3 = Web3(Web3.HTTPProvider(RPC_URL))
+# Akmena Protocol Imports
+from akmena.tools import AkmenaPolicyTool
 
-def load_abi(contract_name):
-    """Dynamically loads the ABI directly from Foundry's out/ directory"""
-    path = f"out/{contract_name}.sol/{contract_name}.json"
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"ABI not found at {path}. Did you run 'forge build'?")
-    with open(path, "r") as f:
-        return json.load(f)["abi"]
+# 1. Load Secure Environment Variables
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+AGENT_PRIVATE_KEY = os.getenv("AGENT_PRIVATE_KEY", "0x" + "1" * 64)
+OPERATOR_ADDRESS = os.getenv("HUMAN_OPERATOR_ADDRESS", "0xAD11111111111111111111111111111111111111")
+AGENT_ADDRESS = "0x2222222222222222222222222222222222222222" # Mock agent address
 
-class AkmenaAgent:
-    def __init__(self, private_key: str, boundary_address: str):
-        self.w3 = w3
-        self.account = Account.from_key(private_key)
-        self.boundary_abi = load_abi("AkmenaPolicyBoundary")
-        
-        # Checksum the address
-        checksum_addr = self.w3.to_checksum_address(boundary_address)
-        self.boundary = self.w3.eth.contract(address=checksum_addr, abi=self.boundary_abi)
-        
-        print(f"[+] AI Neural Link active. Connected to {RPC_URL}")
-        print(f"[+] Agent Hot Wallet Initialized: {self.account.address}")
+# 2. Mock the On-Chain State (Until we deploy V2 to Sepolia)
+class MockPolicyModule:
+    def get_policy(self, operator_address, agent_address):
+        print(f"\n[EVM CALL] Querying AkmenaPolicyBoundary for Agent {agent_address[:8]}...")
+        return {
+            "max_spend_per_tx": 100,
+            "daily_limit": 1000,
+            "spent_today": 250,
+            "last_reset": 0,
+            "requires_escrow": True
+        }
 
-    def check_policy(self, operator_address: str):
-        print(f"\n[*] Querying Akmena Policy Boundary for operator {operator_address}...")
-        operator_checksum = self.w3.to_checksum_address(operator_address)
-        
-        try:
-            # Call the public mapping: agentPolicies(operator, agent)
-            policy = self.boundary.functions.agentPolicies(operator_checksum, self.account.address).call()
-            
-            print("\n" + "="*30)
-            print("🛡️ AI SPENDING POLICY DETECTED")
-            print("="*30)
-            print(f"Max Spend Per Tx : {self.w3.from_wei(policy[0], 'ether')} Tokens")
-            print(f"Daily Limit      : {self.w3.from_wei(policy[1], 'ether')} Tokens")
-            print(f"Spent Today      : {self.w3.from_wei(policy[2], 'ether')} Tokens")
-            print(f"Requires Escrow  : {'YES' if policy[4] else 'NO'}")
-            print("="*30 + "\n")
-            return policy
-        except Exception as e:
-            print(f"[-] Failed to read policy: {e}")
+def initialize_ghost_bundler():
+    print("=== WAKING UP THE GHOST-BUNDLER (GEMINI 3.6 EDITION) ===")
+    print(f"[*] Agent EVM Identity Bound: {AGENT_ADDRESS}")
+
+    # 3. Instantiate the Protocol Tooling
+    raw_policy_tool = AkmenaPolicyTool(MockPolicyModule())
+
+    # LangChain strict type schema
+    class PolicyCheckInput(BaseModel):
+        operator_address: str = Field(description="The Ethereum address of the human operator")
+        agent_address: str = Field(description="The Ethereum address of the AI agent's hot wallet")
+
+    # Wrap for LangGraph integration
+    langchain_policy_tool = StructuredTool.from_function(
+        func=raw_policy_tool.execute,
+        name=raw_policy_tool.name,
+        description=raw_policy_tool.description,
+        args_schema=PolicyCheckInput
+    )
+
+    tools = [langchain_policy_tool]
+
+    # 4. Initialize the Cognitive Engine (Upgraded to Gemini 3.6 Flash)
+    llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0.0)
+
+    # 5. Construct the Reasoning Loop
+    agent = create_react_agent(llm, tools)
+
+    return agent
 
 if __name__ == "__main__":
-    print("=== Akmena AI Agent Boot Sequence ===")
-    
-    if not w3.is_connected():
-        print("[-] FATAL: Could not connect to Base Sepolia.")
-        exit(1)
+    if not GOOGLE_API_KEY:
+        print("[-] WARNING: GOOGLE_API_KEY not set. Execution will fail.")
+    else:
+        ghost_bundler = initialize_ghost_bundler()
         
-    print("[+] RPC Connection to Base Sepolia Verified.")
-    
-    # Generate a temporary ephemeral key just to test the boot sequence
-    ephemeral_key = "0x" + secrets.token_hex(32)
-    
-    # Dummy contract address (we will replace this with your actual deployment address later)
-    dummy_boundary = "0x9505575Ca05213D00D59E93Ec4E4374F15A132b9"
-    dummy_operator = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-    
-    try:
-        agent = AkmenaAgent(private_key=ephemeral_key, boundary_address=dummy_boundary)
-        agent.check_policy(dummy_operator)
-        print("[+] AI Agent Boot Sequence Complete. Ready for Live Deployment Data.")
-    except Exception as e:
-        print(f"[-] Boot Sequence Failed: {e}")
+        system_prompt = (
+            "You are the 'Ghost-Bundler', an autonomous quantitative trading and execution agent operating on the Base network. "
+            "You are secured by the Akmena Protocol deterministic firewall. "
+            "You must ALWAYS use your tools to check your on-chain Akmena policy limits before answering questions about your spending power. "
+            f"Your EVM address is {AGENT_ADDRESS}. Your human operator is {OPERATOR_ADDRESS}."
+        )
+
+        print("\n=== EXECUTING DIRECTIVE ===")
+        try:
+            inputs = {"messages": [
+                ("system", system_prompt),
+                ("user", "Initialize systems. Run a diagnostic to check our current spending limits on the Akmena Protocol firewall. Can I spend 500 ETH today in a single transaction?")
+            ]}
+            
+            for s in ghost_bundler.stream(inputs, stream_mode="values"):
+                message = s["messages"][-1]
+                message.pretty_print()
+                
+        except Exception as e:
+            print(f"\n[-] Execution Error: {e}")

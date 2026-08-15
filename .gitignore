@@ -30,3 +30,4 @@ logs/
 *.zip
 review/packages/sdk/node_modules/
 packages/sdk/dist/
+.env
