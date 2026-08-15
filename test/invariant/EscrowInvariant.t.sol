@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 
 import {EscrowEngine} from "../../src/economics/EscrowEngine.sol";
+import {IEscrowEngine} from "../../src/economics/IEscrowEngine.sol";
 import {LibStorage} from "../../src/storage/LibStorage.sol";
 import {EscrowHandler} from "./handlers/EscrowHandler.sol";
 
@@ -61,15 +62,12 @@ contract EscrowInvariant is StdInvariant, Test {
     }
 
     /*
-     * Escrow ID zero must remain unused.
+     * Escrow ID zero must remain unused and strictly revert.
+     * Note: We test this as a standard unit test since it involves a revert exception.
      */
-    function invariant_escrowZeroReserved() public view {
-        LibStorage.EscrowData memory escrowData = escrow.getEscrow(0);
-
-        assertEq(escrowData.buyer, address(0));
-        assertEq(escrowData.seller, address(0));
-        assertEq(escrowData.amount, 0);
-        assertEq(escrowData.status, 0);
+    function test_RevertWhen_QueryingEscrowZero() public {
+        vm.expectRevert(IEscrowEngine.EscrowNotFound.selector);
+        escrow.getEscrow(0);
     }
 
     /*
@@ -105,5 +103,7 @@ contract EscrowInvariant is StdInvariant, Test {
         assertEq(handler.unauthorizedRefundSuccesses(), 0);
     }
 
-    function test_SanityCheck() public pure { assertTrue(true); }
+    function test_SanityCheck() public pure {
+        assertTrue(true);
+    }
 }
