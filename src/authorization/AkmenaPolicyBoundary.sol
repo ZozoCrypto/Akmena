@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {AkmenaCore} from "../core/AkmenaCore.sol";
 import {IEscrowEngine} from "../economics/IEscrowEngine.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
+import {LibTransientProof} from "../libraries/LibTransientProof.sol";
 
 contract AkmenaPolicyBoundary {
     AkmenaCore public immutable core;
@@ -22,6 +23,7 @@ contract AkmenaPolicyBoundary {
     error EscrowPrerequisiteFailed();
     error UnauthorizedAgent();
     error ExecutionFailed();
+    error InvalidTransientProof();
 
     constructor(address _core) {
         core = AkmenaCore(_core);
@@ -42,7 +44,6 @@ contract AkmenaPolicyBoundary {
         });
     }
 
-    /// @notice ATOMIC EXECUTION: Validates policy and executes payload in one EVM frame.
     function executeAgentCall(
         address operator,
         address targetContract,
@@ -71,16 +72,16 @@ contract AkmenaPolicyBoundary {
             
             LibStorage.EscrowData memory targetData = IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
             if (targetData.status != 1) revert EscrowPrerequisiteFailed();
+
+            // FORTIFICATION: Verify the cryptographic transient proof of economic backing
+            bool hasProof = LibTransientProof.verifyEscrowProof(targetEscrowId, targetData.buyer, targetData.amount);
+            if (!hasProof) revert InvalidTransientProof();
         }
 
-        // Optimistic accounting update
         policy.totalSpentToday += amountToSpend;
 
-        // ATOMIC PROXY: Call the target contract with the payload.
-        // If this fails, the EVM reverts the entire transaction, rolling back the totalSpentToday.
         (bool success, bytes memory returnData) = targetContract.call(payload);
         if (!success) {
-            // Bubble up the revert reason from the target contract
             assembly {
                 revert(add(returnData, 32), mload(returnData))
             }

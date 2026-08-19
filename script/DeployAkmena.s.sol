@@ -1,37 +1,54 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity ^0.8.28;
 
-import "forge-std/Script.sol";
-import "../src/core/AkmenaCore.sol";
-import "../src/economics/EscrowEngine.sol";
-import "../src/registry/AgentRegistry.sol";
+import {Script, console} from "forge-std/Script.sol";
+import {AkmenaCore} from "../src/core/AkmenaCore.sol";
+import {EscrowEngine} from "../src/economics/EscrowEngine.sol";
+import {SettlementEngine} from "../src/economics/SettlementEngine.sol";
+import {TreasuryEngine} from "../src/economics/TreasuryEngine.sol";
+import {PaymentsEngine} from "../src/economics/PaymentsEngine.sol";
+import {AkmenaPolicyBoundary} from "../src/authorization/AkmenaPolicyBoundary.sol";
+import {WorkflowEngine} from "../src/orchestration/WorkflowEngine.sol";
+import {DelegationEngine} from "../src/authorization/DelegationEngine.sol";
+import {AttestationEngine} from "../src/authorization/AttestationEngine.sol";
+import {PrivacyEngine} from "../src/privacy/PrivacyEngine.sol";
+import {StealthAddressRegistry} from "../src/privacy/StealthAddressRegistry.sol";
 
 contract DeployAkmena is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        
         vm.startBroadcast(deployerPrivateKey);
 
-        // 1. Deploy Core Protocol Registry
+        console.log("Deploying Akmena Nuclear-Hardened Protocol on Base...");
+
         AkmenaCore core = new AkmenaCore();
-        console.log("AkmenaCore deployed at:", address(core));
+        EscrowEngine escrow = new EscrowEngine();
+        SettlementEngine settlement = new SettlementEngine();
+        TreasuryEngine treasury = new TreasuryEngine();
+        PaymentsEngine payments = new PaymentsEngine();
+        AkmenaPolicyBoundary policyBoundary = new AkmenaPolicyBoundary(address(core));
+        WorkflowEngine workflow = new WorkflowEngine(address(core));
+        DelegationEngine delegation = new DelegationEngine();
+        AttestationEngine attestation = new AttestationEngine();
+        
+        // Native Protocol Privacy Execution 
+        PrivacyEngine privacy = new PrivacyEngine();
+        StealthAddressRegistry stealthRegistry = new StealthAddressRegistry();
 
-        // 2. Deploy Escrow Engine
-        EscrowEngine escrowEngine = new EscrowEngine();
-        console.log("EscrowEngine deployed at:", address(escrowEngine));
+        core.registerModule(bytes32("ESCROW_ENGINE"), address(escrow), "2.0.0");
+        core.registerModule(bytes32("SETTLEMENT_ENGINE"), address(settlement), "2.0.0");
+        core.registerModule(bytes32("TREASURY_ENGINE"), address(treasury), "2.0.0");
+        core.registerModule(bytes32("PAYMENTS_ENGINE"), address(payments), "2.0.0");
+        core.registerModule(bytes32("POLICY_BOUNDARY"), address(policyBoundary), "2.0.0");
+        core.registerModule(bytes32("WORKFLOW_ENGINE"), address(workflow), "2.0.0");
+        core.registerModule(bytes32("DELEGATION_ENGINE"), address(delegation), "2.0.0");
+        core.registerModule(bytes32("ATTESTATION_ENGINE"), address(attestation), "2.0.0");
+        
+        // Locking Privacy Constraints into the Router
+        core.registerModule(bytes32("PRIVACY_ENGINE"), address(privacy), "1.0.0");
+        core.registerModule(bytes32("STEALTH_REGISTRY"), address(stealthRegistry), "1.0.0");
 
-        // 3. Deploy Agent Registry
-        AgentRegistry agentRegistry = new AgentRegistry();
-        console.log("AgentRegistry deployed at:", address(agentRegistry));
-
-        // 4. Register modules to Core (using keccak256 module keys)
-        bytes32 ESCROW_KEY = keccak256("akmena.module.escrow");
-        bytes32 REGISTRY_KEY = keccak256("akmena.module.registry");
-
-        core.registerModule(ESCROW_KEY, address(escrowEngine), "v2.0.0");
-        core.registerModule(REGISTRY_KEY, address(agentRegistry), "v2.0.0");
-
-        console.log("Modules registered successfully on Base Sepolia!");
+        console.log("All modules registered and locked successfully.");
 
         vm.stopBroadcast();
     }
