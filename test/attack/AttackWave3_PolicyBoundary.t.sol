@@ -34,7 +34,7 @@ contract AttackWave3_PolicyBoundaryTest is Test {
         boundary.executeAgentCall(
             operator,
             address(this), // Dummy target
-            100 ether,
+            100 ether, bytes32("ESCROW_ENGINE"),
             0,
             "" // Empty payload
         );
@@ -46,13 +46,13 @@ contract AttackWave3_PolicyBoundaryTest is Test {
 
         vm.prank(agent);
         vm.expectRevert();
-        boundary.executeAgentCall(operator, address(this), 1 ether, 999999, "");
+        boundary.executeAgentCall(operator, address(this), 1 ether, bytes32("ESCROW_ENGINE"), 999999, "");
     }
 
     function test_Attack_ArbitraryCallerCanSubmitVictimIdentity() public {
         vm.prank(attacker);
 
         vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedAgent.selector);
-        boundary.executeAgentCall(operator, address(this), 1 ether, 0, "");
+        boundary.executeAgentCall(operator, address(this), 1 ether, bytes32("ESCROW_ENGINE"), 0, "");
     }
 }

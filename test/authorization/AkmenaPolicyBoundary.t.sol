@@ -39,7 +39,7 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
         // Agent executes within the policy atomically
         vm.prank(aiAgentHotWallet);
         boundary.executeAgentCall(
-            humanOperator, address(target), 50e18, 0, abi.encodeWithSelector(DummyTarget.ping.selector)
+            humanOperator, address(target), 50e18, bytes32("ESCROW_ENGINE"), 0, abi.encodeWithSelector(DummyTarget.ping.selector)
         );
     }
 }

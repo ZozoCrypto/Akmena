@@ -49,4 +49,10 @@ contract EscrowEngine is IEscrowEngine {
         if (data.buyer == address(0)) revert EscrowNotFound();
         return data;
     }
+
+    /// @notice Unified interface for the PolicyBoundary dynamic routing
+    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+        LibStorage.EscrowData memory targetData = this.getEscrow(proofId);
+        return targetData.status == 1 && targetData.buyer == operator && targetData.amount >= amount;
+    }
 }

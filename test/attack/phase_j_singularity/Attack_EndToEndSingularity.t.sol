@@ -1,3 +1,4 @@
+import {IEscrowEngine} from "../../../src/economics/IEscrowEngine.sol";
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
@@ -38,8 +39,8 @@ contract Attack_EndToEndSingularityTest is Test {
         // Attempt execution with a fake escrow ID (1) that was never funded / has no transient proof
         bytes memory payload = abi.encodeWithSignature("executeAction()");
         
-        vm.expectRevert(AkmenaPolicyBoundary.InvalidTransientProof.selector);
-        policyBoundary.executeAgentCall(maliciousAgent, address(core), 1e18, 1, payload);
+        vm.expectRevert(IEscrowEngine.EscrowNotFound.selector);
+        policyBoundary.executeAgentCall(maliciousAgent, address(core), 1e18, bytes32("ESCROW_ENGINE"), 1, payload);
 
         vm.stopPrank();
     }

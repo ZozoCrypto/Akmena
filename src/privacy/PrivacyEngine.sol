@@ -3,8 +3,6 @@ pragma solidity ^0.8.28;
 
 import {LibTransientProof} from "../libraries/LibTransientProof.sol";
 
-/// @title Akmena Privacy Engine
-/// @notice Handles stealth commitments and private escrow releases for autonomous agents.
 contract PrivacyEngine {
     mapping(bytes32 => bool) public commitments;
     mapping(bytes32 => bool) public nullifierHashes;
@@ -18,7 +16,6 @@ contract PrivacyEngine {
     error TransferFailed();
     error InvalidAddress();
 
-    /// @notice Lock value into a private escrow commitment
     function depositPrivateEscrow(bytes32 commitment) external payable {
         if (msg.value == 0) revert InvalidCommitment();
         if (commitments[commitment]) revert CommitmentAlreadyExists();
@@ -27,33 +24,31 @@ contract PrivacyEngine {
         emit CommitmentDeposited(commitment, msg.value);
     }
 
-    /// @notice Release private escrow to a stealth burner address via nullifier verification
     function executePrivateSettlement(
         bytes32 nullifierHash,
         bytes32 secret,
         uint256 amount,
         address payable stealthRecipient
     ) external {
-        if (stealthRecipient == address(0)) revert InvalidAddress(); // Slither fix: zero-check
+        if (stealthRecipient == address(0)) revert InvalidAddress();
         if (nullifierHashes[nullifierHash]) revert NullifierAlreadySpent();
         
         bytes32 derivedCommitment = keccak256(abi.encodePacked(nullifierHash, secret, amount));
         if (!commitments[derivedCommitment]) revert InvalidCommitment();
 
-        // 1. CEI Pattern: Invalidate nullifier immediately
         nullifierHashes[nullifierHash] = true;
-        
-        // 2. Erase the commitment leaf
         commitments[derivedCommitment] = false;
 
-        // 3. Slither fix: Emit event BEFORE the external low-level call (Strict CEI)
         emit PrivateSettlementExecuted(nullifierHash, stealthRecipient, amount);
 
-        // 4. Write EIP-1153 transient proof receipt
         LibTransientProof.setEscrowProof(uint256(nullifierHash), stealthRecipient, amount);
 
-        // 5. Settle native asset
         (bool success, ) = stealthRecipient.call{value: amount}("");
         if (!success) revert TransferFailed();
+    }
+
+    /// @notice Allows the PolicyBoundary to verify transient proofs written in this module's context
+    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+        return LibTransientProof.verifyEscrowProof(proofId, operator, amount);
     }
 }

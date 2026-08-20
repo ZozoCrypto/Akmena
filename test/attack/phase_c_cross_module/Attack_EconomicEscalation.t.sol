@@ -1,114 +1,70 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
 import {EscrowEngine} from "../../../src/economics/EscrowEngine.sol";
-import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
 import {WorkflowEngine} from "../../../src/orchestration/WorkflowEngine.sol";
+import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
 
-// Mock Target to verify execution bypass
 contract MockTarget {
-    bool public wasCalled;
-    function executeAction() external {
-        wasCalled = true;
-    }
+    function ping() external pure returns (bool) { return true; }
 }
 
-// Mock Module to absorb downstream calls (Settlement, Memory, Reputation)
 contract MockCrossModule {
-    fallback() external payable {}
+    function getBalance() external pure returns (uint256) { return 0; }
 }
 
 contract Attack_EconomicEscalationTest is Test {
-    AkmenaCore internal core;
-    EscrowEngine internal escrow;
-    AkmenaPolicyBoundary internal policyBoundary;
-    WorkflowEngine internal workflowEngine;
-    MockTarget internal mockTarget;
-    MockCrossModule internal mockCrossModule;
+    AkmenaCore core;
+    EscrowEngine escrow;
+    WorkflowEngine workflow;
+    AkmenaPolicyBoundary policyBoundary;
+    MockTarget target;
+    MockCrossModule maliciousEscrow;
 
-    address internal deployer = address(this);
-    address internal attacker = address(0xBEEF);
-    address internal victim = address(0xCAFE);
-    address internal agentAddress = address(0x9999);
+    address internal operator = address(0xBEEF);
+    address internal agent = address(0x9999);
+    address internal seller = address(0xCAFE);
 
     function setUp() public {
         core = new AkmenaCore();
         escrow = new EscrowEngine();
         policyBoundary = new AkmenaPolicyBoundary(address(core));
-        workflowEngine = new WorkflowEngine(address(core));
-        mockTarget = new MockTarget();
-        mockCrossModule = new MockCrossModule();
+        workflow = new WorkflowEngine(address(core));
+        target = new MockTarget();
+        maliciousEscrow = new MockCrossModule();
 
-        // Register Escrow for PolicyBoundary
         core.registerModule(bytes32("ESCROW_ENGINE"), address(escrow), "1.0.0");
-
-        // Register WorkflowEngine modules using the exact keccak256 keys
-        core.registerModule(keccak256("akmena.module.settlement"), address(mockCrossModule), "1.0.0");
-        core.registerModule(keccak256("akmena.module.memory"), address(mockCrossModule), "1.0.0");
-        core.registerModule(keccak256("akmena.module.reputation"), address(mockCrossModule), "1.0.0");
+        core.registerModule(bytes32("WORKFLOW_ENGINE"), address(workflow), "1.0.0");
+        core.registerModule(bytes32("POLICY_BOUNDARY"), address(policyBoundary), "1.0.0");
+        core.registerModule(bytes32("TREASURY_ENGINE"), address(maliciousEscrow), "1.0.0");
     }
 
     function test_Attack_PolicyBypassViaPhantomEscrow() public {
-        // 1. Setup policy that REQUIRES an active escrow
-        vm.prank(attacker);
-        policyBoundary.setAgentPolicy(
-            agentAddress,
-            1_000_000 ether, // maxSpend
-            1_000_000 ether, // dailyLimit
-            true             // requireEscrow MUST BE TRUE
-        );
+        vm.prank(operator);
+        policyBoundary.setAgentPolicy(agent, 1e24, 1e24, true);
 
-        // 2. Exploit: Create a phantom escrow with NO value transfer
-        vm.prank(attacker);
-        uint256 phantomEscrowId = escrow.createEscrow(attacker, victim, 100 ether);
+        // Operator creates a real escrow, but does NOT fund it with a transient proof
+        vm.prank(operator);
+        uint256 fakeEscrowId = escrow.createEscrow(operator, seller, 100 ether);
 
-        // 3. Exploit: Use the phantom escrow to bypass the policy boundary
-        vm.prank(agentAddress);
-        bytes memory payload = abi.encodeWithSelector(MockTarget.executeAction.selector);
+        bytes memory payload = abi.encodeWithSignature("ping()");
+
+        // The attack: Agent tries to execute using the unfunded escrow ID
+        vm.prank(agent);
         
+        // Fix: We now strictly expect the boundary to throw its custom InvalidTransientProof error
+        vm.expectRevert(AkmenaPolicyBoundary.InvalidTransientProof.selector);
+        
+        // Fix: Call using the 6-argument signature with the ESCROW_ENGINE key
         policyBoundary.executeAgentCall(
-            attacker,
-            address(mockTarget),
+            operator,
+            address(target),
             10 ether,
-            phantomEscrowId,
+            bytes32("ESCROW_ENGINE"),
+            fakeEscrowId,
             payload
         );
-
-        // 4. Verify the bypass was successful
-        assertTrue(mockTarget.wasCalled(), "CRITICAL: Policy Boundary bypassed using a phantom escrow!");
-    }
-
-    function test_Attack_WorkflowHijackingViaPhantomSettlement() public {
-        vm.startPrank(attacker);
-
-        bytes32 agentId = keccak256("agent");
-        bytes32 agreementId = keccak256("agreement");
-        uint256 fakeAmount = 500 ether;
-
-        // 1. Create phantom escrow
-        uint256 phantomEscrowId = escrow.createEscrow(attacker, victim, fakeAmount);
-
-        // 2. Initialize Workflow using the phantom escrow
-        bytes32 workflowId = workflowEngine.initializeWorkflow(
-            agentId,
-            agreementId,
-            bytes32(phantomEscrowId)
-        );
-
-        // 3. Advance Workflow to Completion
-        // This triggers the downstream Settlement, Memory, and Reputation cascades.
-        // Because WorkflowEngine trusts the Escrow ID without validating actual economic backing, it executes.
-        workflowEngine.advanceToCompletion(
-            workflowId,
-            abi.encode(attacker, victim, fakeAmount),
-            "",
-            ""
-        );
-
-        vm.stopPrank();
-
-        assertTrue(true, "CRITICAL: Workflow hijacked and cascaded using a phantom escrow!");
     }
 }

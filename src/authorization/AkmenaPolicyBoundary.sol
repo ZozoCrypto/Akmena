@@ -2,9 +2,11 @@
 pragma solidity ^0.8.28;
 
 import {AkmenaCore} from "../core/AkmenaCore.sol";
-import {IEscrowEngine} from "../economics/IEscrowEngine.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
-import {LibTransientProof} from "../libraries/LibTransientProof.sol";
+
+interface ITransientProofVerifier {
+    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
+}
 
 contract AkmenaPolicyBoundary {
     AkmenaCore public immutable core;
@@ -44,11 +46,13 @@ contract AkmenaPolicyBoundary {
         });
     }
 
+    /// @notice Upgraded to accept a dynamic proofModuleKey for zero-knowledge or public verifications
     function executeAgentCall(
         address operator,
         address targetContract,
         uint256 amountToSpend,
-        uint256 targetEscrowId,
+        bytes32 proofModuleKey,
+        uint256 proofId,
         bytes calldata payload
     ) external returns (bytes memory) {
         address agent = msg.sender;
@@ -67,14 +71,11 @@ contract AkmenaPolicyBoundary {
         if (policy.totalSpentToday + amountToSpend > policy.dailyLimit) revert PolicyExceeded();
 
         if (policy.requireActiveEscrow) {
-            (address escrowAddr, bool active, ) = core.getModule(bytes32("ESCROW_ENGINE"));
-            require(active, "Escrow Engine Offline");
+            (address moduleAddr, bool active, ) = core.getModule(proofModuleKey);
+            require(active, "Proof Module Offline");
             
-            LibStorage.EscrowData memory targetData = IEscrowEngine(escrowAddr).getEscrow(targetEscrowId); 
-            if (targetData.status != 1) revert EscrowPrerequisiteFailed();
-
-            // FORTIFICATION: Verify the cryptographic transient proof of economic backing
-            bool hasProof = LibTransientProof.verifyEscrowProof(targetEscrowId, targetData.buyer, targetData.amount);
+            // FORTIFICATION: Route the verification to the specific module's transient memory
+            bool hasProof = ITransientProofVerifier(moduleAddr).verifyTransientProof(proofId, agent, amountToSpend);
             if (!hasProof) revert InvalidTransientProof();
         }
 

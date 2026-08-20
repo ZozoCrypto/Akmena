@@ -36,7 +36,7 @@ contract Attack_BoundaryDesyncTest is Test {
         bytes memory payload = abi.encodeWithSelector(DummyTarget.failAction.selector);
 
         vm.expectRevert("Simulated Network/Slippage Failure");
-        boundary.executeAgentCall(operator, address(target), 100 ether, 0, payload);
+        boundary.executeAgentCall(operator, address(target), 100 ether, bytes32("ESCROW_ENGINE"), 0, payload);
 
         vm.stopPrank();
 
