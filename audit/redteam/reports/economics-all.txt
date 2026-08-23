@@ -1,0 +1,259 @@
+
+============================================================
+src/economics/EscrowEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {LibStorage} from "../storage/LibStorage.sol";
+import {IEscrowEngine} from "./IEscrowEngine.sol";
+
+contract EscrowEngine is IEscrowEngine {
+    uint256 private _nextEscrowId = 1;
+
+    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256) {
+        if (amount == 0) revert InvalidAmount();
+        if (buyer == address(0) || seller == address(0)) revert InvalidAddress();
+
+        uint256 escrowId = _nextEscrowId++;
+        LibStorage.EscrowData memory data = LibStorage.EscrowData({
+            buyer: buyer,
+            seller: seller,
+            amount: amount,
+            status: 1 // Funded / Active
+        });
+
+        LibStorage.escrow().escrows[escrowId] = data;
+        emit EscrowCreated(escrowId, buyer, seller, amount);
+        return escrowId;
+    }
+
+    function releaseEscrow(uint256 escrowId) external {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[escrowId];
+        if (data.buyer == address(0)) revert EscrowNotFound();
+        if (data.status != 1) revert EscrowNotActive();
+        if (msg.sender != data.buyer) revert UnauthorizedAccess();
+
+        data.status = 2; // Released
+        emit EscrowReleased(escrowId);
+    }
+
+    function refundEscrow(uint256 escrowId) external {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[escrowId];
+        if (data.buyer == address(0)) revert EscrowNotFound();
+        if (data.status != 1) revert EscrowNotActive();
+        if (msg.sender != data.seller) revert UnauthorizedAccess();
+
+        data.status = 3; // Refunded
+        emit EscrowRefunded(escrowId);
+    }
+
+    function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory) {
+        LibStorage.EscrowData memory data = LibStorage.escrow().escrows[escrowId];
+        if (data.buyer == address(0)) revert EscrowNotFound();
+        return data;
+    }
+
+    /// @notice Unified interface for the PolicyBoundary dynamic routing
+    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+        LibStorage.EscrowData memory targetData = this.getEscrow(proofId);
+        return targetData.status == 1 && targetData.buyer == operator && targetData.amount >= amount;
+    }
+}
+
+============================================================
+src/economics/IEscrowEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {LibStorage} from "../storage/LibStorage.sol";
+
+interface IEscrowEngine {
+    event EscrowCreated(uint256 indexed escrowId, address indexed buyer, address indexed seller, uint256 amount);
+    event EscrowReleased(uint256 indexed escrowId);
+    event EscrowRefunded(uint256 indexed escrowId);
+
+    error InvalidAddress();
+    error InvalidAmount();
+    error EscrowNotFound();
+    error EscrowNotActive();
+    error UnauthorizedAccess();
+
+    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256);
+    function releaseEscrow(uint256 escrowId) external;
+    function refundEscrow(uint256 escrowId) external;
+    function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory);
+}
+
+============================================================
+src/economics/IPaymentsEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+interface IPaymentsEngine {
+    event PaymentExecuted(address indexed from, address indexed to, uint256 amount);
+
+    error InvalidAddress();
+    error InvalidAmount();
+    error PaymentFailed();
+
+    function executePayment(address from, address to, uint256 amount) external;
+    function getTotalVolume() external view returns (uint256);
+}
+
+============================================================
+src/economics/ISettlementEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {LibStorage} from "../storage/LibStorage.sol";
+
+interface ISettlementEngine {
+    event SettlementRecorded(bytes32 indexed settlementId, address indexed payer, address indexed payee, uint256 amount);
+
+    error InvalidAddress();
+    error InvalidAmount();
+    error SettlementAlreadyExists();
+    error SettlementNotFound();
+
+    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external;
+    function getSettlement(bytes32 settlementId) external view returns (LibStorage.SettlementData memory);
+    function exists(bytes32 settlementId) external view returns (bool);
+}
+
+============================================================
+src/economics/ITreasuryEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+interface ITreasuryEngine {
+    event TreasuryFunded(uint256 amount);
+    event FundsDisbursed(address indexed to, uint256 amount);
+    event SupplyUpdated(uint256 totalSupply, uint256 circulatingSupply);
+
+    error InvalidAddress();
+    error InvalidAmount();
+    error InsufficientTreasuryFunds();
+
+    function fundTreasury(uint256 amount) external;
+    function disburseFunds(address to, uint256 amount) external;
+    function updateSupply(uint256 total, uint256 circulating) external;
+    function getTreasuryState() external view returns (uint256 total, uint256 circulating, uint256 balance);
+}
+
+============================================================
+src/economics/PaymentsEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {IPaymentsEngine} from "./IPaymentsEngine.sol";
+import {LibStorage} from "../storage/LibStorage.sol";
+
+contract PaymentsEngine is IPaymentsEngine {
+    function executePayment(address from, address to, uint256 amount) external override {
+        if (from == address(0) || to == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
+
+        LibStorage.PaymentsStorage storage ds = LibStorage.payments();
+        
+        // M2M State Update for volume tracking (decoupled from standard logic to protect privacy)
+        ds.totalProcessedVolume += amount;
+
+        // Note: Future integration point for hybrid ERC-8109 transient storage execution
+        emit PaymentExecuted(from, to, amount);
+    }
+
+    function getTotalVolume() external view override returns (uint256) {
+        return LibStorage.payments().totalProcessedVolume;
+    }
+}
+
+============================================================
+src/economics/SettlementEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {ISettlementEngine} from "./ISettlementEngine.sol";
+import {LibStorage} from "../storage/LibStorage.sol";
+
+contract SettlementEngine is ISettlementEngine {
+    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external override {
+        if (payer == address(0) || payee == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
+
+        LibStorage.SettlementStorage storage ds = LibStorage.settlement();
+        
+        if (ds.records[settlementId].timestamp != 0) {
+            revert SettlementAlreadyExists();
+        }
+
+        ds.records[settlementId] = LibStorage.SettlementData({
+            payer: payer,
+            payee: payee,
+            amount: amount,
+            timestamp: block.timestamp
+        });
+
+        emit SettlementRecorded(settlementId, payer, payee, amount);
+    }
+
+    function getSettlement(bytes32 settlementId) external view override returns (LibStorage.SettlementData memory) {
+        LibStorage.SettlementStorage storage ds = LibStorage.settlement();
+        if (ds.records[settlementId].timestamp == 0) revert SettlementNotFound();
+        return ds.records[settlementId];
+    }
+
+    function exists(bytes32 settlementId) external view override returns (bool) {
+        return LibStorage.settlement().records[settlementId].timestamp != 0;
+    }
+}
+
+============================================================
+src/economics/TreasuryEngine.sol
+============================================================
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {ITreasuryEngine} from "./ITreasuryEngine.sol";
+import {LibStorage} from "../storage/LibStorage.sol";
+
+contract TreasuryEngine is ITreasuryEngine {
+    function fundTreasury(uint256 amount) external override {
+        if (amount == 0) revert InvalidAmount();
+
+        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
+        ds.treasuryBalance += amount;
+
+        emit TreasuryFunded(amount);
+    }
+
+    function disburseFunds(address to, uint256 amount) external override {
+        if (to == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
+
+        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
+        if (ds.treasuryBalance < amount) revert InsufficientTreasuryFunds();
+
+        ds.treasuryBalance -= amount;
+        emit FundsDisbursed(to, amount);
+    }
+
+    function updateSupply(uint256 total, uint256 circulating) external override {
+        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
+        ds.totalSupply = total;
+        ds.circulatingSupply = circulating;
+
+        emit SupplyUpdated(total, circulating);
+    }
+
+    function getTreasuryState() external view override returns (uint256 total, uint256 circulating, uint256 balance) {
+        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
+        return (ds.totalSupply, ds.circulatingSupply, ds.treasuryBalance);
+    }
+}

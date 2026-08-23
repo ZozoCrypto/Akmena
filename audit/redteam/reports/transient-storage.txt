@@ -1,0 +1,19 @@
+src/privacy/PrivacyEngine.sol:4:import {LibTransientProof} from "../libraries/LibTransientProof.sol";
+src/privacy/PrivacyEngine.sol:44:        LibTransientProof.setEscrowProof(uint256(nullifierHash), stealthRecipient, amount);
+src/privacy/PrivacyEngine.sol:50:    /// @notice Allows the PolicyBoundary to verify transient proofs written in this module's context
+src/privacy/PrivacyEngine.sol:51:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/privacy/PrivacyEngine.sol:52:        return LibTransientProof.verifyEscrowProof(proofId, operator, amount);
+src/authorization/AkmenaPolicyBoundary.sol:7:interface ITransientProofVerifier {
+src/authorization/AkmenaPolicyBoundary.sol:8:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
+src/authorization/AkmenaPolicyBoundary.sol:28:    error InvalidTransientProof();
+src/authorization/AkmenaPolicyBoundary.sol:77:            // FORTIFICATION: Route the verification to the specific module's transient memory
+src/authorization/AkmenaPolicyBoundary.sol:78:            bool hasProof = ITransientProofVerifier(moduleAddr).verifyTransientProof(proofId, agent, amountToSpend);
+src/authorization/AkmenaPolicyBoundary.sol:79:            if (!hasProof) revert InvalidTransientProof();
+src/economics/PaymentsEngine.sol:17:        // Note: Future integration point for hybrid ERC-8109 transient storage execution
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/libraries/LibTransientProof.sol:4:library LibTransientProof {
+src/libraries/LibTransientProof.sol:5:    // EIP-1153 Transient storage slots
+src/libraries/LibTransientProof.sol:6:    // Slot layout for transient escrow receipts
+src/libraries/LibTransientProof.sol:7:    bytes32 constant ESCROW_PROOF_NAMESPACE = keccak256("akmena.transient.escrow.proof");
+src/libraries/LibTransientProof.sol:12:            tstore(slot, 1)
+src/libraries/LibTransientProof.sol:19:            isValid := tload(slot)

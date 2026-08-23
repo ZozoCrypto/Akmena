@@ -1,0 +1,20 @@
+'forge clean' running (wd: /home/cryptzozo/projects/akmena)
+'forge config --json' running
+'forge build --build-info --deny never --skip ./test/** ./script/** --force' running (wd: /home/cryptzozo/projects/akmena)
+INFO:Detectors:
+Detector: arbitrary-send-eth
+PrivacyEngine.executePrivateSettlement(bytes32,bytes32,uint256,address) (src/privacy/PrivacyEngine.sol#27-48) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = stealthRecipient.call{value: amount}() (src/privacy/PrivacyEngine.sol#46)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+Detector: incorrect-equality
+AgentAvailabilityEngine.isAvailable(bytes32) (src/availability/AgentAvailabilityEngine.sol#19-21) uses a dangerous strict equality:
+	- availability[agentId].status == Availability.Available (src/availability/AgentAvailabilityEngine.sol#20)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: unused-return
+AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes) (src/authorization/AkmenaPolicyBoundary.sol#50-92) ignores return value by (moduleAddr,active,None) = core.getModule(proofModuleKey) (src/authorization/AkmenaPolicyBoundary.sol#74)
+WorkflowEngine._getModuleAddress(bytes32) (src/orchestration/WorkflowEngine.sol#93-97) ignores return value by (moduleAddr,isEnabled,None) = IAkmenaCoreRegistry(akmenaCore).getModule(key) (src/orchestration/WorkflowEngine.sol#94)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Slither:. analyzed (135 contracts with 64 detectors), 4 result(s) found

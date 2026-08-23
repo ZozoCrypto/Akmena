@@ -1,0 +1,359 @@
+src/reputation/ReputationEngine.sol:8:    function updateScore(address agent, uint256 score) external override {
+src/reputation/ReputationEngine.sol:17:    function getScore(address agent) external view override returns (uint256) {
+src/reputation/IReputationEngine.sol:9:    function updateScore(address agent, uint256 score) external;
+src/reputation/IReputationEngine.sol:10:    function getScore(address agent) external view returns (uint256);
+src/privacy/PrivacyEngine.sol:19:    function depositPrivateEscrow(bytes32 commitment) external payable {
+src/privacy/PrivacyEngine.sol:27:    function executePrivateSettlement(
+src/privacy/PrivacyEngine.sol:51:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/privacy/StealthAddressRegistry.sol:23:    function announce(
+src/privacy/StealthAddressRegistry.sol:32:    function registerStealthMetaAddress(
+src/privacy/StealthAddressRegistry.sol:40:    function getStealthMetaAddress(
+src/analytics/AgentAnalyticsEngine.sol:9:    function updateAnalytics(
+src/analytics/AgentAnalyticsEngine.sol:28:    function getAnalytics(bytes32 agentId) external view returns (Analytics memory) {
+src/analytics/AgentAnalyticsEngine.sol:32:    function hasAnalytics(bytes32 agentId) external view returns (bool) {
+src/discovery/AgentDiscovery.sol:28:    function indexAgent(bytes32 agentId, string calldata category) external {
+src/discovery/AgentDiscovery.sol:48:    function getAgentsByCategory(string calldata category) external view returns (bytes32[] memory) {
+src/discovery/AgentDiscovery.sol:52:    function isIndexed(bytes32 agentId) external view returns (bool) {
+src/staking/AgentStakingEngine.sol:12:    function stake(bytes32 agentId, uint256 amount) external {
+src/staking/AgentStakingEngine.sol:29:    function unstake(bytes32 agentId, uint256 amount) external {
+src/staking/AgentStakingEngine.sol:45:    function getStake(bytes32 agentId) external view returns (Stake memory) {
+src/staking/AgentStakingEngine.sol:49:    function stakedBalance(bytes32 agentId) external view returns (uint256) {
+src/identity/Identity.sol:12:    function initialize(
+src/identity/Identity.sol:30:    function identityType()
+src/identity/IHumanIdentity.sol:9:    function isVerified() external view returns (bool);
+src/identity/IOrganizationIdentity.sol:9:    function getThreshold() external view returns (uint256);
+src/identity/IOrganizationIdentity.sol:10:    function getSigners() external view returns (address[] memory);
+src/identity/IIdentity.sol:24:    function identityId() external view returns (uint256);
+src/identity/IIdentity.sol:27:    function owner() external view returns (address);
+src/identity/IIdentity.sol:30:    function identityType() external view returns (IdentityType);
+src/identity/IIdentity.sol:37:    function isActive() external view returns (bool);
+src/identity/IIdentity.sol:40:    function protocolVersion() external pure returns (string memory);
+src/identity/IIdentity.sol:47:    function metadataURI() external view returns (string memory);
+src/identity/IdentityClone.sol:19:    function initialize(uint256 id_, IdentityType type_, address owner_) external {
+src/identity/IdentityClone.sol:28:    function identityId() external view override returns (uint256) {
+src/identity/IdentityClone.sol:32:    function identityType() external view override returns (IdentityType) {
+src/identity/IdentityClone.sol:36:    function isActive() external view override returns (bool) {
+src/identity/IdentityClone.sol:40:    function owner() external view override returns (address) {
+src/identity/IdentityClone.sol:44:    function metadataURI() external pure override returns (string memory) {
+src/identity/IdentityClone.sol:48:    function protocolVersion() external pure override returns (string memory) {
+src/identity/IdentityBase.sol:19:    function __IdentityBase_init(uint256 identityId_, address owner_, string memory metadataURI_)
+src/identity/IdentityBase.sol:33:    function initialize(uint256 identityId_, address owner_, string calldata metadataURI_)
+src/identity/IdentityBase.sol:41:    function identityId() external view override returns (uint256) {
+src/identity/IdentityBase.sol:45:    function owner() external view override returns (address) {
+src/identity/IdentityBase.sol:49:    function isActive() external view override returns (bool) {
+src/identity/IdentityBase.sol:53:    function metadataURI() external view override returns (string memory) {
+src/identity/IdentityBase.sol:57:    function protocolVersion() external pure override returns (string memory) {
+src/identity/IdentityBase.sol:61:    function updateMetadata(string calldata newMetadata) external {
+src/identity/IdentityBase.sol:69:    function transferOwnership(address newOwner) external {
+src/identity/IdentityBase.sol:79:    function deactivate() external {
+src/identity/IdentityBase.sol:87:    function identityType() external view virtual override returns (IdentityType) {
+src/identity/IdentityFactory.sol:8:    function initialize(uint256 id_, IIdentity.IdentityType type_, address owner_) external;
+src/identity/IdentityFactory.sol:27:    function createIdentity(IIdentity.IdentityType identityType) external returns (address) {
+src/identity/IdentityFactory.sol:45:    function _clone(address impl) internal returns (address instance) {
+src/identity/IMachineIdentity.sol:9:    function getController() external view returns (address);
+src/identity/IMachineIdentity.sol:10:    function executionHash() external view returns (bytes32);
+src/token/core/AkmenaToken.sol:28:    function maxSupply() external pure returns (uint256) {
+src/token/core/AkmenaToken.sol:36:    function _transferTokens(address from, address to, uint256 amount) internal override {
+src/token/core/AkmenaToken.sol:40:    function _authorizationDigest(bytes32 structHash) internal view override returns (bytes32) {
+src/token/core/AkmenaToken.sol:48:    function transferWithAuthorization(
+src/token/core/AkmenaToken.sol:62:    function receiveWithAuthorization(
+src/token/core/AkmenaToken.sol:76:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
+src/token/extensions/AKMAuthorization.sol:55:    function authorizationState(address authorizer, bytes32 nonce) public view virtual override returns (bool) {
+src/token/extensions/AKMAuthorization.sol:63:    function _currentTime() internal view virtual returns (uint256) {
+src/token/extensions/AKMAuthorization.sol:71:    function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
+src/token/extensions/AKMAuthorization.sol:77:    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:83:    function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:91:    function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
+src/token/extensions/AKMAuthorization.sol:107:    function _recoverSigner(bytes32 digest, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
+src/token/extensions/AKMAuthorization.sol:111:    function _verifySigner(address expectedSigner, bytes32 digest, uint8 v, bytes32 r, bytes32 s) internal pure {
+src/token/extensions/AKMPayments.sol:23:    function _transferTokens(address from, address to, uint256 amount) internal virtual;
+src/token/extensions/AKMPayments.sol:26:    function _authorizationDigest(bytes32 structHash) internal view virtual returns (bytes32);
+src/token/extensions/AKMPayments.sol:32:    function transferWithAuthorization(
+src/token/extensions/AKMPayments.sol:65:    function receiveWithAuthorization(
+src/token/extensions/AKMPayments.sol:99:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) public virtual {
+src/slashing/AgentSlashingEngine.sol:11:    function slash(bytes32 agentId, uint256 amount) external {
+src/slashing/AgentSlashingEngine.sol:26:    function getSlashRecord(bytes32 agentId) external view returns (SlashRecord memory) {
+src/slashing/AgentSlashingEngine.sol:30:    function totalSlashed(bytes32 agentId) external view returns (uint256) {
+src/slashing/AgentSlashingEngine.sol:34:    function slashCount(bytes32 agentId) external view returns (uint256) {
+src/marketplace/TaskMarketplace.sol:17:    function createTask(bytes32 taskId, bytes32 creatorAgent, uint256 reward, string calldata metadataURI) external {
+src/marketplace/TaskMarketplace.sol:44:    function assignTask(bytes32 taskId, bytes32 assignedAgent) external {
+src/marketplace/TaskMarketplace.sol:61:    function completeTask(bytes32 taskId) external {
+src/marketplace/TaskMarketplace.sol:78:    function exists(bytes32 taskId) public view returns (bool) {
+src/marketplace/TaskMarketplace.sol:82:    function getTask(bytes32 taskId) external view returns (Task memory) {
+src/economics/IPaymentsEngine.sol:11:    function executePayment(address from, address to, uint256 amount) external;
+src/economics/IPaymentsEngine.sol:12:    function getTotalVolume() external view returns (uint256);
+src/economics/PaymentsEngine.sol:8:    function executePayment(address from, address to, uint256 amount) external override {
+src/economics/PaymentsEngine.sol:21:    function getTotalVolume() external view override returns (uint256) {
+src/economics/IEscrowEngine.sol:17:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256);
+src/economics/IEscrowEngine.sol:18:    function releaseEscrow(uint256 escrowId) external;
+src/economics/IEscrowEngine.sol:19:    function refundEscrow(uint256 escrowId) external;
+src/economics/IEscrowEngine.sol:20:    function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory);
+src/economics/SettlementEngine.sol:8:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external override {
+src/economics/SettlementEngine.sol:28:    function getSettlement(bytes32 settlementId) external view override returns (LibStorage.SettlementData memory) {
+src/economics/SettlementEngine.sol:34:    function exists(bytes32 settlementId) external view override returns (bool) {
+src/economics/EscrowEngine.sol:10:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256) {
+src/economics/EscrowEngine.sol:27:    function releaseEscrow(uint256 escrowId) external {
+src/economics/EscrowEngine.sol:37:    function refundEscrow(uint256 escrowId) external {
+src/economics/EscrowEngine.sol:47:    function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory) {
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/economics/TreasuryEngine.sol:8:    function fundTreasury(uint256 amount) external override {
+src/economics/TreasuryEngine.sol:17:    function disburseFunds(address to, uint256 amount) external override {
+src/economics/TreasuryEngine.sol:28:    function updateSupply(uint256 total, uint256 circulating) external override {
+src/economics/TreasuryEngine.sol:36:    function getTreasuryState() external view override returns (uint256 total, uint256 circulating, uint256 balance) {
+src/economics/ITreasuryEngine.sol:13:    function fundTreasury(uint256 amount) external;
+src/economics/ITreasuryEngine.sol:14:    function disburseFunds(address to, uint256 amount) external;
+src/economics/ITreasuryEngine.sol:15:    function updateSupply(uint256 total, uint256 circulating) external;
+src/economics/ITreasuryEngine.sol:16:    function getTreasuryState() external view returns (uint256 total, uint256 circulating, uint256 balance);
+src/economics/ISettlementEngine.sol:14:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external;
+src/economics/ISettlementEngine.sol:15:    function getSettlement(bytes32 settlementId) external view returns (LibStorage.SettlementData memory);
+src/economics/ISettlementEngine.sol:16:    function exists(bytes32 settlementId) external view returns (bool);
+src/libraries/LibTransientProof.sol:9:    function setEscrowProof(uint256 escrowId, address buyer, uint256 amount) internal {
+src/libraries/LibTransientProof.sol:16:    function verifyEscrowProof(uint256 escrowId, address buyer, uint256 amount) internal view returns (bool isValid) {
+src/orchestration/IWorkflowEngine.sol:26:    function initializeWorkflow(bytes32 agentIdentityId, bytes32 agreementId, bytes32 escrowId) external returns (bytes32);
+src/orchestration/IWorkflowEngine.sol:27:    function advanceToCompletion(bytes32 workflowId, bytes calldata settlementData, bytes calldata memoryData, bytes calldata reputationData) external;
+src/orchestration/IWorkflowEngine.sol:31:    function getModule(bytes32 key) external view returns (address, bool, string memory);
+src/orchestration/IWorkflowEngine.sol:36:    function executeSettlement(bytes32 escrowId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/IWorkflowEngine.sol:40:    function commitMemory(bytes32 agentId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/IWorkflowEngine.sol:44:    function updateReputation(bytes32 agentId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/WorkflowEngine.sol:26:    function initializeWorkflow(
+src/orchestration/WorkflowEngine.sol:49:    function advanceToCompletion(
+src/orchestration/WorkflowEngine.sol:93:    function _getModuleAddress(bytes32 key) internal view returns (address) {
+src/rewards/AgentRewardEngine.sol:11:    function grantReward(bytes32 agentId, uint256 amount) external {
+src/rewards/AgentRewardEngine.sol:26:    function getRewards(bytes32 agentId) external view returns (Reward memory) {
+src/rewards/AgentRewardEngine.sol:30:    function totalRewards(bytes32 agentId) external view returns (uint256) {
+src/rewards/AgentRewardEngine.sol:34:    function rewardEvents(bytes32 agentId) external view returns (uint256) {
+src/skills/AgentSkillEngine.sol:12:    function addSkill(bytes32 agentId, string calldata skill) external {
+src/skills/AgentSkillEngine.sol:26:    function getSkills(bytes32 agentId) external view returns (Skill[] memory) {
+src/skills/AgentSkillEngine.sol:30:    function hasSkill(bytes32 agentId, bytes32 skillHash) external view returns (bool) {
+src/credentials/AgentCredentialEngine.sol:12:    function addCredential(bytes32 agentId, string calldata credential) external {
+src/credentials/AgentCredentialEngine.sol:26:    function getCredentials(bytes32 agentId) external view returns (Credential[] memory) {
+src/credentials/AgentCredentialEngine.sol:30:    function hasCredential(bytes32 agentId, bytes32 credentialHash) external view returns (bool) {
+src/governance/AkmenaTimelock.sol:46:    function queue(bytes32 proposalId, uint256 eta, bytes32 proposalHash) external override onlyGovernor {
+src/governance/AkmenaTimelock.sol:56:    function cancel(bytes32 proposalId) external override {
+src/governance/AkmenaTimelock.sol:69:    function sunsetGuardian() external {
+src/governance/AkmenaTimelock.sol:76:    function execute(bytes32 proposalId, ProtocolAction[] calldata actions, bytes32 adrHash) external override {
+src/governance/AkmenaTimelock.sol:100:    function getProposalStatus(bytes32 proposalId) external view override returns (uint256 eta, bool executed, bool canceled) {
+src/governance/IGovernance.sol:13:    function executeGovernanceAction(ActionType action, bytes calldata payload) external;
+src/governance/IGovernance.sol:17:    function queue(bytes32 proposalId, uint256 eta, bytes32 proposalHash) external;
+src/governance/IGovernance.sol:18:    function cancel(bytes32 proposalId) external;
+src/governance/IGovernance.sol:19:    function execute(bytes32 proposalId, ProtocolAction[] calldata actions, bytes32 adrHash) external;
+src/governance/IGovernance.sol:20:    function getProposalStatus(bytes32 proposalId) external view returns (uint256 eta, bool executed, bool canceled);
+src/governance/IGovernance.sol:24:    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
+src/governance/IGovernance.sol:25:    function totalSupply() external view returns (uint256);
+src/governance/AkmenaGovernor.sol:28:    function setTimelock(address _timelock) external {
+src/governance/AkmenaGovernor.sol:33:    function propose(ProtocolAction[] calldata actions, string calldata title, string calldata descriptionURI, bytes32 adrHash) external returns (bytes32) {
+src/governance/AkmenaGovernor.sol:61:    function castVote(bytes32 proposalId, bool support) external {
+src/governance/AkmenaGovernor.sol:78:    function queue(bytes32 proposalId) external {
+src/governance/AkmenaGovernor.sol:88:    function state(bytes32 proposalId) public view returns (ProposalState) {
+src/governance/AgentGovernanceEngine.sol:15:    function createProposal(bytes32 proposalId, string calldata description) external {
+src/governance/AgentGovernanceEngine.sol:33:    function executeProposal(bytes32 proposalId) external {
+src/governance/AgentGovernanceEngine.sol:49:    function rejectProposal(bytes32 proposalId) external {
+src/governance/AgentGovernanceEngine.sol:65:    function getProposal(bytes32 proposalId) external view returns (Proposal memory) {
+src/governance/AgentGovernanceEngine.sol:73:    function exists(bytes32 proposalId) external view returns (bool) {
+src/autonomous/IAgreementEngine.sol:16:    function createAgreement(bytes32 agreementId, address partyB, bytes32 termsHash, uint256 validUntil) external;
+src/autonomous/IAgreementEngine.sol:17:    function executeAgreement(bytes32 agreementId) external;
+src/autonomous/IAgreementEngine.sol:18:    function getAgreement(bytes32 agreementId) external view returns (LibStorage.AgreementData memory);
+src/autonomous/AgreementEngine.sol:8:    function createAgreement(bytes32 agreementId, address partyB, bytes32 termsHash, uint256 validUntil) external override {
+src/autonomous/AgreementEngine.sol:29:    function executeAgreement(bytes32 agreementId) external override {
+src/autonomous/AgreementEngine.sol:42:    function getAgreement(bytes32 agreementId) external view override returns (LibStorage.AgreementData memory) {
+src/autonomous/IDiscoveryEngine.sol:12:    function registerProfile(bytes32 category, string calldata metadataURI) external;
+src/autonomous/IDiscoveryEngine.sol:13:    function updateStatus(bool isActive) external;
+src/autonomous/IDiscoveryEngine.sol:14:    function getProfile(address agent) external view returns (LibStorage.DiscoveryData memory);
+src/autonomous/DiscoveryEngine.sol:8:    function registerProfile(bytes32 category, string calldata metadataURI) external override {
+src/autonomous/DiscoveryEngine.sol:21:    function updateStatus(bool isActive) external override {
+src/autonomous/DiscoveryEngine.sol:28:    function getProfile(address agent) external view override returns (LibStorage.DiscoveryData memory) {
+src/autonomous/MarketplaceEngine.sol:8:    function createTask(uint256 reward) external override returns (uint256) {
+src/autonomous/MarketplaceEngine.sol:27:    function assignTask(uint256 taskId, address assignee) external override {
+src/autonomous/MarketplaceEngine.sol:43:    function completeTask(uint256 taskId, address caller) external override {
+src/autonomous/MarketplaceEngine.sol:56:    function getTask(uint256 taskId) external view override returns (LibStorage.TaskData memory) {
+src/autonomous/IMarketplaceEngine.sol:17:    function createTask(uint256 reward) external returns (uint256);
+src/autonomous/IMarketplaceEngine.sol:18:    function assignTask(uint256 taskId, address assignee) external;
+src/autonomous/IMarketplaceEngine.sol:19:    function completeTask(uint256 taskId, address caller) external;
+src/autonomous/IMarketplaceEngine.sol:20:    function getTask(uint256 taskId) external view returns (LibStorage.TaskData memory);
+src/authorization/CapabilityEngine.sol:8:    function grantCapability(address identity, bytes32 capability) external override {
+src/authorization/CapabilityEngine.sol:21:    function revokeCapability(address identity, bytes32 capability) external override {
+src/authorization/CapabilityEngine.sol:34:    function hasCapability(address identity, bytes32 capability) external view override returns (bool) {
+src/authorization/VerificationEngine.sol:8:    function setVerification(address identity, bool status) external override {
+src/authorization/VerificationEngine.sol:17:    function isVerified(address identity) external view override returns (bool) {
+src/authorization/ICapabilityEngine.sol:12:    function grantCapability(address identity, bytes32 capability) external;
+src/authorization/ICapabilityEngine.sol:13:    function revokeCapability(address identity, bytes32 capability) external;
+src/authorization/ICapabilityEngine.sol:14:    function hasCapability(address identity, bytes32 capability) external view returns (bool);
+src/authorization/AttestationEngine.sol:17:    function recordAttestation(address subject, bytes32 attestationHash) external override {
+src/authorization/AttestationEngine.sol:28:    function recordAttestationTyped(
+src/authorization/AttestationEngine.sol:52:    function hasAttestation(address subject, address attester, bytes32 attestationHash) external view override returns (bool) {
+src/authorization/IAttestationEngine.sol:10:    function recordAttestation(address subject, bytes32 attestationHash) external;
+src/authorization/IAttestationEngine.sol:11:    function hasAttestation(address subject, address attester, bytes32 attestationHash) external view returns (bool);
+src/authorization/DelegationEngine.sol:17:    function setDelegate(address delegate, bool status) external override {
+src/authorization/DelegationEngine.sol:27:    function setDelegateTyped(
+src/authorization/DelegationEngine.sol:50:    function isDelegate(address identity, address delegate) external view override returns (bool) {
+src/authorization/AkmenaPolicyBoundary.sol:8:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
+src/authorization/AkmenaPolicyBoundary.sol:34:    function setAgentPolicy(
+src/authorization/AkmenaPolicyBoundary.sol:50:    function executeAgentCall(
+src/authorization/IVerificationEngine.sol:9:    function setVerification(address identity, bool status) external;
+src/authorization/IVerificationEngine.sol:10:    function isVerified(address identity) external view returns (bool);
+src/authorization/IDelegationEngine.sol:9:    function setDelegate(address delegate, bool status) external;
+src/authorization/IDelegationEngine.sol:10:    function isDelegate(address identity, address delegate) external view returns (bool);
+src/reviews/AgentReviewEngine.sol:12:    function submitReview(bytes32 agentId, string calldata reviewer, string calldata comment) external {
+src/reviews/AgentReviewEngine.sol:28:    function getReviews(bytes32 agentId) external view returns (Review[] memory) {
+src/reviews/AgentReviewEngine.sol:32:    function reviewCount(bytes32 agentId) external view returns (uint256) {
+src/earnings/AgentEarningsEngine.sol:11:    function recordEarnings(bytes32 agentId, uint256 amount) external {
+src/earnings/AgentEarningsEngine.sol:26:    function getEarnings(bytes32 agentId) external view returns (Earnings memory) {
+src/earnings/AgentEarningsEngine.sol:30:    function totalEarned(bytes32 agentId) external view returns (uint256) {
+src/earnings/AgentEarningsEngine.sol:34:    function transactionCount(bytes32 agentId) external view returns (uint256) {
+src/interfaces/IAgentRegistry.sol:43:    function register(bytes32 id, string calldata metadataURI) external;
+src/interfaces/IAgentRegistry.sol:48:    function updateMetadata(bytes32 id, string calldata metadataURI) external;
+src/interfaces/IAgentRegistry.sol:53:    function setVerification(bytes32 id, bool verified) external;
+src/interfaces/IAgentRegistry.sol:60:    function exists(bytes32 id) external view returns (bool);
+src/interfaces/IAgentRegistry.sol:63:    function totalAgents() external view returns (uint256);
+src/interfaces/IAgentRegistry.sol:66:    function agentOf(address owner) external view returns (bytes32);
+src/interfaces/IAgentRegistry.sol:69:    function ownerOf(bytes32 id) external view returns (address);
+src/interfaces/IAgentRegistry.sol:72:    function isVerified(bytes32 id) external view returns (bool);
+src/interfaces/IAgentRegistry.sol:75:    function getAgent(bytes32 id) external view returns (Agent memory);
+src/interfaces/IAgentAnalyticsEngine.sol:22:    function updateAnalytics(
+src/interfaces/IAgentAnalyticsEngine.sol:30:    function getAnalytics(bytes32 agentId) external view returns (Analytics memory);
+src/interfaces/IAgentAnalyticsEngine.sol:32:    function hasAnalytics(bytes32 agentId) external view returns (bool);
+src/interfaces/IAgentGovernanceEngine.sol:24:    function createProposal(bytes32 proposalId, string calldata description) external;
+src/interfaces/IAgentGovernanceEngine.sol:26:    function executeProposal(bytes32 proposalId) external;
+src/interfaces/IAgentGovernanceEngine.sol:28:    function rejectProposal(bytes32 proposalId) external;
+src/interfaces/IAgentGovernanceEngine.sol:30:    function getProposal(bytes32 proposalId) external view returns (Proposal memory);
+src/interfaces/IAgentGovernanceEngine.sol:32:    function exists(bytes32 proposalId) external view returns (bool);
+src/interfaces/IAgentAvailabilityEngine.sol:19:    function setAvailability(bytes32 agentId, Availability status) external;
+src/interfaces/IAgentAvailabilityEngine.sol:21:    function getAvailability(bytes32 agentId) external view returns (AgentAvailability memory);
+src/interfaces/IAgentAvailabilityEngine.sol:23:    function isAvailable(bytes32 agentId) external view returns (bool);
+src/interfaces/IAgentRatingEngine.sol:14:    function submitRating(bytes32 agentId, uint256 score) external;
+src/interfaces/IAgentRatingEngine.sol:16:    function getAverageRating(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentRatingEngine.sol:18:    function getRatingCount(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentRatingEngine.sol:20:    function hasRated(bytes32 agentId, address reviewer) external view returns (bool);
+src/interfaces/IAgentCredentialEngine.sol:13:    function addCredential(bytes32 agentId, string calldata credential) external;
+src/interfaces/IAgentCredentialEngine.sol:15:    function getCredentials(bytes32 agentId) external view returns (Credential[] memory);
+src/interfaces/IAgentCredentialEngine.sol:17:    function hasCredential(bytes32 agentId, bytes32 credentialHash) external view returns (bool);
+src/interfaces/IAKMPayments.sol:7:    function transferAndCall(address to, uint256 value) external returns (bool);
+src/interfaces/IAKMPayments.sol:9:    function transferAndCall(address to, uint256 value, bytes calldata data) external returns (bool);
+src/interfaces/IAKMPayments.sol:11:    function transferFromAndCall(address from, address to, uint256 value) external returns (bool);
+src/interfaces/IAKMPayments.sol:13:    function transferFromAndCall(address from, address to, uint256 value, bytes calldata data) external returns (bool);
+src/interfaces/IAKMPayments.sol:15:    function approveAndCall(address spender, uint256 value) external returns (bool);
+src/interfaces/IAKMPayments.sol:17:    function approveAndCall(address spender, uint256 value, bytes calldata data) external returns (bool);
+src/interfaces/ITaskMarketplace.sol:35:    function createTask(bytes32 taskId, bytes32 creatorAgent, uint256 reward, string calldata metadataURI) external;
+src/interfaces/ITaskMarketplace.sol:37:    function assignTask(bytes32 taskId, bytes32 assignedAgent) external;
+src/interfaces/ITaskMarketplace.sol:39:    function completeTask(bytes32 taskId) external;
+src/interfaces/ITaskMarketplace.sol:41:    function exists(bytes32 taskId) external view returns (bool);
+src/interfaces/ITaskMarketplace.sol:43:    function getTask(bytes32 taskId) external view returns (Task memory);
+src/interfaces/IAgentSlashingEngine.sol:14:    function slash(bytes32 agentId, uint256 amount) external;
+src/interfaces/IAgentSlashingEngine.sol:16:    function getSlashRecord(bytes32 agentId) external view returns (SlashRecord memory);
+src/interfaces/IAgentSlashingEngine.sol:18:    function totalSlashed(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentSlashingEngine.sol:20:    function slashCount(bytes32 agentId) external view returns (uint256);
+src/interfaces/IDisputeEngine.sol:26:    function openDispute(bytes32 disputeId, bytes32 agreementId, string calldata evidenceURI) external;
+src/interfaces/IDisputeEngine.sol:28:    function resolveDispute(bytes32 disputeId) external;
+src/interfaces/IDisputeEngine.sol:30:    function rejectDispute(bytes32 disputeId) external;
+src/interfaces/IDisputeEngine.sol:32:    function exists(bytes32 disputeId) external view returns (bool);
+src/interfaces/IDisputeEngine.sol:34:    function getDispute(bytes32 disputeId) external view returns (Dispute memory);
+src/interfaces/IReputationEngine.sol:18:    function reward(bytes32 agentId, uint256 points) external;
+src/interfaces/IReputationEngine.sol:20:    function penalize(bytes32 agentId, uint256 points) external;
+src/interfaces/IReputationEngine.sol:22:    function recordCompletion(bytes32 agentId) external;
+src/interfaces/IReputationEngine.sol:24:    function getReputation(bytes32 agentId) external view returns (Reputation memory);
+src/interfaces/IAKMToken.sol:10:    function maxSupply() external view returns (uint256);
+src/interfaces/IAgentDiscovery.sol:17:    function indexAgent(bytes32 agentId, string calldata category) external;
+src/interfaces/IAgentDiscovery.sol:23:    function getAgentsByCategory(string calldata category) external view returns (bytes32[] memory);
+src/interfaces/IAgentDiscovery.sol:25:    function isIndexed(bytes32 agentId) external view returns (bool);
+src/interfaces/IAgentRewardEngine.sol:14:    function grantReward(bytes32 agentId, uint256 amount) external;
+src/interfaces/IAgentRewardEngine.sol:16:    function getRewards(bytes32 agentId) external view returns (Reward memory);
+src/interfaces/IAgentRewardEngine.sol:18:    function totalRewards(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentRewardEngine.sol:20:    function rewardEvents(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentSkillEngine.sol:13:    function addSkill(bytes32 agentId, string calldata skill) external;
+src/interfaces/IAgentSkillEngine.sol:15:    function getSkills(bytes32 agentId) external view returns (Skill[] memory);
+src/interfaces/IAgentSkillEngine.sol:17:    function hasSkill(bytes32 agentId, bytes32 skillHash) external view returns (bool);
+src/interfaces/IAgentStakingEngine.sol:15:    function stake(bytes32 agentId, uint256 amount) external;
+src/interfaces/IAgentStakingEngine.sol:17:    function unstake(bytes32 agentId, uint256 amount) external;
+src/interfaces/IAgentStakingEngine.sol:19:    function getStake(bytes32 agentId) external view returns (Stake memory);
+src/interfaces/IAgentStakingEngine.sol:21:    function stakedBalance(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentEarningsEngine.sol:14:    function recordEarnings(bytes32 agentId, uint256 amount) external;
+src/interfaces/IAgentEarningsEngine.sol:16:    function getEarnings(bytes32 agentId) external view returns (Earnings memory);
+src/interfaces/IAgentEarningsEngine.sol:18:    function totalEarned(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentEarningsEngine.sol:20:    function transactionCount(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentMatchingEngine.sol:12:    function setScore(bytes32 agentId, uint256 score) external;
+src/interfaces/IAgentMatchingEngine.sol:14:    function getScore(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentMatchingEngine.sol:16:    function getMatch(bytes32 agentId) external view returns (Match memory);
+src/interfaces/IAgentMatchingEngine.sol:18:    function exists(bytes32 agentId) external view returns (bool);
+src/interfaces/IAgentPortfolioEngine.sol:14:    function addPortfolioItem(bytes32 agentId, string calldata title, string calldata uri) external;
+src/interfaces/IAgentPortfolioEngine.sol:16:    function getPortfolioItems(bytes32 agentId) external view returns (PortfolioItem[] memory);
+src/interfaces/IAgentPortfolioEngine.sol:18:    function portfolioCount(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAgentTreasuryEngine.sol:14:    function deposit(uint256 amount) external;
+src/interfaces/IAgentTreasuryEngine.sol:16:    function withdraw(uint256 amount) external;
+src/interfaces/IAgentTreasuryEngine.sol:18:    function getTreasury() external view returns (Treasury memory);
+src/interfaces/IAgentTreasuryEngine.sol:20:    function balance() external view returns (uint256);
+src/interfaces/IAgentReviewEngine.sol:14:    function submitReview(bytes32 agentId, string calldata reviewer, string calldata comment) external;
+src/interfaces/IAgentReviewEngine.sol:16:    function getReviews(bytes32 agentId) external view returns (Review[] memory);
+src/interfaces/IAgentReviewEngine.sol:18:    function reviewCount(bytes32 agentId) external view returns (uint256);
+src/interfaces/IAKMAuthorization.sol:8:    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
+src/interfaces/IAKMAuthorization.sol:11:    function transferWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:24:    function receiveWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:37:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external;
+src/storage/LibGovernanceStorage.sol:40:    function governanceStorage() internal pure returns (GovernanceStorage storage gs) {
+src/storage/LibWorkflowStorage.sol:23:    function workflowStorage() internal pure returns (WorkflowStorage storage ws) {
+src/storage/LibStorage.sol:27:    function identity() internal pure returns (IdentityStorage storage ds) { bytes32 slot = StorageNamespaces.IDENTITY; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:28:    function registry() internal pure returns (RegistryStorage storage ds) { bytes32 slot = StorageNamespaces.REGISTRY; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:29:    function authorization() internal pure returns (AuthorizationStorage storage ds) { bytes32 slot = StorageNamespaces.AUTHORIZATION; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:30:    function treasury() internal pure returns (TreasuryStorage storage ds) { bytes32 slot = StorageNamespaces.TREASURY; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:31:    function escrow() internal pure returns (EscrowStorage storage ds) { bytes32 slot = StorageNamespaces.ESCROW; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:32:    function settlement() internal pure returns (SettlementStorage storage ds) { bytes32 slot = StorageNamespaces.SETTLEMENT; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:33:    function payments() internal pure returns (PaymentsStorage storage ds) { bytes32 slot = StorageNamespaces.PAYMENTS; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:34:    function marketplace() internal pure returns (MarketplaceStorage storage ds) { bytes32 slot = StorageNamespaces.MARKETPLACE; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:35:    function reputation() internal pure returns (ReputationStorage storage ds) { bytes32 slot = StorageNamespaces.REPUTATION; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:36:    function memoryStorage() internal pure returns (MemoryStorage storage ds) { bytes32 slot = StorageNamespaces.MEMORY; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:37:    function discovery() internal pure returns (DiscoveryStorage storage ds) { bytes32 slot = StorageNamespaces.DISCOVERY; assembly { ds.slot := slot } }
+src/storage/LibStorage.sol:38:    function agreement() internal pure returns (AgreementStorage storage ds) { bytes32 slot = StorageNamespaces.AGREEMENT; assembly { ds.slot := slot } }
+src/portfolio/AgentPortfolioEngine.sol:12:    function addPortfolioItem(bytes32 agentId, string calldata title, string calldata uri) external {
+src/portfolio/AgentPortfolioEngine.sol:26:    function getPortfolioItems(bytes32 agentId) external view returns (PortfolioItem[] memory) {
+src/portfolio/AgentPortfolioEngine.sol:30:    function portfolioCount(bytes32 agentId) external view returns (uint256) {
+src/matching/AgentMatchingEngine.sol:13:    function setScore(bytes32 agentId, uint256 score) external {
+src/matching/AgentMatchingEngine.sol:27:    function getScore(bytes32 agentId) external view returns (uint256) {
+src/matching/AgentMatchingEngine.sol:35:    function getMatch(bytes32 agentId) external view returns (Match memory) {
+src/matching/AgentMatchingEngine.sol:43:    function exists(bytes32 agentId) public view returns (bool) {
+src/availability/AgentAvailabilityEngine.sol:9:    function setAvailability(bytes32 agentId, Availability status) external {
+src/availability/AgentAvailabilityEngine.sol:15:    function getAvailability(bytes32 agentId) external view returns (AgentAvailability memory) {
+src/availability/AgentAvailabilityEngine.sol:19:    function isAvailable(bytes32 agentId) external view returns (bool) {
+src/ratings/AgentRatingEngine.sol:15:    function submitRating(bytes32 agentId, uint256 score) external {
+src/ratings/AgentRatingEngine.sol:32:    function getAverageRating(bytes32 agentId) external view returns (uint256) {
+src/ratings/AgentRatingEngine.sol:42:    function getRatingCount(bytes32 agentId) external view returns (uint256) {
+src/ratings/AgentRatingEngine.sol:46:    function hasRated(bytes32 agentId, address reviewer) external view returns (bool) {
+src/disputes/DisputeEngine.sol:14:    function openDispute(bytes32 disputeId, bytes32 agreementId, string calldata evidenceURI) external {
+src/disputes/DisputeEngine.sol:35:    function resolveDispute(bytes32 disputeId) external {
+src/disputes/DisputeEngine.sol:51:    function rejectDispute(bytes32 disputeId) external {
+src/disputes/DisputeEngine.sol:67:    function exists(bytes32 disputeId) public view returns (bool) {
+src/disputes/DisputeEngine.sol:71:    function getDispute(bytes32 disputeId) external view returns (Dispute memory) {
+src/treasury/AgentTreasuryEngine.sol:12:    function deposit(uint256 amount) external {
+src/treasury/AgentTreasuryEngine.sol:23:    function withdraw(uint256 amount) external {
+src/treasury/AgentTreasuryEngine.sol:38:    function getTreasury() external view returns (Treasury memory) {
+src/treasury/AgentTreasuryEngine.sol:42:    function balance() external view returns (uint256) {
+src/memory/IMemoryEngine.sol:9:    function commitRoot(bytes32 key, bytes32 rootHash) external;
+src/memory/IMemoryEngine.sol:10:    function getRoot(bytes32 key) external view returns (bytes32);
+src/memory/MemoryEngine.sol:8:    function commitRoot(bytes32 key, bytes32 rootHash) external override {
+src/memory/MemoryEngine.sol:17:    function getRoot(bytes32 key) external view override returns (bytes32) {
+src/registry/Registry.sol:25:    function allocateIdentityId() external override returns (uint256) {
+src/registry/Registry.sol:34:    function nextIdentityId() external view override returns (uint256) {
+src/registry/Registry.sol:43:    function registerIdentity(address identity) external override {
+src/registry/Registry.sol:62:    function removeIdentity(uint256 id) external override {
+src/registry/Registry.sol:80:    function identityAddress(uint256 id) external view override returns (address) {
+src/registry/Registry.sol:85:    function identityId(address identity) external view override returns (uint256) {
+src/registry/Registry.sol:90:    function exists(uint256 id) external view override returns (bool) {
+src/core/AkmenaCore.sol:47:    function registerModule(
+src/core/AkmenaCore.sol:82:    function setModuleStatus(
+src/core/AkmenaCore.sol:100:    function setPaused(
+src/core/AkmenaCore.sol:111:    function isPaused()
+src/core/AkmenaCore.sol:119:    function getModule(
+src/registry/AgentRegistry.sol:66:    function register(bytes32 id, string calldata metadataURI) external {
+src/registry/AgentRegistry.sol:107:    function updateMetadata(bytes32 id, string calldata metadataURI) external {
+src/registry/AgentRegistry.sol:133:    function setVerification(bytes32 id, bool verified) external {
+src/registry/AgentRegistry.sol:154:    function totalAgents() external view returns (uint256) {
+src/registry/AgentRegistry.sol:158:    function exists(bytes32 id) public view returns (bool) {
+src/registry/AgentRegistry.sol:162:    function agentOf(address owner) external view returns (bytes32) {
+src/registry/AgentRegistry.sol:166:    function ownerOf(bytes32 id) external view returns (address) {
+src/registry/AgentRegistry.sol:174:    function isVerified(bytes32 id) external view returns (bool) {
+src/registry/AgentRegistry.sol:182:    function getAgent(bytes32 id) external view returns (Agent memory) {
+src/registry/IRegistry.sol:32:    function allocateIdentityId() external returns (uint256);
+src/registry/IRegistry.sol:35:    function nextIdentityId() external view returns (uint256);
+src/registry/IRegistry.sol:41:    function registerIdentity(address identity) external;
+src/registry/IRegistry.sol:43:    function removeIdentity(uint256 identityId) external;
+src/registry/IRegistry.sol:49:    function identityAddress(uint256 identityId) external view returns (address);
+src/registry/IRegistry.sol:51:    function identityId(address identity) external view returns (uint256);
+src/registry/IRegistry.sol:53:    function exists(uint256 identityId) external view returns (bool);

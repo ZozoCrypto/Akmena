@@ -1,0 +1,14 @@
+src/storage/LibWorkflowStorage.sol:4:import {WorkflowStep} from "../orchestration/IWorkflowEngine.sol";
+src/orchestration/IWorkflowEngine.sol:16:struct ProtocolContext {
+src/orchestration/IWorkflowEngine.sol:25:interface IWorkflowEngine {
+src/orchestration/IWorkflowEngine.sol:34:// Note: Modules now explicitly require the ProtocolContext for independent authorization
+src/orchestration/IWorkflowEngine.sol:36:    function executeSettlement(bytes32 escrowId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/IWorkflowEngine.sol:40:    function commitMemory(bytes32 agentId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/IWorkflowEngine.sol:44:    function updateReputation(bytes32 agentId, bytes calldata data, ProtocolContext calldata ctx) external;
+src/orchestration/WorkflowEngine.sol:4:import {IWorkflowEngine, WorkflowStep, ProtocolContext, IAkmenaCoreRegistry, ISettlementModule, IMemoryModule, IReputationModule} from "./IWorkflowEngine.sol";
+src/orchestration/WorkflowEngine.sol:7:contract WorkflowEngine is IWorkflowEngine {
+src/orchestration/WorkflowEngine.sol:70:        // 3. Construct the ProtocolContext payload for underlying modules
+src/orchestration/WorkflowEngine.sol:71:        ProtocolContext memory ctx = ProtocolContext({
+src/orchestration/WorkflowEngine.sol:78:        ISettlementModule(settlementModule).executeSettlement(record.escrowId, settlementData, ctx);
+src/orchestration/WorkflowEngine.sol:83:        IMemoryModule(memoryModule).commitMemory(record.agentIdentityId, memoryData, ctx);
+src/orchestration/WorkflowEngine.sol:88:        IReputationModule(reputationModule).updateReputation(record.agentIdentityId, reputationData, ctx);

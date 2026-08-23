@@ -1,0 +1,303 @@
+src/privacy/PrivacyEngine.sol:51:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/privacy/PrivacyEngine.sol:52:        return LibTransientProof.verifyEscrowProof(proofId, operator, amount);
+src/privacy/StealthAddressRegistry.sol:10:        address indexed caller,
+src/privacy/StealthAddressRegistry.sol:29:        emit Announcement(schemeId, stealthAddress, msg.sender, ephemeralPubKey, metadata);
+src/privacy/StealthAddressRegistry.sol:36:        stealthMetaAddresses[msg.sender][schemeId] = stealthMetaAddress;
+src/privacy/StealthAddressRegistry.sol:37:        emit StealthMetaAddressSet(msg.sender, schemeId, stealthMetaAddress);
+src/registry/AgentRegistry.sol:11:    error Unauthorized();
+src/registry/AgentRegistry.sol:14:    error OwnerAlreadyRegistered();
+src/registry/AgentRegistry.sol:22:    event RegistryInitialized(address indexed owner);
+src/registry/AgentRegistry.sol:24:    event AgentRegistered(bytes32 indexed id, address indexed owner, string metadataURI);
+src/registry/AgentRegistry.sol:36:        address owner;
+src/registry/AgentRegistry.sol:45:    address public immutable registryOwner;
+src/registry/AgentRegistry.sol:48:    mapping(address => bytes32) internal ownerToAgent;
+src/registry/AgentRegistry.sol:57:        registryOwner = msg.sender;
+src/registry/AgentRegistry.sol:59:        emit RegistryInitialized(msg.sender);
+src/registry/AgentRegistry.sol:67:        if (msg.sender == address(0)) {
+src/registry/AgentRegistry.sol:79:        if (ownerToAgent[msg.sender] != bytes32(0)) {
+src/registry/AgentRegistry.sol:80:            revert OwnerAlreadyRegistered();
+src/registry/AgentRegistry.sol:85:            owner: msg.sender,
+src/registry/AgentRegistry.sol:94:        ownerToAgent[msg.sender] = id;
+src/registry/AgentRegistry.sol:100:        emit AgentRegistered(id, msg.sender, metadataURI);
+src/registry/AgentRegistry.sol:118:        if (agent.owner != msg.sender) {
+src/registry/AgentRegistry.sol:119:            revert Unauthorized();
+src/registry/AgentRegistry.sol:138:        if (msg.sender != registryOwner) {
+src/registry/AgentRegistry.sol:139:            revert Unauthorized();
+src/registry/AgentRegistry.sol:159:        return agents[id].owner != address(0);
+src/registry/AgentRegistry.sol:162:    function agentOf(address owner) external view returns (bytes32) {
+src/registry/AgentRegistry.sol:163:        return ownerToAgent[owner];
+src/registry/AgentRegistry.sol:166:    function ownerOf(bytes32 id) external view returns (address) {
+src/registry/AgentRegistry.sol:171:        return agents[id].owner;
+src/core/AkmenaCore.sol:32:    error UnauthorizedAccess();
+src/core/AkmenaCore.sol:37:        if (msg.sender != deployer) {
+src/core/AkmenaCore.sol:38:            revert UnauthorizedAccess();
+src/core/AkmenaCore.sol:44:        deployer = msg.sender;
+src/ratings/AgentRatingEngine.sol:20:        if (reviewerSubmitted[agentId][msg.sender]) {
+src/ratings/AgentRatingEngine.sol:24:        reviewerSubmitted[agentId][msg.sender] = true;
+src/ratings/AgentRatingEngine.sol:29:        emit RatingSubmitted(agentId, msg.sender, score);
+src/disputes/DisputeEngine.sol:26:            claimant: msg.sender,
+src/disputes/DisputeEngine.sol:32:        emit DisputeOpened(disputeId, agreementId, msg.sender);
+src/interfaces/IAgentRegistry.sol:14:        address owner;
+src/interfaces/IAgentRegistry.sol:28:    event AgentRegistered(bytes32 indexed id, address indexed owner, string metadataURI);
+src/interfaces/IAgentRegistry.sol:66:    function agentOf(address owner) external view returns (bytes32);
+src/interfaces/IAgentRegistry.sol:68:    /// @notice Returns the owner of an agent.
+src/interfaces/IAgentRegistry.sol:69:    function ownerOf(bytes32 id) external view returns (address);
+src/interfaces/IAKMAuthorization.sol:4:/// @title IAKMAuthorization
+src/interfaces/IAKMAuthorization.sol:5:/// @notice ERC-3009 authorization interface for AKM.
+src/interfaces/IAKMAuthorization.sol:6:interface IAKMAuthorization {
+src/interfaces/IAKMAuthorization.sol:7:    /// @notice Returns whether an authorization nonce has been used.
+src/interfaces/IAKMAuthorization.sol:8:    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
+src/interfaces/IAKMAuthorization.sol:10:    /// @notice Executes a signed transfer authorization.
+src/interfaces/IAKMAuthorization.sol:11:    function transferWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:17:        bytes32 nonce,
+src/interfaces/IAKMAuthorization.sol:23:    /// @notice Executes a signed transfer where the recipient submits the authorization.
+src/interfaces/IAKMAuthorization.sol:24:    function receiveWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:30:        bytes32 nonce,
+src/interfaces/IAKMAuthorization.sol:36:    /// @notice Cancels an unused authorization.
+src/interfaces/IAKMAuthorization.sol:37:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external;
+src/storage/StorageNamespaces.sol:7:    bytes32 public constant AUTHORIZATION = keccak256("akmena.storage.authorization");
+src/storage/LibStorage.sol:9:    struct AuthorizationStorage { mapping(address => mapping(bytes32 => bool)) capabilities; mapping(address => mapping(address => bool)) delegates; mapping(address => bool) verified; mapping(address => mapping(address => mapping(bytes32 => bool))) attestations; }
+src/storage/LibStorage.sol:15:    struct PaymentsStorage { uint256 totalProcessedVolume; mapping(address => uint256) spentNonces; }
+src/storage/LibStorage.sol:29:    function authorization() internal pure returns (AuthorizationStorage storage ds) { bytes32 slot = StorageNamespaces.AUTHORIZATION; assembly { ds.slot := slot } }
+src/identity/Identity.sol:14:        address owner_,
+src/identity/Identity.sol:23:            owner_,
+src/governance/AkmenaTimelock.sol:10:    address public guardian;
+src/governance/AkmenaTimelock.sol:11:    bool public guardianSunset;
+src/governance/AkmenaTimelock.sol:25:    event GuardianSunsetExecuted();
+src/governance/AkmenaTimelock.sol:27:    error Unauthorized();
+src/governance/AkmenaTimelock.sol:33:    error GuardianSunset();
+src/governance/AkmenaTimelock.sol:35:    constructor(address _governor, address _akmenaCore, address _guardian) {
+src/governance/AkmenaTimelock.sol:38:        guardian = _guardian;
+src/governance/AkmenaTimelock.sol:42:        if (msg.sender != governor) revert Unauthorized();
+src/governance/AkmenaTimelock.sol:57:        if (guardianSunset) revert GuardianSunset();
+src/governance/AkmenaTimelock.sol:58:        if (msg.sender != guardian) revert Unauthorized();
+src/governance/AkmenaTimelock.sol:69:    function sunsetGuardian() external {
+src/governance/AkmenaTimelock.sol:70:        if (msg.sender != guardian) revert Unauthorized();
+src/governance/AkmenaTimelock.sol:71:        guardianSunset = true;
+src/governance/AkmenaTimelock.sol:72:        guardian = address(0);
+src/governance/AkmenaTimelock.sol:73:        emit GuardianSunsetExecuted();
+src/governance/AkmenaGovernor.sol:37:        if (token.getPastVotes(msg.sender, snapshotBlock) < gs.params.proposalThreshold) {
+src/governance/AkmenaGovernor.sol:41:        bytes32 proposalId = keccak256(abi.encode(msg.sender, block.number, adrHash, actions));
+src/governance/AkmenaGovernor.sol:48:        p.proposer = msg.sender;
+src/governance/AkmenaGovernor.sol:57:        emit ProposalCreated(proposalId, msg.sender, title, adrHash, snapshotBlock);
+src/governance/AkmenaGovernor.sol:65:        if (gs.hasVoted[proposalId][msg.sender]) revert AlreadyVoted();
+src/governance/AkmenaGovernor.sol:68:        uint256 weight = token.getPastVotes(msg.sender, p.snapshotBlock);
+src/governance/AkmenaGovernor.sol:70:        gs.hasVoted[proposalId][msg.sender] = true;
+src/governance/AkmenaGovernor.sol:75:        emit VoteCast(msg.sender, proposalId, support, weight);
+src/identity/IIdentity.sol:26:    /// @notice Returns the canonical owner/controller.
+src/identity/IIdentity.sol:27:    function owner() external view returns (address);
+src/identity/IIdentity.sol:59:    event OwnershipTransferred(uint256 indexed identityId, address indexed previousOwner, address indexed newOwner);
+src/identity/IdentityClone.sol:13:    address private _owner;
+src/identity/IdentityClone.sol:17:    error NotAuthorized();
+src/identity/IdentityClone.sol:19:    function initialize(uint256 id_, IdentityType type_, address owner_) external {
+src/identity/IdentityClone.sol:24:        _owner = owner_;
+src/identity/IdentityClone.sol:40:    function owner() external view override returns (address) {
+src/identity/IdentityClone.sol:41:        return _owner;
+src/identity/IdentityBase.sol:11:    error NotOwner();
+src/identity/IdentityBase.sol:12:    error ZeroOwner();
+src/identity/IdentityBase.sol:15:    address internal _owner;
+src/identity/IdentityBase.sol:19:    function __IdentityBase_init(uint256 identityId_, address owner_, string memory metadataURI_)
+src/identity/IdentityBase.sol:23:        if (owner_ == address(0)) revert ZeroOwner();
+src/identity/IdentityBase.sol:26:        _owner = owner_;
+src/identity/IdentityBase.sol:33:    function initialize(uint256 identityId_, address owner_, string calldata metadataURI_)
+src/identity/IdentityBase.sol:38:        __IdentityBase_init(identityId_, owner_, metadataURI_);
+src/identity/IdentityBase.sol:45:    function owner() external view override returns (address) {
+src/identity/IdentityBase.sol:46:        return _owner;
+src/identity/IdentityBase.sol:62:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityBase.sol:69:    function transferOwnership(address newOwner) external {
+src/identity/IdentityBase.sol:70:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityBase.sol:71:        if (newOwner == address(0)) revert ZeroOwner();
+src/identity/IdentityBase.sol:73:        address previous = _owner;
+src/identity/IdentityBase.sol:74:        _owner = newOwner;
+src/identity/IdentityBase.sol:76:        emit OwnershipTransferred(_identityId, previous, newOwner);
+src/identity/IdentityBase.sol:80:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityFactory.sol:8:    function initialize(uint256 id_, IIdentity.IdentityType type_, address owner_) external;
+src/identity/IdentityFactory.sol:35:        IIdentityClone(clone).initialize(newId, identityType, msg.sender);
+src/autonomous/IAgreementEngine.sol:14:    error UnauthorizedAccess();
+src/autonomous/AgreementEngine.sol:19:            partyA: msg.sender,
+src/autonomous/AgreementEngine.sol:26:        emit AgreementCreated(agreementId, msg.sender, partyB);
+src/autonomous/AgreementEngine.sol:33:        if (msg.sender != agreementData.partyB) revert UnauthorizedAccess();
+src/autonomous/DiscoveryEngine.sol:12:        ds.agentProfiles[msg.sender] = LibStorage.DiscoveryData({
+src/autonomous/DiscoveryEngine.sol:18:        emit AgentRegistered(msg.sender, category, metadataURI);
+src/autonomous/DiscoveryEngine.sol:23:        ds.agentProfiles[msg.sender].isActive = isActive;
+src/autonomous/DiscoveryEngine.sol:25:        emit AgentStatusUpdated(msg.sender, isActive);
+src/token/core/AkmenaToken.sol:7:import {AKMAuthorization} from "../extensions/AKMAuthorization.sol";
+src/token/core/AkmenaToken.sol:40:    function _authorizationDigest(bytes32 structHash) internal view override returns (bytes32) {
+src/token/core/AkmenaToken.sol:48:    function transferWithAuthorization(
+src/token/core/AkmenaToken.sol:54:        bytes32 nonce,
+src/token/core/AkmenaToken.sol:59:        super.transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:62:    function receiveWithAuthorization(
+src/token/core/AkmenaToken.sol:68:        bytes32 nonce,
+src/token/core/AkmenaToken.sol:73:        super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:76:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
+src/token/core/AkmenaToken.sol:80:        super.cancelAuthorization(authorizer, nonce, v, r, s);
+src/autonomous/MarketplaceEngine.sol:15:            creator: msg.sender,
+src/autonomous/MarketplaceEngine.sol:22:        emit TaskCreated(currentId, msg.sender, reward);
+src/autonomous/MarketplaceEngine.sol:35:        if (msg.sender != taskData.creator) revert UnauthorizedAccess();
+src/autonomous/MarketplaceEngine.sol:43:    function completeTask(uint256 taskId, address caller) external override {
+src/autonomous/MarketplaceEngine.sol:49:        if (caller != taskData.creator && caller != taskData.assignee) revert UnauthorizedAccess();
+src/autonomous/IMarketplaceEngine.sol:15:    error UnauthorizedAccess();
+src/autonomous/IMarketplaceEngine.sol:19:    function completeTask(uint256 taskId, address caller) external;
+src/token/extensions/AKMAuthorization.sol:5:import {IAKMAuthorization} from "../../interfaces/IAKMAuthorization.sol";
+src/token/extensions/AKMAuthorization.sol:7:/// @title AKMAuthorization
+src/token/extensions/AKMAuthorization.sol:8:/// @notice Authorization engine powering AKM payment authorizations.
+src/token/extensions/AKMAuthorization.sol:10:abstract contract AKMAuthorization is IAKMAuthorization {
+src/token/extensions/AKMAuthorization.sol:17:    error AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:18:    error AuthorizationExpired();
+src/token/extensions/AKMAuthorization.sol:19:    error AuthorizationNotYetValid();
+src/token/extensions/AKMAuthorization.sol:26:    bytes32 internal constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256(
+src/token/extensions/AKMAuthorization.sol:27:        "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:30:    bytes32 internal constant RECEIVE_WITH_AUTHORIZATION_TYPEHASH = keccak256(
+src/token/extensions/AKMAuthorization.sol:31:        "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:34:    bytes32 internal constant CANCEL_AUTHORIZATION_TYPEHASH =
+src/token/extensions/AKMAuthorization.sol:35:        keccak256("CancelAuthorization(address authorizer,bytes32 nonce)");
+src/token/extensions/AKMAuthorization.sol:41:    mapping(address => mapping(bytes32 => bool)) internal _authorizationStates;
+src/token/extensions/AKMAuthorization.sol:47:    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:49:    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:55:    function authorizationState(address authorizer, bytes32 nonce) public view virtual override returns (bool) {
+src/token/extensions/AKMAuthorization.sol:56:        return _authorizationStates[authorizer][nonce];
+src/token/extensions/AKMAuthorization.sol:68:    //                 INTERNAL AUTHORIZATION LOGIC
+src/token/extensions/AKMAuthorization.sol:71:    function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
+src/token/extensions/AKMAuthorization.sol:72:        if (_authorizationStates[authorizer][nonce]) {
+src/token/extensions/AKMAuthorization.sol:73:            revert AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:77:    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:78:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:80:        emit AuthorizationUsed(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:83:    function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:84:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:86:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:88:        emit AuthorizationCanceled(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:91:    function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
+src/token/extensions/AKMAuthorization.sol:95:            revert AuthorizationNotYetValid();
+src/token/extensions/AKMAuthorization.sol:99:            revert AuthorizationExpired();
+src/token/extensions/AKMPayments.sol:5:import {AKMAuthorization} from "./AKMAuthorization.sol";
+src/token/extensions/AKMPayments.sol:9:abstract contract AKMPayments is AKMAuthorization {
+src/token/extensions/AKMPayments.sol:16:    event AuthorizationTransfer(address indexed from, address indexed to, uint256 value, bytes32 indexed nonce);
+src/token/extensions/AKMPayments.sol:26:    function _authorizationDigest(bytes32 structHash) internal view virtual returns (bytes32);
+src/token/extensions/AKMPayments.sol:29:    //             TRANSFER WITH AUTHORIZATION
+src/token/extensions/AKMPayments.sol:32:    function transferWithAuthorization(
+src/token/extensions/AKMPayments.sol:38:        bytes32 nonce,
+src/token/extensions/AKMPayments.sol:43:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:44:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:47:            abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)
+src/token/extensions/AKMPayments.sol:50:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:54:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:58:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:62:    //            RECEIVE WITH AUTHORIZATION
+src/token/extensions/AKMPayments.sol:65:    function receiveWithAuthorization(
+src/token/extensions/AKMPayments.sol:71:        bytes32 nonce,
+src/token/extensions/AKMPayments.sol:76:        require(msg.sender == to, "AKM: caller must be recipient");
+src/token/extensions/AKMPayments.sol:78:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:79:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:82:            keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
+src/token/extensions/AKMPayments.sol:84:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:88:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:92:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:96:    //              CANCEL AUTHORIZATION
+src/token/extensions/AKMPayments.sol:99:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) public virtual {
+src/token/extensions/AKMPayments.sol:100:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMPayments.sol:102:        bytes32 structHash = keccak256(abi.encode(CANCEL_AUTHORIZATION_TYPEHASH, authorizer, nonce));
+src/token/extensions/AKMPayments.sol:104:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:108:        _cancelAuthorization(authorizer, nonce);
+src/economics/IEscrowEngine.sol:15:    error UnauthorizedAccess();
+src/economics/EscrowEngine.sol:31:        if (msg.sender != data.buyer) revert UnauthorizedAccess();
+src/economics/EscrowEngine.sol:41:        if (msg.sender != data.seller) revert UnauthorizedAccess();
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/economics/EscrowEngine.sol:56:        return targetData.status == 1 && targetData.buyer == operator && targetData.amount >= amount;
+src/libraries/Errors.sol:7:    error Unauthorized();
+src/orchestration/IWorkflowEngine.sol:22:    // uint256 nonce;
+src/orchestration/IWorkflowEngine.sol:34:// Note: Modules now explicitly require the ProtocolContext for independent authorization
+src/authorization/CapabilityEngine.sol:4:import {ICapabilityEngine} from "./ICapabilityEngine.sol";
+src/authorization/CapabilityEngine.sol:7:contract CapabilityEngine is ICapabilityEngine {
+src/authorization/CapabilityEngine.sol:8:    function grantCapability(address identity, bytes32 capability) external override {
+src/authorization/CapabilityEngine.sol:11:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/CapabilityEngine.sol:13:        if (ds.capabilities[identity][capability]) {
+src/authorization/CapabilityEngine.sol:14:            revert CapabilityAlreadyGranted();
+src/authorization/CapabilityEngine.sol:17:        ds.capabilities[identity][capability] = true;
+src/authorization/CapabilityEngine.sol:18:        emit CapabilityGranted(identity, capability);
+src/authorization/CapabilityEngine.sol:21:    function revokeCapability(address identity, bytes32 capability) external override {
+src/authorization/CapabilityEngine.sol:24:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/CapabilityEngine.sol:26:        if (!ds.capabilities[identity][capability]) {
+src/authorization/CapabilityEngine.sol:27:            revert CapabilityNotFound();
+src/authorization/CapabilityEngine.sol:30:        ds.capabilities[identity][capability] = false;
+src/authorization/CapabilityEngine.sol:31:        emit CapabilityRevoked(identity, capability);
+src/authorization/CapabilityEngine.sol:34:    function hasCapability(address identity, bytes32 capability) external view override returns (bool) {
+src/authorization/CapabilityEngine.sol:35:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/CapabilityEngine.sol:36:        return ds.capabilities[identity][capability];
+src/authorization/VerificationEngine.sol:11:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/VerificationEngine.sol:20:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/ICapabilityEngine.sol:4:interface ICapabilityEngine {
+src/authorization/ICapabilityEngine.sol:5:    event CapabilityGranted(address indexed identity, bytes32 indexed capability);
+src/authorization/ICapabilityEngine.sol:6:    event CapabilityRevoked(address indexed identity, bytes32 indexed capability);
+src/authorization/ICapabilityEngine.sol:9:    error CapabilityAlreadyGranted();
+src/authorization/ICapabilityEngine.sol:10:    error CapabilityNotFound();
+src/authorization/ICapabilityEngine.sol:12:    function grantCapability(address identity, bytes32 capability) external;
+src/authorization/ICapabilityEngine.sol:13:    function revokeCapability(address identity, bytes32 capability) external;
+src/authorization/ICapabilityEngine.sol:14:    function hasCapability(address identity, bytes32 capability) external view returns (bool);
+src/authorization/AttestationEngine.sol:4:import {IAttestationEngine} from "./IAttestationEngine.sol";
+src/authorization/AttestationEngine.sol:9:contract AttestationEngine is IAttestationEngine, EIP712 {
+src/authorization/AttestationEngine.sol:12:    bytes32 private constant RECORD_ATTESTATION_TYPEHASH = keccak256("RecordAttestation(address subject,bytes32 attestationHash,uint256 nonce,uint256 deadline)");
+src/authorization/AttestationEngine.sol:13:    mapping(address => uint256) public nonces;
+src/authorization/AttestationEngine.sol:15:    constructor() EIP712("AkmenaAttestationEngine", "1") {}
+src/authorization/AttestationEngine.sol:17:    function recordAttestation(address subject, bytes32 attestationHash) external override {
+src/authorization/AttestationEngine.sol:19:        if (attestationHash == bytes32(0)) revert EmptyAttestation();
+src/authorization/AttestationEngine.sol:21:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:22:        ds.attestations[subject][msg.sender][attestationHash] = true;
+src/authorization/AttestationEngine.sol:24:        emit AttestationRecorded(subject, msg.sender, attestationHash);
+src/authorization/AttestationEngine.sol:27:    /// @notice FORTIFIED: Cryptographically verified attestation via EIP-712 signature
+src/authorization/AttestationEngine.sol:28:    function recordAttestationTyped(
+src/authorization/AttestationEngine.sol:31:        bytes32 attestationHash,
+src/authorization/AttestationEngine.sol:36:        if (attestationHash == bytes32(0)) revert EmptyAttestation();
+src/authorization/AttestationEngine.sol:39:        uint256 currentNonce = nonces[attester]++;
+src/authorization/AttestationEngine.sol:40:        bytes32 structHash = keccak256(abi.encode(RECORD_ATTESTATION_TYPEHASH, subject, attestationHash, currentNonce, deadline));
+src/authorization/AttestationEngine.sol:46:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:47:        ds.attestations[subject][attester][attestationHash] = true;
+src/authorization/AttestationEngine.sol:49:        emit AttestationRecorded(subject, attester, attestationHash);
+src/authorization/AttestationEngine.sol:52:    function hasAttestation(address subject, address attester, bytes32 attestationHash) external view override returns (bool) {
+src/authorization/AttestationEngine.sol:55:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:56:        return ds.attestations[subject][attester][attestationHash];
+src/orchestration/WorkflowEngine.sol:19:    error UnauthorizedInitiator();
+src/orchestration/WorkflowEngine.sol:32:        bytes32 workflowId = keccak256(abi.encode(msg.sender, agentIdentityId, agreementId, escrowId, block.timestamp));
+src/orchestration/WorkflowEngine.sol:36:            initiator: msg.sender,
+src/orchestration/WorkflowEngine.sol:43:        emit WorkflowInitialized(workflowId, msg.sender);
+src/orchestration/WorkflowEngine.sol:60:        // 1. Layer 1 Authorization Check: Does the caller own this workflow?
+src/orchestration/WorkflowEngine.sol:61:        if (msg.sender != record.initiator) revert UnauthorizedInitiator();
+src/orchestration/WorkflowEngine.sol:72:            actor: msg.sender,
+src/authorization/IDelegationEngine.sol:5:    event DelegateSet(address indexed identity, address indexed delegate, bool status);
+src/authorization/IDelegationEngine.sol:9:    function setDelegate(address delegate, bool status) external;
+src/authorization/IDelegationEngine.sol:10:    function isDelegate(address identity, address delegate) external view returns (bool);
+src/authorization/IAttestationEngine.sol:4:interface IAttestationEngine {
+src/authorization/IAttestationEngine.sol:5:    event AttestationRecorded(address indexed subject, address indexed attester, bytes32 indexed attestationHash);
+src/authorization/IAttestationEngine.sol:8:    error EmptyAttestation();
+src/authorization/IAttestationEngine.sol:10:    function recordAttestation(address subject, bytes32 attestationHash) external;
+src/authorization/IAttestationEngine.sol:11:    function hasAttestation(address subject, address attester, bytes32 attestationHash) external view returns (bool);
+src/authorization/DelegationEngine.sol:12:    bytes32 private constant SET_DELEGATE_TYPEHASH = keccak256("SetDelegate(address delegate,bool status,uint256 nonce,uint256 deadline)");
+src/authorization/DelegationEngine.sol:13:    mapping(address => uint256) public nonces;
+src/authorization/DelegationEngine.sol:17:    function setDelegate(address delegate, bool status) external override {
+src/authorization/DelegationEngine.sol:18:        if (delegate == address(0)) revert InvalidAddress();
+src/authorization/DelegationEngine.sol:20:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:21:        ds.delegates[msg.sender][delegate] = status;
+src/authorization/DelegationEngine.sol:23:        emit DelegateSet(msg.sender, delegate, status);
+src/authorization/DelegationEngine.sol:26:    /// @notice FORTIFIED: Cryptographically verified delegate assignment via EIP-712 signature
+src/authorization/DelegationEngine.sol:27:    function setDelegateTyped(
+src/authorization/DelegationEngine.sol:28:        address owner,
+src/authorization/DelegationEngine.sol:29:        address delegate,
+src/authorization/DelegationEngine.sol:34:        if (owner == address(0) || delegate == address(0)) revert InvalidAddress();
+src/authorization/DelegationEngine.sol:37:        uint256 currentNonce = nonces[owner]++;
+src/authorization/DelegationEngine.sol:38:        bytes32 structHash = keccak256(abi.encode(SET_DELEGATE_TYPEHASH, delegate, status, currentNonce, deadline));
+src/authorization/DelegationEngine.sol:42:        require(signer == owner, "Invalid signature");
+src/authorization/DelegationEngine.sol:44:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:45:        ds.delegates[owner][delegate] = status;
+src/authorization/DelegationEngine.sol:47:        emit DelegateSet(owner, delegate, status);
+src/authorization/DelegationEngine.sol:50:    function isDelegate(address identity, address delegate) external view override returns (bool) {
+src/authorization/DelegationEngine.sol:51:        if (identity == address(0) || delegate == address(0)) return false;
+src/authorization/DelegationEngine.sol:53:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:54:        return ds.delegates[identity][delegate];
+src/authorization/AkmenaPolicyBoundary.sol:8:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
+src/authorization/AkmenaPolicyBoundary.sol:26:    error UnauthorizedAgent();
+src/authorization/AkmenaPolicyBoundary.sol:40:        agentPolicies[msg.sender][agent] = SpendingPolicy({
+src/authorization/AkmenaPolicyBoundary.sol:51:        address operator,
+src/authorization/AkmenaPolicyBoundary.sol:58:        address agent = msg.sender;
+src/authorization/AkmenaPolicyBoundary.sol:59:        if (agent == address(0)) revert UnauthorizedAgent();
+src/authorization/AkmenaPolicyBoundary.sol:61:        SpendingPolicy storage policy = agentPolicies[operator][agent];
+src/authorization/AkmenaPolicyBoundary.sol:63:        if (policy.maxSpendPerTransaction == 0) revert UnauthorizedAgent();

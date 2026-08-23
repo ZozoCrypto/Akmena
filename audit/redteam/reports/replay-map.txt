@@ -1,0 +1,107 @@
+src/privacy/PrivacyEngine.sol:8:    mapping(bytes32 => bool) public nullifierHashes;
+src/privacy/PrivacyEngine.sol:11:    event PrivateSettlementExecuted(bytes32 indexed nullifierHash, address indexed recipient, uint256 amount);
+src/privacy/PrivacyEngine.sol:14:    error NullifierAlreadySpent();
+src/privacy/PrivacyEngine.sol:28:        bytes32 nullifierHash,
+src/privacy/PrivacyEngine.sol:34:        if (nullifierHashes[nullifierHash]) revert NullifierAlreadySpent();
+src/privacy/PrivacyEngine.sol:36:        bytes32 derivedCommitment = keccak256(abi.encodePacked(nullifierHash, secret, amount));
+src/privacy/PrivacyEngine.sol:39:        nullifierHashes[nullifierHash] = true;
+src/privacy/PrivacyEngine.sol:42:        emit PrivateSettlementExecuted(nullifierHash, stealthRecipient, amount);
+src/privacy/PrivacyEngine.sol:44:        LibTransientProof.setEscrowProof(uint256(nullifierHash), stealthRecipient, amount);
+src/core/AkmenaCore.sol:15:    bool private paused;
+src/core/AkmenaCore.sol:29:        bool paused
+src/core/AkmenaCore.sol:100:    function setPaused(
+src/core/AkmenaCore.sol:106:        paused = status;
+src/core/AkmenaCore.sol:111:    function isPaused()
+src/core/AkmenaCore.sol:116:        return paused;
+src/interfaces/IAgentGovernanceEngine.sol:7:        Executed,
+src/interfaces/IAgentGovernanceEngine.sol:20:    event ProposalExecuted(bytes32 indexed proposalId);
+src/interfaces/IAKMAuthorization.sol:7:    /// @notice Returns whether an authorization nonce has been used.
+src/interfaces/IAKMAuthorization.sol:8:    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
+src/interfaces/IAKMAuthorization.sol:17:        bytes32 nonce,
+src/interfaces/IAKMAuthorization.sol:30:        bytes32 nonce,
+src/interfaces/IAKMAuthorization.sol:36:    /// @notice Cancels an unused authorization.
+src/interfaces/IAKMAuthorization.sol:37:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external;
+src/storage/LibStorage.sol:15:    struct PaymentsStorage { uint256 totalProcessedVolume; mapping(address => uint256) spentNonces; }
+src/storage/LibStorage.sol:24:    struct AgreementData { address partyA; address partyB; bytes32 termsHash; uint256 validUntil; bool isExecuted; }
+src/token/core/AkmenaToken.sol:54:        bytes32 nonce,
+src/token/core/AkmenaToken.sol:59:        super.transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:68:        bytes32 nonce,
+src/token/core/AkmenaToken.sol:73:        super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:76:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
+src/token/core/AkmenaToken.sol:80:        super.cancelAuthorization(authorizer, nonce, v, r, s);
+src/token/extensions/AKMAuthorization.sol:17:    error AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:27:        "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:31:        "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:35:        keccak256("CancelAuthorization(address authorizer,bytes32 nonce)");
+src/token/extensions/AKMAuthorization.sol:47:    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:49:    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:55:    function authorizationState(address authorizer, bytes32 nonce) public view virtual override returns (bool) {
+src/token/extensions/AKMAuthorization.sol:56:        return _authorizationStates[authorizer][nonce];
+src/token/extensions/AKMAuthorization.sol:71:    function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
+src/token/extensions/AKMAuthorization.sol:72:        if (_authorizationStates[authorizer][nonce]) {
+src/token/extensions/AKMAuthorization.sol:73:            revert AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:77:    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:78:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:80:        emit AuthorizationUsed(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:83:    function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:84:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:86:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:88:        emit AuthorizationCanceled(authorizer, nonce);
+src/token/extensions/AKMPayments.sol:16:    event AuthorizationTransfer(address indexed from, address indexed to, uint256 value, bytes32 indexed nonce);
+src/token/extensions/AKMPayments.sol:38:        bytes32 nonce,
+src/token/extensions/AKMPayments.sol:43:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:47:            abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)
+src/token/extensions/AKMPayments.sol:54:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:58:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:71:        bytes32 nonce,
+src/token/extensions/AKMPayments.sol:78:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:82:            keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
+src/token/extensions/AKMPayments.sol:88:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:92:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:99:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) public virtual {
+src/token/extensions/AKMPayments.sol:100:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMPayments.sol:102:        bytes32 structHash = keccak256(abi.encode(CANCEL_AUTHORIZATION_TYPEHASH, authorizer, nonce));
+src/token/extensions/AKMPayments.sol:108:        _cancelAuthorization(authorizer, nonce);
+src/economics/IPaymentsEngine.sol:5:    event PaymentExecuted(address indexed from, address indexed to, uint256 amount);
+src/economics/PaymentsEngine.sol:15:        ds.totalProcessedVolume += amount;
+src/economics/PaymentsEngine.sol:18:        emit PaymentExecuted(from, to, amount);
+src/economics/PaymentsEngine.sol:22:        return LibStorage.payments().totalProcessedVolume;
+src/libraries/Errors.sol:5:/// @notice Canonical custom errors used throughout the protocol.
+src/libraries/Types.sol:5:/// @notice Shared enums used throughout the protocol.
+src/orchestration/IWorkflowEngine.sol:22:    // uint256 nonce;
+src/governance/AkmenaTimelock.sol:17:        bool executed;
+src/governance/AkmenaTimelock.sol:23:    event ProposalExecuted(bytes32 indexed proposalId);
+src/governance/AkmenaTimelock.sol:25:    event GuardianSunsetExecuted();
+src/governance/AkmenaTimelock.sol:31:    error ProposalAlreadyExecuted();
+src/governance/AkmenaTimelock.sol:50:            executed: false,
+src/governance/AkmenaTimelock.sol:62:        if (r.executed) revert ProposalAlreadyExecuted();
+src/governance/AkmenaTimelock.sol:73:        emit GuardianSunsetExecuted();
+src/governance/AkmenaTimelock.sol:79:        if (r.executed) revert ProposalAlreadyExecuted();
+src/governance/AkmenaTimelock.sol:87:        r.executed = true;
+src/governance/AkmenaTimelock.sol:97:        emit ProposalExecuted(proposalId);
+src/governance/AkmenaTimelock.sol:100:    function getProposalStatus(bytes32 proposalId) external view override returns (uint256 eta, bool executed, bool canceled) {
+src/governance/AkmenaTimelock.sol:102:        return (r.eta, r.executed, r.canceled);
+src/governance/IGovernance.sol:4:enum ProposalState { Pending, Active, Succeeded, Defeated, Queued, Executed, Expired, Canceled }
+src/governance/IGovernance.sol:20:    function getProposalStatus(bytes32 proposalId) external view returns (uint256 eta, bool executed, bool canceled);
+src/governance/AkmenaGovernor.sol:95:        (uint256 eta, bool executed, bool canceled) = timelock.getProposalStatus(proposalId);
+src/governance/AkmenaGovernor.sol:98:        if (executed) return ProposalState.Executed;
+src/governance/AgentGovernanceEngine.sol:44:        proposal.status = ProposalStatus.Executed;
+src/governance/AgentGovernanceEngine.sol:46:        emit ProposalExecuted(proposalId);
+src/autonomous/IAgreementEngine.sol:8:    event AgreementExecuted(bytes32 indexed agreementId);
+src/autonomous/AgreementEngine.sol:23:            isExecuted: false
+src/autonomous/AgreementEngine.sol:35:        if (agreementData.isExecuted) revert("AgreementAlreadyExecuted");
+src/autonomous/AgreementEngine.sol:37:        agreementData.isExecuted = true;
+src/autonomous/AgreementEngine.sol:39:        emit AgreementExecuted(agreementId);
+src/authorization/AttestationEngine.sol:12:    bytes32 private constant RECORD_ATTESTATION_TYPEHASH = keccak256("RecordAttestation(address subject,bytes32 attestationHash,uint256 nonce,uint256 deadline)");
+src/authorization/AttestationEngine.sol:13:    mapping(address => uint256) public nonces;
+src/authorization/AttestationEngine.sol:39:        uint256 currentNonce = nonces[attester]++;
+src/authorization/AttestationEngine.sol:40:        bytes32 structHash = keccak256(abi.encode(RECORD_ATTESTATION_TYPEHASH, subject, attestationHash, currentNonce, deadline));
+src/authorization/DelegationEngine.sol:12:    bytes32 private constant SET_DELEGATE_TYPEHASH = keccak256("SetDelegate(address delegate,bool status,uint256 nonce,uint256 deadline)");
+src/authorization/DelegationEngine.sol:13:    mapping(address => uint256) public nonces;
+src/authorization/DelegationEngine.sol:37:        uint256 currentNonce = nonces[owner]++;
+src/authorization/DelegationEngine.sol:38:        bytes32 structHash = keccak256(abi.encode(SET_DELEGATE_TYPEHASH, delegate, status, currentNonce, deadline));
+src/authorization/AkmenaPolicyBoundary.sol:17:        uint256 totalSpentToday;
+src/authorization/AkmenaPolicyBoundary.sol:43:            totalSpentToday: 0,
+src/authorization/AkmenaPolicyBoundary.sol:67:            policy.totalSpentToday = 0;
+src/authorization/AkmenaPolicyBoundary.sol:71:        if (policy.totalSpentToday + amountToSpend > policy.dailyLimit) revert PolicyExceeded();
+src/authorization/AkmenaPolicyBoundary.sol:82:        policy.totalSpentToday += amountToSpend;

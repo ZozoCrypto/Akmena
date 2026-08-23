@@ -1,0 +1,81 @@
+src/registry/IRegistry.sol:22:    event IdentityRegistered(uint256 indexed identityId, address indexed identity, IIdentity.IdentityType identityType);
+src/registry/IRegistry.sol:24:    event IdentityRemoved(uint256 indexed identityId, address indexed identity);
+src/registry/IRegistry.sol:41:    function registerIdentity(address identity) external;
+src/registry/IRegistry.sol:43:    function removeIdentity(uint256 identityId) external;
+src/registry/IRegistry.sol:49:    function identityAddress(uint256 identityId) external view returns (address);
+src/registry/IRegistry.sol:51:    function identityId(address identity) external view returns (uint256);
+src/registry/IRegistry.sol:53:    function exists(uint256 identityId) external view returns (bool);
+src/registry/AgentRegistry.sol:22:    event RegistryInitialized(address indexed owner);
+src/registry/AgentRegistry.sol:24:    event AgentRegistered(bytes32 indexed id, address indexed owner, string metadataURI);
+src/registry/AgentRegistry.sol:36:        address owner;
+src/registry/AgentRegistry.sol:48:    mapping(address => bytes32) internal ownerToAgent;
+src/registry/AgentRegistry.sol:57:        registryOwner = msg.sender;
+src/registry/AgentRegistry.sol:59:        emit RegistryInitialized(msg.sender);
+src/registry/AgentRegistry.sol:66:    function register(bytes32 id, string calldata metadataURI) external {
+src/registry/AgentRegistry.sol:67:        if (msg.sender == address(0)) {
+src/registry/AgentRegistry.sol:79:        if (ownerToAgent[msg.sender] != bytes32(0)) {
+src/registry/AgentRegistry.sol:85:            owner: msg.sender,
+src/registry/AgentRegistry.sol:94:        ownerToAgent[msg.sender] = id;
+src/registry/AgentRegistry.sol:100:        emit AgentRegistered(id, msg.sender, metadataURI);
+src/registry/AgentRegistry.sol:118:        if (agent.owner != msg.sender) {
+src/registry/AgentRegistry.sol:138:        if (msg.sender != registryOwner) {
+src/registry/AgentRegistry.sol:159:        return agents[id].owner != address(0);
+src/registry/AgentRegistry.sol:162:    function agentOf(address owner) external view returns (bytes32) {
+src/registry/AgentRegistry.sol:163:        return ownerToAgent[owner];
+src/registry/AgentRegistry.sol:166:    function ownerOf(bytes32 id) external view returns (address) {
+src/registry/AgentRegistry.sol:171:        return agents[id].owner;
+src/registry/Registry.sol:14:    // Start IDs at 1 so that an ID of 0 represents an unregistered state.
+src/registry/Registry.sol:43:    function registerIdentity(address identity) external override {
+src/registry/Registry.sol:49:        uint256 id = IIdentity(identity).identityId();
+src/registry/Registry.sol:85:    function identityId(address identity) external view override returns (uint256) {
+src/identity/IdentityClone.sol:8:/// @dev Uses an initializer pattern because it will be deployed via ERC-1167 minimal proxies.
+src/identity/IdentityClone.sol:10:    bool private _initialized;
+src/identity/IdentityClone.sol:13:    address private _owner;
+src/identity/IdentityClone.sol:19:    function initialize(uint256 id_, IdentityType type_, address owner_) external {
+src/identity/IdentityClone.sol:20:        if (_initialized) revert AlreadyInitialized();
+src/identity/IdentityClone.sol:21:        _initialized = true;
+src/identity/IdentityClone.sol:24:        _owner = owner_;
+src/identity/IdentityClone.sol:28:    function identityId() external view override returns (uint256) {
+src/identity/IdentityClone.sol:40:    function owner() external view override returns (address) {
+src/identity/IdentityClone.sol:41:        return _owner;
+src/identity/IdentityBase.sol:9:/// @dev ERC-1167 clone compatible. Must be initialized exactly once.
+src/identity/IdentityBase.sol:14:    uint256 internal _identityId;
+src/identity/IdentityBase.sol:15:    address internal _owner;
+src/identity/IdentityBase.sol:19:    function __IdentityBase_init(uint256 identityId_, address owner_, string memory metadataURI_)
+src/identity/IdentityBase.sol:23:        if (owner_ == address(0)) revert ZeroOwner();
+src/identity/IdentityBase.sol:25:        _identityId = identityId_;
+src/identity/IdentityBase.sol:26:        _owner = owner_;
+src/identity/IdentityBase.sol:30:        emit IdentityActivated(identityId_);
+src/identity/IdentityBase.sol:33:    function initialize(uint256 identityId_, address owner_, string calldata metadataURI_)
+src/identity/IdentityBase.sol:36:        initializer
+src/identity/IdentityBase.sol:38:        __IdentityBase_init(identityId_, owner_, metadataURI_);
+src/identity/IdentityBase.sol:41:    function identityId() external view override returns (uint256) {
+src/identity/IdentityBase.sol:42:        return _identityId;
+src/identity/IdentityBase.sol:45:    function owner() external view override returns (address) {
+src/identity/IdentityBase.sol:46:        return _owner;
+src/identity/IdentityBase.sol:62:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityBase.sol:66:        emit MetadataUpdated(_identityId, newMetadata);
+src/identity/IdentityBase.sol:69:    function transferOwnership(address newOwner) external {
+src/identity/IdentityBase.sol:70:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityBase.sol:73:        address previous = _owner;
+src/identity/IdentityBase.sol:74:        _owner = newOwner;
+src/identity/IdentityBase.sol:76:        emit OwnershipTransferred(_identityId, previous, newOwner);
+src/identity/IdentityBase.sol:80:        if (msg.sender != _owner) revert NotOwner();
+src/identity/IdentityBase.sol:84:        emit IdentityDeactivated(_identityId);
+src/identity/IdentityFactory.sol:8:    function initialize(uint256 id_, IIdentity.IdentityType type_, address owner_) external;
+src/identity/IdentityFactory.sol:26:    /// @notice Deploys a new identity clone and registers it canonically.
+src/identity/IdentityFactory.sol:35:        IIdentityClone(clone).initialize(newId, identityType, msg.sender);
+src/identity/IdentityFactory.sol:38:        registry.registerIdentity(clone);
+src/identity/IIdentity.sol:24:    function identityId() external view returns (uint256);
+src/identity/IIdentity.sol:26:    /// @notice Returns the canonical owner/controller.
+src/identity/IIdentity.sol:27:    function owner() external view returns (address);
+src/identity/IIdentity.sol:53:    event IdentityActivated(uint256 indexed identityId);
+src/identity/IIdentity.sol:55:    event IdentityDeactivated(uint256 indexed identityId);
+src/identity/IIdentity.sol:57:    event MetadataUpdated(uint256 indexed identityId, string metadataURI);
+src/identity/IIdentity.sol:59:    event OwnershipTransferred(uint256 indexed identityId, address indexed previousOwner, address indexed newOwner);
+src/identity/Identity.sol:12:    function initialize(
+src/identity/Identity.sol:13:        uint256 identityId_,
+src/identity/Identity.sol:14:        address owner_,
+src/identity/Identity.sol:19:        initializer
+src/identity/Identity.sol:22:            identityId_,
+src/identity/Identity.sol:23:            owner_,

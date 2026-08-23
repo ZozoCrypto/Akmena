@@ -1,0 +1,68 @@
+src/analytics/AgentAnalyticsEngine.sol:22:            updatedAt: block.timestamp
+src/registry/AgentRegistry.sol:86:            createdAt: uint64(block.timestamp),
+src/registry/AgentRegistry.sol:87:            updatedAt: uint64(block.timestamp),
+src/registry/AgentRegistry.sol:123:        agent.updatedAt = uint64(block.timestamp);
+src/registry/AgentRegistry.sol:145:        agent.updatedAt = uint64(block.timestamp);
+src/disputes/DisputeEngine.sol:29:            createdAt: block.timestamp
+src/treasury/AgentTreasuryEngine.sol:18:        treasury.lastUpdated = block.timestamp;
+src/treasury/AgentTreasuryEngine.sol:33:        treasury.lastUpdated = block.timestamp;
+src/earnings/AgentEarningsEngine.sol:21:        record.lastPaymentAt = block.timestamp;
+src/interfaces/IAKMAuthorization.sol:15:        uint256 validAfter,
+src/interfaces/IAKMAuthorization.sol:16:        uint256 validBefore,
+src/interfaces/IAKMAuthorization.sol:28:        uint256 validAfter,
+src/interfaces/IAKMAuthorization.sol:29:        uint256 validBefore,
+src/portfolio/AgentPortfolioEngine.sol:21:        portfolios[agentId].push(PortfolioItem({agentId: agentId, title: title, uri: uri, createdAt: block.timestamp}));
+src/availability/AgentAvailabilityEngine.sol:10:        availability[agentId] = AgentAvailability({agentId: agentId, status: status, updatedAt: block.timestamp});
+src/staking/AgentStakingEngine.sol:23:            userStake.stakedAt = block.timestamp;
+src/token/core/AkmenaToken.sol:52:        uint256 validAfter,
+src/token/core/AkmenaToken.sol:53:        uint256 validBefore,
+src/token/core/AkmenaToken.sol:59:        super.transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:66:        uint256 validAfter,
+src/token/core/AkmenaToken.sol:67:        uint256 validBefore,
+src/token/core/AkmenaToken.sol:73:        super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/extensions/AKMAuthorization.sol:27:        "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:31:        "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:64:        return block.timestamp;
+src/token/extensions/AKMAuthorization.sol:91:    function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
+src/token/extensions/AKMAuthorization.sol:94:        if (timestamp <= validAfter) {
+src/token/extensions/AKMAuthorization.sol:98:        if (timestamp >= validBefore) {
+src/token/extensions/AKMPayments.sol:36:        uint256 validAfter,
+src/token/extensions/AKMPayments.sol:37:        uint256 validBefore,
+src/token/extensions/AKMPayments.sol:44:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:47:            abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)
+src/token/extensions/AKMPayments.sol:69:        uint256 validAfter,
+src/token/extensions/AKMPayments.sol:70:        uint256 validBefore,
+src/token/extensions/AKMPayments.sol:79:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:82:            keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
+src/slashing/AgentSlashingEngine.sol:21:        record.lastSlashedAt = block.timestamp;
+src/marketplace/TaskMarketplace.sol:34:            createdAt: uint64(block.timestamp),
+src/marketplace/TaskMarketplace.sol:73:        task.completedAt = uint64(block.timestamp);
+src/economics/SettlementEngine.sol:22:            timestamp: block.timestamp
+src/orchestration/IWorkflowEngine.sol:21:    // uint256 deadline;
+src/orchestration/WorkflowEngine.sol:32:        bytes32 workflowId = keccak256(abi.encode(msg.sender, agentIdentityId, agreementId, escrowId, block.timestamp));
+src/rewards/AgentRewardEngine.sol:21:        reward.lastRewardAt = block.timestamp;
+src/skills/AgentSkillEngine.sol:19:        skills[agentId].push(Skill({agentId: agentId, name: skill, addedAt: block.timestamp}));
+src/credentials/AgentCredentialEngine.sol:19:        credentials[agentId].push(Credential({agentId: agentId, value: credential, issuedAt: block.timestamp}));
+src/governance/AkmenaTimelock.sol:81:        if (block.timestamp < r.eta) revert TimelockNotExpired();
+src/governance/AkmenaTimelock.sol:82:        if (block.timestamp > r.eta + GRACE_PERIOD) revert TimelockExpired();
+src/governance/AkmenaGovernor.sol:36:        uint256 snapshotBlock = block.number - gs.params.votingDelayBlocks;
+src/governance/AkmenaGovernor.sol:41:        bytes32 proposalId = keccak256(abi.encode(msg.sender, block.number, adrHash, actions));
+src/governance/AkmenaGovernor.sol:50:        p.voteStart = block.number + gs.params.votingDelayBlocks;
+src/governance/AkmenaGovernor.sol:84:        uint256 eta = block.timestamp + gs.params.timelockDelay;
+src/governance/AkmenaGovernor.sol:100:        if (block.number <= p.voteStart) return ProposalState.Pending;
+src/governance/AkmenaGovernor.sol:101:        if (block.number <= p.voteEnd) return ProposalState.Active;
+src/governance/AkmenaGovernor.sol:107:        if (block.timestamp >= eta + 14 days) return ProposalState.Expired;
+src/governance/AgentGovernanceEngine.sol:25:            proposalId: proposalId, description: description, status: ProposalStatus.Active, createdAt: block.timestamp
+src/autonomous/AgreementEngine.sol:34:        if (block.timestamp > agreementData.validUntil) revert AgreementExpired();
+src/authorization/AttestationEngine.sol:12:    bytes32 private constant RECORD_ATTESTATION_TYPEHASH = keccak256("RecordAttestation(address subject,bytes32 attestationHash,uint256 nonce,uint256 deadline)");
+src/authorization/AttestationEngine.sol:32:        uint256 deadline,
+src/authorization/AttestationEngine.sol:37:        require(block.timestamp <= deadline, "Signature expired");
+src/authorization/AttestationEngine.sol:40:        bytes32 structHash = keccak256(abi.encode(RECORD_ATTESTATION_TYPEHASH, subject, attestationHash, currentNonce, deadline));
+src/authorization/DelegationEngine.sol:12:    bytes32 private constant SET_DELEGATE_TYPEHASH = keccak256("SetDelegate(address delegate,bool status,uint256 nonce,uint256 deadline)");
+src/authorization/DelegationEngine.sol:31:        uint256 deadline,
+src/authorization/DelegationEngine.sol:35:        require(block.timestamp <= deadline, "Signature expired");
+src/authorization/DelegationEngine.sol:38:        bytes32 structHash = keccak256(abi.encode(SET_DELEGATE_TYPEHASH, delegate, status, currentNonce, deadline));
+src/authorization/AkmenaPolicyBoundary.sol:44:            lastResetTimestamp: block.timestamp,
+src/authorization/AkmenaPolicyBoundary.sol:66:        if (block.timestamp > policy.lastResetTimestamp + 1 days) {
+src/authorization/AkmenaPolicyBoundary.sol:68:            policy.lastResetTimestamp = block.timestamp;
+src/reviews/AgentReviewEngine.sol:22:            Review({agentId: agentId, reviewer: reviewer, comment: comment, createdAt: block.timestamp})

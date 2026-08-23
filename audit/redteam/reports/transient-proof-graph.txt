@@ -1,0 +1,8 @@
+src/privacy/PrivacyEngine.sol:44:        LibTransientProof.setEscrowProof(uint256(nullifierHash), stealthRecipient, amount);
+src/privacy/PrivacyEngine.sol:51:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/privacy/PrivacyEngine.sol:52:        return LibTransientProof.verifyEscrowProof(proofId, operator, amount);
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/libraries/LibTransientProof.sol:9:    function setEscrowProof(uint256 escrowId, address buyer, uint256 amount) internal {
+src/libraries/LibTransientProof.sol:16:    function verifyEscrowProof(uint256 escrowId, address buyer, uint256 amount) internal view returns (bool isValid) {
+src/authorization/AkmenaPolicyBoundary.sol:8:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
+src/authorization/AkmenaPolicyBoundary.sol:78:            bool hasProof = ITransientProofVerifier(moduleAddr).verifyTransientProof(proofId, agent, amountToSpend);

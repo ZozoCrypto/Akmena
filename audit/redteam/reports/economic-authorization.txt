@@ -1,0 +1,34 @@
+src/economics/PaymentsEngine.sol:9:        if (from == address(0) || to == address(0)) revert InvalidAddress();
+src/economics/PaymentsEngine.sol:10:        if (amount == 0) revert InvalidAmount();
+src/economics/IEscrowEngine.sol:7:    event EscrowCreated(uint256 indexed escrowId, address indexed buyer, address indexed seller, uint256 amount);
+src/economics/IEscrowEngine.sol:15:    error UnauthorizedAccess();
+src/economics/IEscrowEngine.sol:17:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256);
+src/economics/SettlementEngine.sol:8:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external override {
+src/economics/SettlementEngine.sol:9:        if (payer == address(0) || payee == address(0)) revert InvalidAddress();
+src/economics/SettlementEngine.sol:10:        if (amount == 0) revert InvalidAmount();
+src/economics/SettlementEngine.sol:15:            revert SettlementAlreadyExists();
+src/economics/SettlementEngine.sol:19:            payer: payer,
+src/economics/SettlementEngine.sol:20:            payee: payee,
+src/economics/SettlementEngine.sol:25:        emit SettlementRecorded(settlementId, payer, payee, amount);
+src/economics/SettlementEngine.sol:30:        if (ds.records[settlementId].timestamp == 0) revert SettlementNotFound();
+src/economics/EscrowEngine.sol:10:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256) {
+src/economics/EscrowEngine.sol:11:        if (amount == 0) revert InvalidAmount();
+src/economics/EscrowEngine.sol:12:        if (buyer == address(0) || seller == address(0)) revert InvalidAddress();
+src/economics/EscrowEngine.sol:16:            buyer: buyer,
+src/economics/EscrowEngine.sol:17:            seller: seller,
+src/economics/EscrowEngine.sol:23:        emit EscrowCreated(escrowId, buyer, seller, amount);
+src/economics/EscrowEngine.sol:29:        if (data.buyer == address(0)) revert EscrowNotFound();
+src/economics/EscrowEngine.sol:30:        if (data.status != 1) revert EscrowNotActive();
+src/economics/EscrowEngine.sol:31:        if (msg.sender != data.buyer) revert UnauthorizedAccess();
+src/economics/EscrowEngine.sol:39:        if (data.buyer == address(0)) revert EscrowNotFound();
+src/economics/EscrowEngine.sol:40:        if (data.status != 1) revert EscrowNotActive();
+src/economics/EscrowEngine.sol:41:        if (msg.sender != data.seller) revert UnauthorizedAccess();
+src/economics/EscrowEngine.sol:49:        if (data.buyer == address(0)) revert EscrowNotFound();
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/economics/EscrowEngine.sol:56:        return targetData.status == 1 && targetData.buyer == operator && targetData.amount >= amount;
+src/economics/TreasuryEngine.sol:9:        if (amount == 0) revert InvalidAmount();
+src/economics/TreasuryEngine.sol:18:        if (to == address(0)) revert InvalidAddress();
+src/economics/TreasuryEngine.sol:19:        if (amount == 0) revert InvalidAmount();
+src/economics/TreasuryEngine.sol:22:        if (ds.treasuryBalance < amount) revert InsufficientTreasuryFunds();
+src/economics/ISettlementEngine.sol:7:    event SettlementRecorded(bytes32 indexed settlementId, address indexed payer, address indexed payee, uint256 amount);
+src/economics/ISettlementEngine.sol:14:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external;

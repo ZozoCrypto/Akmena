@@ -1,0 +1,10 @@
+src/interfaces/IAKMToken.sol:4:import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+src/interfaces/IAKMToken.sol:8:interface IAKMToken is IERC20 {
+src/libraries/Types.sol:25:        ERC20
+src/token/core/AkmenaToken.sol:4:import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+src/token/core/AkmenaToken.sol:5:import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+src/token/core/AkmenaToken.sol:13:/// @dev Fixed-supply ERC20 with ERC2612 Permit and ERC3009 support.
+src/token/core/AkmenaToken.sol:14:contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
+src/token/core/AkmenaToken.sol:19:    constructor(address initialHolder) ERC20("Akmena Token", "AKM") ERC20Permit("Akmena Token") {
+src/token/core/AkmenaToken.sol:24:        _mint(initialHolder, MAX_SUPPLY);
+src/token/core/AkmenaToken.sol:37:        _transfer(from, to, amount);

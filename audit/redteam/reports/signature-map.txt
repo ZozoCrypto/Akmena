@@ -1,0 +1,138 @@
+src/identity/IOrganizationIdentity.sol:7:/// @notice Interface for multi-signature or decentralized organization identities.
+src/token/core/AkmenaToken.sol:5:import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+src/token/core/AkmenaToken.sol:6:import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+src/token/core/AkmenaToken.sol:7:import {AKMAuthorization} from "../extensions/AKMAuthorization.sol";
+src/token/core/AkmenaToken.sol:13:/// @dev Fixed-supply ERC20 with ERC2612 Permit and ERC3009 support.
+src/token/core/AkmenaToken.sol:14:contract AkmenaToken is ERC20, ERC20Permit, AKMPayments, IAKMToken {
+src/token/core/AkmenaToken.sol:19:    constructor(address initialHolder) ERC20("Akmena Token", "AKM") ERC20Permit("Akmena Token") {
+src/token/core/AkmenaToken.sol:40:    function _authorizationDigest(bytes32 structHash) internal view override returns (bytes32) {
+src/token/core/AkmenaToken.sol:41:        return _hashTypedDataV4(structHash);
+src/token/core/AkmenaToken.sol:48:    function transferWithAuthorization(
+src/token/core/AkmenaToken.sol:59:        super.transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:62:    function receiveWithAuthorization(
+src/token/core/AkmenaToken.sol:73:        super.receiveWithAuthorization(from, to, value, validAfter, validBefore, nonce, v, r, s);
+src/token/core/AkmenaToken.sol:76:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s)
+src/token/core/AkmenaToken.sol:80:        super.cancelAuthorization(authorizer, nonce, v, r, s);
+src/token/extensions/AKMAuthorization.sol:4:import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+src/token/extensions/AKMAuthorization.sol:5:import {IAKMAuthorization} from "../../interfaces/IAKMAuthorization.sol";
+src/token/extensions/AKMAuthorization.sol:7:/// @title AKMAuthorization
+src/token/extensions/AKMAuthorization.sol:8:/// @notice Authorization engine powering AKM payment authorizations.
+src/token/extensions/AKMAuthorization.sol:10:abstract contract AKMAuthorization is IAKMAuthorization {
+src/token/extensions/AKMAuthorization.sol:11:    using ECDSA for bytes32;
+src/token/extensions/AKMAuthorization.sol:17:    error AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:18:    error AuthorizationExpired();
+src/token/extensions/AKMAuthorization.sol:19:    error AuthorizationNotYetValid();
+src/token/extensions/AKMAuthorization.sol:20:    error InvalidSignature();
+src/token/extensions/AKMAuthorization.sol:26:    bytes32 internal constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256(
+src/token/extensions/AKMAuthorization.sol:27:        "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:30:    bytes32 internal constant RECEIVE_WITH_AUTHORIZATION_TYPEHASH = keccak256(
+src/token/extensions/AKMAuthorization.sol:31:        "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+src/token/extensions/AKMAuthorization.sol:34:    bytes32 internal constant CANCEL_AUTHORIZATION_TYPEHASH =
+src/token/extensions/AKMAuthorization.sol:35:        keccak256("CancelAuthorization(address authorizer,bytes32 nonce)");
+src/token/extensions/AKMAuthorization.sol:41:    mapping(address => mapping(bytes32 => bool)) internal _authorizationStates;
+src/token/extensions/AKMAuthorization.sol:47:    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:49:    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
+src/token/extensions/AKMAuthorization.sol:55:    function authorizationState(address authorizer, bytes32 nonce) public view virtual override returns (bool) {
+src/token/extensions/AKMAuthorization.sol:56:        return _authorizationStates[authorizer][nonce];
+src/token/extensions/AKMAuthorization.sol:68:    //                 INTERNAL AUTHORIZATION LOGIC
+src/token/extensions/AKMAuthorization.sol:71:    function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
+src/token/extensions/AKMAuthorization.sol:72:        if (_authorizationStates[authorizer][nonce]) {
+src/token/extensions/AKMAuthorization.sol:73:            revert AuthorizationAlreadyUsed();
+src/token/extensions/AKMAuthorization.sol:77:    function _useAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:78:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:80:        emit AuthorizationUsed(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:83:    function _cancelAuthorization(address authorizer, bytes32 nonce) internal {
+src/token/extensions/AKMAuthorization.sol:84:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:86:        _authorizationStates[authorizer][nonce] = true;
+src/token/extensions/AKMAuthorization.sol:88:        emit AuthorizationCanceled(authorizer, nonce);
+src/token/extensions/AKMAuthorization.sol:91:    function _requireValidAuthorization(uint256 validAfter, uint256 validBefore) internal view {
+src/token/extensions/AKMAuthorization.sol:95:            revert AuthorizationNotYetValid();
+src/token/extensions/AKMAuthorization.sol:99:            revert AuthorizationExpired();
+src/token/extensions/AKMAuthorization.sol:104:    //                 SIGNATURE VERIFICATION
+src/token/extensions/AKMAuthorization.sol:107:    function _recoverSigner(bytes32 digest, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
+src/token/extensions/AKMAuthorization.sol:108:        return ECDSA.recover(digest, v, r, s);
+src/token/extensions/AKMAuthorization.sol:111:    function _verifySigner(address expectedSigner, bytes32 digest, uint8 v, bytes32 r, bytes32 s) internal pure {
+src/token/extensions/AKMAuthorization.sol:112:        address recovered = _recoverSigner(digest, v, r, s);
+src/token/extensions/AKMAuthorization.sol:115:            revert InvalidSignature();
+src/token/extensions/AKMPayments.sol:4:import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+src/token/extensions/AKMPayments.sol:5:import {AKMAuthorization} from "./AKMAuthorization.sol";
+src/token/extensions/AKMPayments.sol:9:abstract contract AKMPayments is AKMAuthorization {
+src/token/extensions/AKMPayments.sol:10:    using ECDSA for bytes32;
+src/token/extensions/AKMPayments.sol:16:    event AuthorizationTransfer(address indexed from, address indexed to, uint256 value, bytes32 indexed nonce);
+src/token/extensions/AKMPayments.sol:25:    /// @dev Returns the EIP-712 digest.
+src/token/extensions/AKMPayments.sol:26:    function _authorizationDigest(bytes32 structHash) internal view virtual returns (bytes32);
+src/token/extensions/AKMPayments.sol:29:    //             TRANSFER WITH AUTHORIZATION
+src/token/extensions/AKMPayments.sol:32:    function transferWithAuthorization(
+src/token/extensions/AKMPayments.sol:43:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:44:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:47:            abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)
+src/token/extensions/AKMPayments.sol:50:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:52:        _verifySigner(from, digest, v, r, s);
+src/token/extensions/AKMPayments.sol:54:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:58:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:62:    //            RECEIVE WITH AUTHORIZATION
+src/token/extensions/AKMPayments.sol:65:    function receiveWithAuthorization(
+src/token/extensions/AKMPayments.sol:78:        _requireUnusedAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:79:        _requireValidAuthorization(validAfter, validBefore);
+src/token/extensions/AKMPayments.sol:82:            keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
+src/token/extensions/AKMPayments.sol:84:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:86:        _verifySigner(from, digest, v, r, s);
+src/token/extensions/AKMPayments.sol:88:        _useAuthorization(from, nonce);
+src/token/extensions/AKMPayments.sol:92:        emit AuthorizationTransfer(from, to, value, nonce);
+src/token/extensions/AKMPayments.sol:96:    //              CANCEL AUTHORIZATION
+src/token/extensions/AKMPayments.sol:99:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) public virtual {
+src/token/extensions/AKMPayments.sol:100:        _requireUnusedAuthorization(authorizer, nonce);
+src/token/extensions/AKMPayments.sol:102:        bytes32 structHash = keccak256(abi.encode(CANCEL_AUTHORIZATION_TYPEHASH, authorizer, nonce));
+src/token/extensions/AKMPayments.sol:104:        bytes32 digest = _authorizationDigest(structHash);
+src/token/extensions/AKMPayments.sol:106:        _verifySigner(authorizer, digest, v, r, s);
+src/token/extensions/AKMPayments.sol:108:        _cancelAuthorization(authorizer, nonce);
+src/orchestration/IWorkflowEngine.sol:20:    // bytes signature;
+src/orchestration/IWorkflowEngine.sol:34:// Note: Modules now explicitly require the ProtocolContext for independent authorization
+src/orchestration/WorkflowEngine.sol:60:        // 1. Layer 1 Authorization Check: Does the caller own this workflow?
+src/authorization/CapabilityEngine.sol:11:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/CapabilityEngine.sol:24:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/CapabilityEngine.sol:35:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/VerificationEngine.sol:11:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/VerificationEngine.sol:20:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:6:import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+src/authorization/AttestationEngine.sol:7:import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+src/authorization/AttestationEngine.sol:9:contract AttestationEngine is IAttestationEngine, EIP712 {
+src/authorization/AttestationEngine.sol:10:    using ECDSA for bytes32;
+src/authorization/AttestationEngine.sol:15:    constructor() EIP712("AkmenaAttestationEngine", "1") {}
+src/authorization/AttestationEngine.sol:21:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:27:    /// @notice FORTIFIED: Cryptographically verified attestation via EIP-712 signature
+src/authorization/AttestationEngine.sol:33:        bytes calldata signature
+src/authorization/AttestationEngine.sol:37:        require(block.timestamp <= deadline, "Signature expired");
+src/authorization/AttestationEngine.sol:41:        bytes32 hash = _hashTypedDataV4(structHash);
+src/authorization/AttestationEngine.sol:43:        address signer = hash.recover(signature);
+src/authorization/AttestationEngine.sol:44:        require(signer == attester, "Invalid signature");
+src/authorization/AttestationEngine.sol:46:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/AttestationEngine.sol:55:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:6:import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+src/authorization/DelegationEngine.sol:7:import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+src/authorization/DelegationEngine.sol:9:contract DelegationEngine is IDelegationEngine, EIP712 {
+src/authorization/DelegationEngine.sol:10:    using ECDSA for bytes32;
+src/authorization/DelegationEngine.sol:15:    constructor() EIP712("AkmenaDelegationEngine", "1") {}
+src/authorization/DelegationEngine.sol:20:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:26:    /// @notice FORTIFIED: Cryptographically verified delegate assignment via EIP-712 signature
+src/authorization/DelegationEngine.sol:32:        bytes calldata signature
+src/authorization/DelegationEngine.sol:35:        require(block.timestamp <= deadline, "Signature expired");
+src/authorization/DelegationEngine.sol:39:        bytes32 hash = _hashTypedDataV4(structHash);
+src/authorization/DelegationEngine.sol:41:        address signer = hash.recover(signature);
+src/authorization/DelegationEngine.sol:42:        require(signer == owner, "Invalid signature");
+src/authorization/DelegationEngine.sol:44:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/authorization/DelegationEngine.sol:53:        LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
+src/interfaces/IAKMAuthorization.sol:4:/// @title IAKMAuthorization
+src/interfaces/IAKMAuthorization.sol:5:/// @notice ERC-3009 authorization interface for AKM.
+src/interfaces/IAKMAuthorization.sol:6:interface IAKMAuthorization {
+src/interfaces/IAKMAuthorization.sol:7:    /// @notice Returns whether an authorization nonce has been used.
+src/interfaces/IAKMAuthorization.sol:8:    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool);
+src/interfaces/IAKMAuthorization.sol:10:    /// @notice Executes a signed transfer authorization.
+src/interfaces/IAKMAuthorization.sol:11:    function transferWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:23:    /// @notice Executes a signed transfer where the recipient submits the authorization.
+src/interfaces/IAKMAuthorization.sol:24:    function receiveWithAuthorization(
+src/interfaces/IAKMAuthorization.sol:36:    /// @notice Cancels an unused authorization.
+src/interfaces/IAKMAuthorization.sol:37:    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external;
+src/storage/StorageNamespaces.sol:7:    bytes32 public constant AUTHORIZATION = keccak256("akmena.storage.authorization");
+src/storage/LibStorage.sol:9:    struct AuthorizationStorage { mapping(address => mapping(bytes32 => bool)) capabilities; mapping(address => mapping(address => bool)) delegates; mapping(address => bool) verified; mapping(address => mapping(address => mapping(bytes32 => bool))) attestations; }
+src/storage/LibStorage.sol:29:    function authorization() internal pure returns (AuthorizationStorage storage ds) { bytes32 slot = StorageNamespaces.AUTHORIZATION; assembly { ds.slot := slot } }

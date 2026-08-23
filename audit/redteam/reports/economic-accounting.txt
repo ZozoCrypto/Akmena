@@ -1,0 +1,58 @@
+src/economics/IPaymentsEngine.sol:5:    event PaymentExecuted(address indexed from, address indexed to, uint256 amount);
+src/economics/IPaymentsEngine.sol:11:    function executePayment(address from, address to, uint256 amount) external;
+src/economics/PaymentsEngine.sol:8:    function executePayment(address from, address to, uint256 amount) external override {
+src/economics/PaymentsEngine.sol:10:        if (amount == 0) revert InvalidAmount();
+src/economics/PaymentsEngine.sol:14:        // M2M State Update for volume tracking (decoupled from standard logic to protect privacy)
+src/economics/PaymentsEngine.sol:15:        ds.totalProcessedVolume += amount;
+src/economics/PaymentsEngine.sol:18:        emit PaymentExecuted(from, to, amount);
+src/economics/PaymentsEngine.sol:22:        return LibStorage.payments().totalProcessedVolume;
+src/economics/IEscrowEngine.sol:7:    event EscrowCreated(uint256 indexed escrowId, address indexed buyer, address indexed seller, uint256 amount);
+src/economics/IEscrowEngine.sol:17:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256);
+src/economics/IEscrowEngine.sol:18:    function releaseEscrow(uint256 escrowId) external;
+src/economics/IEscrowEngine.sol:19:    function refundEscrow(uint256 escrowId) external;
+src/economics/SettlementEngine.sol:8:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external override {
+src/economics/SettlementEngine.sol:10:        if (amount == 0) revert InvalidAmount();
+src/economics/SettlementEngine.sol:12:        LibStorage.SettlementStorage storage ds = LibStorage.settlement();
+src/economics/SettlementEngine.sol:14:        if (ds.records[settlementId].timestamp != 0) {
+src/economics/SettlementEngine.sol:18:        ds.records[settlementId] = LibStorage.SettlementData({
+src/economics/SettlementEngine.sol:21:            amount: amount,
+src/economics/SettlementEngine.sol:25:        emit SettlementRecorded(settlementId, payer, payee, amount);
+src/economics/SettlementEngine.sol:28:    function getSettlement(bytes32 settlementId) external view override returns (LibStorage.SettlementData memory) {
+src/economics/SettlementEngine.sol:29:        LibStorage.SettlementStorage storage ds = LibStorage.settlement();
+src/economics/SettlementEngine.sol:30:        if (ds.records[settlementId].timestamp == 0) revert SettlementNotFound();
+src/economics/SettlementEngine.sol:31:        return ds.records[settlementId];
+src/economics/SettlementEngine.sol:34:    function exists(bytes32 settlementId) external view override returns (bool) {
+src/economics/SettlementEngine.sol:35:        return LibStorage.settlement().records[settlementId].timestamp != 0;
+src/economics/EscrowEngine.sol:10:    function createEscrow(address buyer, address seller, uint256 amount) external returns (uint256) {
+src/economics/EscrowEngine.sol:11:        if (amount == 0) revert InvalidAmount();
+src/economics/EscrowEngine.sol:18:            amount: amount,
+src/economics/EscrowEngine.sol:23:        emit EscrowCreated(escrowId, buyer, seller, amount);
+src/economics/EscrowEngine.sol:27:    function releaseEscrow(uint256 escrowId) external {
+src/economics/EscrowEngine.sol:37:    function refundEscrow(uint256 escrowId) external {
+src/economics/EscrowEngine.sol:54:    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
+src/economics/EscrowEngine.sol:56:        return targetData.status == 1 && targetData.buyer == operator && targetData.amount >= amount;
+src/economics/TreasuryEngine.sol:8:    function fundTreasury(uint256 amount) external override {
+src/economics/TreasuryEngine.sol:9:        if (amount == 0) revert InvalidAmount();
+src/economics/TreasuryEngine.sol:12:        ds.treasuryBalance += amount;
+src/economics/TreasuryEngine.sol:14:        emit TreasuryFunded(amount);
+src/economics/TreasuryEngine.sol:17:    function disburseFunds(address to, uint256 amount) external override {
+src/economics/TreasuryEngine.sol:19:        if (amount == 0) revert InvalidAmount();
+src/economics/TreasuryEngine.sol:22:        if (ds.treasuryBalance < amount) revert InsufficientTreasuryFunds();
+src/economics/TreasuryEngine.sol:24:        ds.treasuryBalance -= amount;
+src/economics/TreasuryEngine.sol:25:        emit FundsDisbursed(to, amount);
+src/economics/TreasuryEngine.sol:28:    function updateSupply(uint256 total, uint256 circulating) external override {
+src/economics/TreasuryEngine.sol:30:        ds.totalSupply = total;
+src/economics/TreasuryEngine.sol:33:        emit SupplyUpdated(total, circulating);
+src/economics/TreasuryEngine.sol:36:    function getTreasuryState() external view override returns (uint256 total, uint256 circulating, uint256 balance) {
+src/economics/TreasuryEngine.sol:38:        return (ds.totalSupply, ds.circulatingSupply, ds.treasuryBalance);
+src/economics/ITreasuryEngine.sol:5:    event TreasuryFunded(uint256 amount);
+src/economics/ITreasuryEngine.sol:6:    event FundsDisbursed(address indexed to, uint256 amount);
+src/economics/ITreasuryEngine.sol:7:    event SupplyUpdated(uint256 totalSupply, uint256 circulatingSupply);
+src/economics/ITreasuryEngine.sol:13:    function fundTreasury(uint256 amount) external;
+src/economics/ITreasuryEngine.sol:14:    function disburseFunds(address to, uint256 amount) external;
+src/economics/ITreasuryEngine.sol:15:    function updateSupply(uint256 total, uint256 circulating) external;
+src/economics/ITreasuryEngine.sol:16:    function getTreasuryState() external view returns (uint256 total, uint256 circulating, uint256 balance);
+src/economics/ISettlementEngine.sol:7:    event SettlementRecorded(bytes32 indexed settlementId, address indexed payer, address indexed payee, uint256 amount);
+src/economics/ISettlementEngine.sol:14:    function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external;
+src/economics/ISettlementEngine.sol:15:    function getSettlement(bytes32 settlementId) external view returns (LibStorage.SettlementData memory);
+src/economics/ISettlementEngine.sol:16:    function exists(bytes32 settlementId) external view returns (bool);

@@ -1,0 +1,98 @@
+'forge clean' running (wd: /home/cryptzozo/projects/akmena)
+'forge config --json' running
+'forge build --build-info --deny never --skip ./test/** ./script/** --force' running (wd: /home/cryptzozo/projects/akmena)
+INFO:Printers:
+Compiled with Foundry
+Total number of contracts in source files: 112
+Number of contracts in dependencies: 23
+Source lines of code (SLOC) in source files: 3629
+Source lines of code (SLOC) in dependencies: 2068
+Number of  assembly lines: 0
+Number of optimization issues: 0
+Number of informational issues: 35
+Number of low issues: 29
+Number of medium issues: 3
+Number of high issues: 1
+ERCs: ERC2612, ERC20
+
++-------------------------+-------------+---------------+--------------------+--------------+--------------+
+| Name                    | # functions | ERCS          | ERC20 info         | Complex code | Features     |
++-------------------------+-------------+---------------+--------------------+--------------+--------------+
+| Vm                      | 563         |               |                    | No           | AbiEncoderV2 |
+| AgentAnalyticsEngine    | 6           |               |                    | No           |              |
+| ITransientProofVerifier | 1           |               |                    | No           |              |
+| AkmenaPolicyBoundary    | 3           |               |                    | Yes          | Assembly     |
+| AttestationEngine       | 15          |               |                    | No           | Ecrecover    |
+| CapabilityEngine        | 6           |               |                    | No           |              |
+| DelegationEngine        | 15          |               |                    | No           | Ecrecover    |
+| VerificationEngine      | 4           |               |                    | No           |              |
+| AgreementEngine         | 6           |               |                    | No           |              |
+| DiscoveryEngine         | 6           |               |                    | No           |              |
+| MarketplaceEngine       | 8           |               |                    | No           |              |
+| AgentAvailabilityEngine | 6           |               |                    | No           |              |
+| AkmenaCore              | 7           |               |                    | No           |              |
+| AgentCredentialEngine   | 6           |               |                    | No           |              |
+| AgentDiscovery          | 6           |               |                    | No           |              |
+| DisputeEngine           | 10          |               |                    | No           |              |
+| AgentEarningsEngine     | 8           |               |                    | No           |              |
+| EscrowEngine            | 10          |               |                    | No           |              |
+| PaymentsEngine          | 4           |               |                    | No           |              |
+| SettlementEngine        | 6           |               |                    | No           |              |
+| TreasuryEngine          | 8           |               |                    | No           |              |
+| AgentGovernanceEngine   | 10          |               |                    | No           |              |
+| AkmenaGovernor          | 6           |               |                    | No           |              |
+| AkmenaTimelock          | 11          |               |                    | No           |              |
+| IAkmenaCoreExecutable   | 1           |               |                    | No           |              |
+| IVotes                  | 2           |               |                    | No           |              |
+| IHumanIdentity          | 7           |               |                    | No           |              |
+| IMachineIdentity        | 8           |               |                    | No           |              |
+| IOrganizationIdentity   | 8           |               |                    | No           |              |
+| Identity                | 25          |               |                    | No           | Assembly     |
+|                         |             |               |                    |              | Upgradeable  |
+| IdentityClone           | 13          |               |                    | No           |              |
+| IIdentityClone          | 1           |               |                    | No           |              |
+| IdentityFactory         | 3           |               |                    | No           | Assembly     |
+| IAKMPayments            | 6           |               |                    | No           |              |
+| IAgentRegistry          | 9           |               |                    | No           |              |
+| IAgentRegistry          | 0           |               |                    | No           |              |
+| IReputationEngine       | 4           |               |                    | No           |              |
+| IAgentRegistry          | 0           |               |                    | No           |              |
+| IAgentRegistry          | 0           |               |                    | No           |              |
+| IAgentRegistry          | 0           |               |                    | No           |              |
+| Errors                  | 0           |               |                    | No           |              |
+| Events                  | 0           |               |                    | No           |              |
+| LibTransientProof       | 3           |               |                    | No           | Assembly     |
+| ModuleKeys              | 1           |               |                    | No           |              |
+| Types                   | 0           |               |                    | No           |              |
+| Validation              | 0           |               |                    | No           |              |
+| TaskMarketplace         | 10          |               |                    | No           |              |
+| AgentMatchingEngine     | 8           |               |                    | No           |              |
+| MemoryEngine            | 4           |               |                    | No           |              |
+| IAkmenaCoreRegistry     | 1           |               |                    | No           |              |
+| ISettlementModule       | 1           |               |                    | No           |              |
+| IMemoryModule           | 1           |               |                    | No           |              |
+| IReputationModule       | 1           |               |                    | No           |              |
+| WorkflowEngine          | 7           |               |                    | No           |              |
+| AgentPortfolioEngine    | 6           |               |                    | No           |              |
+| PrivacyEngine           | 3           |               |                    | No           | Receive ETH  |
+|                         |             |               |                    |              | Send ETH     |
+| StealthAddressRegistry  | 3           |               |                    | No           |              |
+| AgentRatingEngine       | 8           |               |                    | No           |              |
+| AgentRegistry           | 10          |               |                    | No           |              |
+| Registry                | 15          |               |                    | No           |              |
+| ReputationEngine        | 4           |               |                    | No           |              |
+| AgentReviewEngine       | 6           |               |                    | No           |              |
+| AgentRewardEngine       | 8           |               |                    | No           |              |
+| AgentSkillEngine        | 6           |               |                    | No           |              |
+| AgentSlashingEngine     | 8           |               |                    | No           |              |
+| AgentStakingEngine      | 8           |               |                    | No           |              |
+| LibGovernanceStorage    | 2           |               |                    | No           | Assembly     |
+| LibStorage              | 12          |               |                    | No           | Assembly     |
+| LibWorkflowStorage      | 2           |               |                    | No           | Assembly     |
+| StorageNamespaces       | 1           |               |                    | No           |              |
+| AkmenaToken             | 73          | ERC20,ERC2612 | No Minting         | No           | Ecrecover    |
+|                         |             |               | Approve Race Cond. |              |              |
+|                         |             |               |                    |              |              |
+| AgentTreasuryEngine     | 8           |               |                    | No           |              |
++-------------------------+-------------+---------------+--------------------+--------------+--------------+
+INFO:Slither:. analyzed (135 contracts)

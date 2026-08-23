@@ -31,3 +31,11 @@ logs/
 review/packages/sdk/node_modules/
 packages/sdk/dist/
 .env
+
+# Large generated red-team analysis maps
+audit/redteam/reports/secret-scan.txt
+audit/redteam/reports/x402-map.txt
+audit/redteam/reports/redteam-hits.txt
+audit/redteam/reports/sdk-agent-security-map.txt
+audit/redteam/reports/autonomous-stack-map.txt
+audit/redteam/reports/mcp-map.txt

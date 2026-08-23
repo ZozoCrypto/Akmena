@@ -1,0 +1,348 @@
+
+Detector: arbitrary-send-eth
+PrivacyEngine.executePrivateSettlement(bytes32,bytes32,uint256,address) (src/privacy/PrivacyEngine.sol#27-48) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = stealthRecipient.call{value: amount}() (src/privacy/PrivacyEngine.sol#46)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+
+Detector: incorrect-equality
+AgentAvailabilityEngine.isAvailable(bytes32) (src/availability/AgentAvailabilityEngine.sol#19-21) uses a dangerous strict equality:
+	- availability[agentId].status == Availability.Available (src/availability/AgentAvailabilityEngine.sol#20)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Detector: unused-return
+AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes) (src/authorization/AkmenaPolicyBoundary.sol#50-92) ignores return value by (moduleAddr,active,None) = core.getModule(proofModuleKey) (src/authorization/AkmenaPolicyBoundary.sol#74)
+WorkflowEngine._getModuleAddress(bytes32) (src/orchestration/WorkflowEngine.sol#93-97) ignores return value by (moduleAddr,isEnabled,None) = IAkmenaCoreRegistry(akmenaCore).getModule(key) (src/orchestration/WorkflowEngine.sol#94)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+Detector: shadowing-local
+IRegistry.removeIdentity(uint256).identityId (src/registry/IRegistry.sol#43) shadows:
+	- IRegistry.identityId(address) (src/registry/IRegistry.sol#51) (function)
+IRegistry.identityAddress(uint256).identityId (src/registry/IRegistry.sol#49) shadows:
+	- IRegistry.identityId(address) (src/registry/IRegistry.sol#51) (function)
+IRegistry.exists(uint256).identityId (src/registry/IRegistry.sol#53) shadows:
+	- IRegistry.identityId(address) (src/registry/IRegistry.sol#51) (function)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#local-variable-shadowing
+
+Detector: missing-zero-check
+AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes).targetContract (src/authorization/AkmenaPolicyBoundary.sol#52) lacks a zero-check on :
+		- (success,returnData) = targetContract.call(payload) (src/authorization/AkmenaPolicyBoundary.sol#84)
+AkmenaTimelock.constructor(address,address,address)._governor (src/governance/AkmenaTimelock.sol#35) lacks a zero-check on :
+		- governor = _governor (src/governance/AkmenaTimelock.sol#36)
+AkmenaTimelock.constructor(address,address,address)._akmenaCore (src/governance/AkmenaTimelock.sol#35) lacks a zero-check on :
+		- akmenaCore = _akmenaCore (src/governance/AkmenaTimelock.sol#37)
+AkmenaTimelock.constructor(address,address,address)._guardian (src/governance/AkmenaTimelock.sol#35) lacks a zero-check on :
+		- guardian = _guardian (src/governance/AkmenaTimelock.sol#38)
+IdentityClone.initialize(uint256,IIdentity.IdentityType,address).owner_ (src/identity/IdentityClone.sol#19) lacks a zero-check on :
+		- _owner = owner_ (src/identity/IdentityClone.sol#24)
+IdentityFactory.constructor(address,address).implementation_ (src/identity/IdentityFactory.sol#21) lacks a zero-check on :
+		- implementation = implementation_ (src/identity/IdentityFactory.sol#22)
+WorkflowEngine.constructor(address)._akmenaCore (src/orchestration/WorkflowEngine.sol#22) lacks a zero-check on :
+		- akmenaCore = _akmenaCore (src/orchestration/WorkflowEngine.sol#23)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+Detector: calls-loop
+AkmenaTimelock.execute(bytes32,ProtocolAction[],bytes32) (src/governance/AkmenaTimelock.sol#76-98) has external calls inside a loop: IAkmenaCoreExecutable(akmenaCore).executeGovernanceAction(actions[i].actionType,actions[i].payload) (src/governance/AkmenaTimelock.sol#91-94)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+
+Detector: reentrancy-events
+Reentrancy in WorkflowEngine.advanceToCompletion(bytes32,bytes,bytes,bytes) (src/orchestration/WorkflowEngine.sol#49-91):
+	External calls:
+	- ISettlementModule(settlementModule).executeSettlement(record.escrowId,settlementData,ctx) (src/orchestration/WorkflowEngine.sol#78)
+	Event emitted after the call(s):
+	- WorkflowAdvanced(workflowId,WorkflowStep.SettlementComplete) (src/orchestration/WorkflowEngine.sol#80)
+Reentrancy in WorkflowEngine.advanceToCompletion(bytes32,bytes,bytes,bytes) (src/orchestration/WorkflowEngine.sol#49-91):
+	External calls:
+	- ISettlementModule(settlementModule).executeSettlement(record.escrowId,settlementData,ctx) (src/orchestration/WorkflowEngine.sol#78)
+	- IMemoryModule(memoryModule).commitMemory(record.agentIdentityId,memoryData,ctx) (src/orchestration/WorkflowEngine.sol#83)
+	Event emitted after the call(s):
+	- WorkflowAdvanced(workflowId,WorkflowStep.MemoryCommitted) (src/orchestration/WorkflowEngine.sol#85)
+Reentrancy in WorkflowEngine.advanceToCompletion(bytes32,bytes,bytes,bytes) (src/orchestration/WorkflowEngine.sol#49-91):
+	External calls:
+	- ISettlementModule(settlementModule).executeSettlement(record.escrowId,settlementData,ctx) (src/orchestration/WorkflowEngine.sol#78)
+	- IMemoryModule(memoryModule).commitMemory(record.agentIdentityId,memoryData,ctx) (src/orchestration/WorkflowEngine.sol#83)
+	- IReputationModule(reputationModule).updateReputation(record.agentIdentityId,reputationData,ctx) (src/orchestration/WorkflowEngine.sol#88)
+	Event emitted after the call(s):
+	- WorkflowAdvanced(workflowId,WorkflowStep.ReputationUpdated) (src/orchestration/WorkflowEngine.sol#90)
+Reentrancy in IdentityFactory.createIdentity(IIdentity.IdentityType) (src/identity/IdentityFactory.sol#27-42):
+	External calls:
+	- newId = registry.allocateIdentityId() (src/identity/IdentityFactory.sol#32)
+	- IIdentityClone(clone).initialize(newId,identityType,msg.sender) (src/identity/IdentityFactory.sol#35)
+	- registry.registerIdentity(clone) (src/identity/IdentityFactory.sol#38)
+	Event emitted after the call(s):
+	- IdentityCreated(clone,newId,identityType) (src/identity/IdentityFactory.sol#40)
+Reentrancy in AkmenaTimelock.execute(bytes32,ProtocolAction[],bytes32) (src/governance/AkmenaTimelock.sol#76-98):
+	External calls:
+	- IAkmenaCoreExecutable(akmenaCore).executeGovernanceAction(actions[i].actionType,actions[i].payload) (src/governance/AkmenaTimelock.sol#91-94)
+	Event emitted after the call(s):
+	- ProposalExecuted(proposalId) (src/governance/AkmenaTimelock.sol#97)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+
+Detector: timestamp
+AgentAnalyticsEngine.hasAnalytics(bytes32) (src/analytics/AgentAnalyticsEngine.sol#32-34) uses timestamp for comparisons
+	Dangerous comparisons:
+	- analytics[agentId].updatedAt > 0 (src/analytics/AgentAnalyticsEngine.sol#33)
+AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes) (src/authorization/AkmenaPolicyBoundary.sol#50-92) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > policy.lastResetTimestamp + 86400 (src/authorization/AkmenaPolicyBoundary.sol#66)
+AttestationEngine.recordAttestationTyped(address,address,bytes32,uint256,bytes) (src/authorization/AttestationEngine.sol#28-50) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp <= deadline,Signature expired) (src/authorization/AttestationEngine.sol#37)
+DelegationEngine.setDelegateTyped(address,address,bool,uint256,bytes) (src/authorization/DelegationEngine.sol#27-48) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp <= deadline,Signature expired) (src/authorization/DelegationEngine.sol#35)
+AgreementEngine.executeAgreement(bytes32) (src/autonomous/AgreementEngine.sol#29-40) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > agreementData.validUntil (src/autonomous/AgreementEngine.sol#34)
+AgentAvailabilityEngine.isAvailable(bytes32) (src/availability/AgentAvailabilityEngine.sol#19-21) uses timestamp for comparisons
+	Dangerous comparisons:
+	- availability[agentId].status == Availability.Available (src/availability/AgentAvailabilityEngine.sol#20)
+DisputeEngine.exists(bytes32) (src/disputes/DisputeEngine.sol#67-69) uses timestamp for comparisons
+	Dangerous comparisons:
+	- disputes[disputeId].claimant != address(0) (src/disputes/DisputeEngine.sol#68)
+AkmenaGovernor.state(bytes32) (src/governance/AkmenaGovernor.sol#88-110) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= eta + 1209600 (src/governance/AkmenaGovernor.sol#107)
+AkmenaTimelock.execute(bytes32,ProtocolAction[],bytes32) (src/governance/AkmenaTimelock.sol#76-98) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < r.eta (src/governance/AkmenaTimelock.sol#81)
+	- block.timestamp > r.eta + GRACE_PERIOD (src/governance/AkmenaTimelock.sol#82)
+TaskMarketplace.exists(bytes32) (src/marketplace/TaskMarketplace.sol#78-80) uses timestamp for comparisons
+	Dangerous comparisons:
+	- tasks[taskId].createdAt != 0 (src/marketplace/TaskMarketplace.sol#79)
+AgentRegistry.exists(bytes32) (src/registry/AgentRegistry.sol#158-160) uses timestamp for comparisons
+	Dangerous comparisons:
+	- agents[id].owner != address(0) (src/registry/AgentRegistry.sol#159)
+AKMAuthorization._requireValidAuthorization(uint256,uint256) (src/token/extensions/AKMAuthorization.sol#91-101) uses timestamp for comparisons
+	Dangerous comparisons:
+	- timestamp <= validAfter (src/token/extensions/AKMAuthorization.sol#94)
+	- timestamp >= validBefore (src/token/extensions/AKMAuthorization.sol#98)
+AgentTreasuryEngine.withdraw(uint256) (src/treasury/AgentTreasuryEngine.sol#23-36) uses timestamp for comparisons
+	Dangerous comparisons:
+	- treasury.balance < amount (src/treasury/AgentTreasuryEngine.sol#28)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Detector: assembly
+AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes) (src/authorization/AkmenaPolicyBoundary.sol#50-92) uses assembly
+	- INLINE ASM (src/authorization/AkmenaPolicyBoundary.sol#86-88)
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#45-55) uses assembly
+	- INLINE ASM (src/identity/IdentityFactory.sol#47-53)
+LibTransientProof.setEscrowProof(uint256,address,uint256) (src/libraries/LibTransientProof.sol#9-14) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#11-13)
+LibTransientProof.verifyEscrowProof(uint256,address,uint256) (src/libraries/LibTransientProof.sol#16-21) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#18-20)
+LibGovernanceStorage.governanceStorage() (src/storage/LibGovernanceStorage.sol#40-45) uses assembly
+	- INLINE ASM (src/storage/LibGovernanceStorage.sol#42-44)
+LibStorage.identity() (src/storage/LibStorage.sol#27) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#27)
+LibStorage.registry() (src/storage/LibStorage.sol#28) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#28)
+LibStorage.authorization() (src/storage/LibStorage.sol#29) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#29)
+LibStorage.treasury() (src/storage/LibStorage.sol#30) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#30)
+LibStorage.escrow() (src/storage/LibStorage.sol#31) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#31)
+LibStorage.settlement() (src/storage/LibStorage.sol#32) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#32)
+LibStorage.payments() (src/storage/LibStorage.sol#33) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#33)
+LibStorage.marketplace() (src/storage/LibStorage.sol#34) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#34)
+LibStorage.reputation() (src/storage/LibStorage.sol#35) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#35)
+LibStorage.memoryStorage() (src/storage/LibStorage.sol#36) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#36)
+LibStorage.discovery() (src/storage/LibStorage.sol#37) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#37)
+LibStorage.agreement() (src/storage/LibStorage.sol#38) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#38)
+LibWorkflowStorage.workflowStorage() (src/storage/LibWorkflowStorage.sol#23-28) uses assembly
+	- INLINE ASM (src/storage/LibWorkflowStorage.sol#25-27)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+
+Detector: pragma
+8 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#3)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Nonces.sol#3)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Panic.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#5)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#4)
+	- Version constraint >=0.4.16 is used by:
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#4)
+	- Version constraint >=0.8.4 is used by:
+		->=0.8.4 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#4)
+	- Version constraint ^0.8.24 is used by:
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/Strings.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#4)
+	- Version constraint >=0.6.2 is used by:
+		->=0.6.2 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)
+	- Version constraint >=0.6.2<0.9.0 is used by:
+		->=0.6.2<0.9.0 (src/Vm.sol#4)
+	- Version constraint 0.8.28 is used by:
+		-0.8.28 (src/analytics/AgentAnalyticsEngine.sol#2)
+		-0.8.28 (src/availability/AgentAvailabilityEngine.sol#2)
+		-0.8.28 (src/credentials/AgentCredentialEngine.sol#2)
+		-0.8.28 (src/discovery/AgentDiscovery.sol#2)
+		-0.8.28 (src/disputes/DisputeEngine.sol#2)
+		-0.8.28 (src/earnings/AgentEarningsEngine.sol#2)
+		-0.8.28 (src/governance/AgentGovernanceEngine.sol#2)
+		-0.8.28 (src/interfaces/IAKMPayments.sol#2)
+		-0.8.28 (src/interfaces/IAgentAnalyticsEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentAvailabilityEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentCredentialEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentDiscovery.sol#2)
+		-0.8.28 (src/interfaces/IAgentEarningsEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentGovernanceEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentMatchingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentPortfolioEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRatingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRegistry.sol#2)
+		-0.8.28 (src/interfaces/IAgentReviewEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRewardEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentSkillEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentSlashingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentStakingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentTreasuryEngine.sol#2)
+		-0.8.28 (src/interfaces/IDisputeEngine.sol#2)
+		-0.8.28 (src/interfaces/IMemoryEngine.sol#2)
+		-0.8.28 (src/interfaces/IReputationEngine.sol#2)
+		-0.8.28 (src/interfaces/ITaskMarketplace.sol#2)
+		-0.8.28 (src/interfaces/ITreasury.sol#2)
+		-0.8.28 (src/interfaces/ITrustEngine.sol#2)
+		-0.8.28 (src/interfaces/IVerifier.sol#2)
+		-0.8.28 (src/libraries/Errors.sol#2)
+		-0.8.28 (src/libraries/Events.sol#2)
+		-0.8.28 (src/libraries/Types.sol#2)
+		-0.8.28 (src/libraries/Validation.sol#2)
+		-0.8.28 (src/marketplace/TaskMarketplace.sol#2)
+		-0.8.28 (src/matching/AgentMatchingEngine.sol#2)
+		-0.8.28 (src/portfolio/AgentPortfolioEngine.sol#2)
+		-0.8.28 (src/ratings/AgentRatingEngine.sol#2)
+		-0.8.28 (src/registry/AgentRegistry.sol#2)
+		-0.8.28 (src/reviews/AgentReviewEngine.sol#2)
+		-0.8.28 (src/rewards/AgentRewardEngine.sol#2)
+		-0.8.28 (src/skills/AgentSkillEngine.sol#2)
+		-0.8.28 (src/slashing/AgentSlashingEngine.sol#2)
+		-0.8.28 (src/staking/AgentStakingEngine.sol#2)
+		-0.8.28 (src/treasury/AgentTreasuryEngine.sol#2)
+	- Version constraint ^0.8.28 is used by:
+		-^0.8.28 (src/authorization/AkmenaPolicyBoundary.sol#2)
+		-^0.8.28 (src/authorization/AttestationEngine.sol#2)
+		-^0.8.28 (src/authorization/CapabilityEngine.sol#2)
+		-^0.8.28 (src/authorization/DelegationEngine.sol#2)
+		-^0.8.28 (src/authorization/IAttestationEngine.sol#2)
+		-^0.8.28 (src/authorization/ICapabilityEngine.sol#2)
+		-^0.8.28 (src/authorization/IDelegationEngine.sol#2)
+		-^0.8.28 (src/authorization/IVerificationEngine.sol#2)
+		-^0.8.28 (src/authorization/VerificationEngine.sol#2)
+		-^0.8.28 (src/autonomous/AgreementEngine.sol#2)
+		-^0.8.28 (src/autonomous/DiscoveryEngine.sol#2)
+		-^0.8.28 (src/autonomous/IAgreementEngine.sol#2)
+		-^0.8.28 (src/autonomous/IDiscoveryEngine.sol#2)
+		-^0.8.28 (src/autonomous/IMarketplaceEngine.sol#2)
+		-^0.8.28 (src/autonomous/MarketplaceEngine.sol#2)
+		-^0.8.28 (src/core/AkmenaCore.sol#2)
+		-^0.8.28 (src/economics/EscrowEngine.sol#2)
+		-^0.8.28 (src/economics/IEscrowEngine.sol#2)
+		-^0.8.28 (src/economics/IPaymentsEngine.sol#2)
+		-^0.8.28 (src/economics/ISettlementEngine.sol#2)
+		-^0.8.28 (src/economics/ITreasuryEngine.sol#2)
+		-^0.8.28 (src/economics/PaymentsEngine.sol#2)
+		-^0.8.28 (src/economics/SettlementEngine.sol#2)
+		-^0.8.28 (src/economics/TreasuryEngine.sol#2)
+		-^0.8.28 (src/governance/AkmenaGovernor.sol#2)
+		-^0.8.28 (src/governance/AkmenaTimelock.sol#2)
+		-^0.8.28 (src/governance/IGovernance.sol#2)
+		-^0.8.28 (src/identity/IHumanIdentity.sol#2)
+		-^0.8.28 (src/identity/IIdentity.sol#2)
+		-^0.8.28 (src/identity/IMachineIdentity.sol#2)
+		-^0.8.28 (src/identity/IOrganizationIdentity.sol#2)
+		-^0.8.28 (src/identity/Identity.sol#2)
+		-^0.8.28 (src/identity/IdentityBase.sol#2)
+		-^0.8.28 (src/identity/IdentityClone.sol#2)
+		-^0.8.28 (src/identity/IdentityFactory.sol#2)
+		-^0.8.28 (src/interfaces/IAKMAuthorization.sol#2)
+		-^0.8.28 (src/interfaces/IAKMToken.sol#2)
+		-^0.8.28 (src/libraries/LibTransientProof.sol#2)
+		-^0.8.28 (src/libraries/ModuleKeys.sol#2)
+		-^0.8.28 (src/memory/IMemoryEngine.sol#2)
+		-^0.8.28 (src/memory/MemoryEngine.sol#2)
+		-^0.8.28 (src/orchestration/IWorkflowEngine.sol#2)
+		-^0.8.28 (src/orchestration/WorkflowEngine.sol#2)
+		-^0.8.28 (src/privacy/PrivacyEngine.sol#2)
+		-^0.8.28 (src/privacy/StealthAddressRegistry.sol#2)
+		-^0.8.28 (src/registry/IRegistry.sol#2)
+		-^0.8.28 (src/registry/Registry.sol#2)
+		-^0.8.28 (src/reputation/IReputationEngine.sol#2)
+		-^0.8.28 (src/reputation/ReputationEngine.sol#2)
+		-^0.8.28 (src/storage/LibGovernanceStorage.sol#2)
+		-^0.8.28 (src/storage/LibStorage.sol#2)
+		-^0.8.28 (src/storage/LibWorkflowStorage.sol#2)
+		-^0.8.28 (src/storage/StorageNamespaces.sol#2)
+		-^0.8.28 (src/token/core/AkmenaToken.sol#2)
+		-^0.8.28 (src/token/extensions/AKMAuthorization.sol#2)
+		-^0.8.28 (src/token/extensions/AKMPayments.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+
+Detector: dead-code
+AkmenaToken._authorizationDigest(bytes32) (src/token/core/AkmenaToken.sol#40-42) is never used and should be removed
+AkmenaToken._transferTokens(address,address,uint256) (src/token/core/AkmenaToken.sol#36-38) is never used and should be removed
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code
+
+Detector: solc-version
+Version constraint >=0.6.2<0.9.0 is too complex.
+It is used by:
+	- >=0.6.2<0.9.0 (src/Vm.sol#4)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+
+Detector: low-level-calls
+Low level call in AkmenaPolicyBoundary.executeAgentCall(address,address,uint256,bytes32,uint256,bytes) (src/authorization/AkmenaPolicyBoundary.sol#50-92):
+	- (success,returnData) = targetContract.call(payload) (src/authorization/AkmenaPolicyBoundary.sol#84)
+Low level call in PrivacyEngine.executePrivateSettlement(bytes32,bytes32,uint256,address) (src/privacy/PrivacyEngine.sol#27-48):
+	- (success,None) = stealthRecipient.call{value: amount}() (src/privacy/PrivacyEngine.sol#46)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+Detector: missing-inheritance
+AkmenaCore (src/core/AkmenaCore.sol#9-139) should inherit from IAkmenaCoreRegistry (src/orchestration/IWorkflowEngine.sol#30-32)
+EscrowEngine (src/economics/EscrowEngine.sol#7-58) should inherit from ITransientProofVerifier (src/authorization/AkmenaPolicyBoundary.sol#7-9)
+IdentityClone (src/identity/IdentityClone.sol#9-51) should inherit from IIdentityClone (src/identity/IdentityFactory.sol#7-9)
+PrivacyEngine (src/privacy/PrivacyEngine.sol#6-54) should inherit from ITransientProofVerifier (src/authorization/AkmenaPolicyBoundary.sol#7-9)
+AgentRegistry (src/registry/AgentRegistry.sol#6-189) should inherit from IAgentRegistry (src/interfaces/IAgentRegistry.sol#7-76)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+
+Detector: naming-convention
+Function VmSafe.eth_getLogs(uint256,uint256,address,bytes32[]) (src/Vm.sol#667-670) is not in mixedCase
+Parameter AkmenaGovernor.setTimelock(address)._timelock (src/governance/AkmenaGovernor.sol#28) is not in mixedCase
+Function IdentityBase.__IdentityBase_init(uint256,address,string) (src/identity/IdentityBase.sol#19-31) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+
+Detector: too-many-digits
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#45-55) uses literals with too many digits:
+	- mstore(uint256,uint256)(ptr__clone_asm_0,0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000) (src/identity/IdentityFactory.sol#49)
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#45-55) uses literals with too many digits:
+	- mstore(uint256,uint256)(ptr__clone_asm_0 + 0x28,0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000) (src/identity/IdentityFactory.sol#51)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+
+Detector: unimplemented-functions
+AkmenaToken (src/token/core/AkmenaToken.sol#14-82) does not implement functions:
+	- AKMPayments._authorizationDigest(bytes32) (src/token/extensions/AKMPayments.sol#26)
+	- AKMPayments._transferTokens(address,address,uint256) (src/token/extensions/AKMPayments.sol#23)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unimplemented-functions
+. analyzed (135 contracts with 102 detectors), 68 result(s) found
+'forge clean' running (wd: /home/cryptzozo/projects/akmena)
+'forge config --json' running
+'forge build --build-info --deny never --skip ./test/** ./script/** --force' running (wd: /home/cryptzozo/projects/akmena)

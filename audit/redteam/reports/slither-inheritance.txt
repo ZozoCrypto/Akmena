@@ -1,0 +1,6 @@
+'forge clean' running (wd: /home/cryptzozo/projects/akmena)
+'forge config --json' running
+'forge build --build-info --deny never --skip ./test/** ./script/** --force' running (wd: /home/cryptzozo/projects/akmena)
+INFO:Printers:Inheritance Graph: inheritance-graph.dot
+
+INFO:Slither:. analyzed (135 contracts)

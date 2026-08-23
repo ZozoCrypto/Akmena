@@ -1,0 +1,3 @@
+src/identity/IdentityFactory.sol:26:    /// @notice Deploys a new identity clone and registers it canonically.
+src/interfaces/IAgentRegistry.sol:27:    /// @notice Emitted when a new agent is registered.
+src/interfaces/IAgentRegistry.sol:40:    /// @notice Registers a new protocol agent.
