@@ -39,13 +39,11 @@ contract SemanticMemoryCopyHarness {
             nonce: 1
         });
 
-        Intent memory mutated = original;
-
-        mutated.contextHash =
-            bytes32(uint256(0x2222));
-
-        mutated.purposeHash =
-            bytes32(uint256(0x1111));
+        Intent memory mutated = Intent({
+            contextHash: bytes32(uint256(0x2222)),
+            purposeHash: bytes32(uint256(0x1111)),
+            nonce: original.nonce
+        });
 
         originalContext = original.contextHash;
         mutatedContext = mutated.contextHash;

@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {AkmenaCore} from "../core/AkmenaCore.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
+import {AkmenaExecutionAuthorization} from "./AkmenaExecutionAuthorization.sol";
 
 interface ITransientProofVerifier {
     function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
@@ -10,7 +11,8 @@ interface ITransientProofVerifier {
 
 contract AkmenaPolicyBoundary {
     AkmenaCore public immutable core;
-    
+    AkmenaExecutionAuthorization public immutable executionAuthorization;
+
     struct SpendingPolicy {
         uint256 maxSpendPerTransaction;
         uint256 dailyLimit;
@@ -29,14 +31,10 @@ contract AkmenaPolicyBoundary {
 
     constructor(address _core) {
         core = AkmenaCore(_core);
+        executionAuthorization = new AkmenaExecutionAuthorization();
     }
 
-    function setAgentPolicy(
-        address agent, 
-        uint256 maxSpend, 
-        uint256 daily, 
-        bool requireEscrow
-    ) external {
+    function setAgentPolicy(address agent, uint256 maxSpend, uint256 daily, bool requireEscrow) external {
         agentPolicies[msg.sender][agent] = SpendingPolicy({
             maxSpendPerTransaction: maxSpend,
             dailyLimit: daily,
@@ -47,6 +45,100 @@ contract AkmenaPolicyBoundary {
     }
 
     /// @notice Upgraded to accept a dynamic proofModuleKey for zero-knowledge or public verifications
+
+    /**
+     * @notice Execute an exact cryptographically authorized intent.
+     *
+     * The authorization primitive binds:
+     * operator, agent, target, selector, calldata,
+     * amount, native value, proof context, nonce,
+     * and validity window.
+     *
+     * The boundary retains policy accounting and proof
+     * enforcement, while the authorization primitive
+     * provides the exact execution-intent binding.
+     */
+    function executeAuthorizedAgentCall(
+        AkmenaExecutionAuthorization.ExecutionIntent calldata intent,
+        bytes calldata payload,
+        bytes calldata signature
+    ) external payable returns (bytes memory) {
+        address agent = msg.sender;
+
+        if (agent == address(0)) {
+            revert UnauthorizedAgent();
+        }
+
+        if (intent.agent != agent) {
+            revert UnauthorizedAgent();
+        }
+
+        if (intent.operator == address(0)) {
+            revert UnauthorizedAgent();
+        }
+
+        SpendingPolicy storage policy = agentPolicies[intent.operator][agent];
+
+        if (policy.maxSpendPerTransaction == 0) {
+            revert UnauthorizedAgent();
+        }
+
+        if (intent.amount > policy.maxSpendPerTransaction) {
+            revert PolicyExceeded();
+        }
+
+        if (policy.totalSpentToday + intent.amount > policy.dailyLimit) {
+            revert PolicyExceeded();
+        }
+
+        if (policy.requireActiveEscrow) {
+            (address moduleAddr, bool active,) = core.getModule(intent.proofModuleKey);
+
+            require(active, "Proof Module Offline");
+
+            bool hasProof =
+                ITransientProofVerifier(moduleAddr).verifyTransientProof(intent.proofId, agent, intent.amount);
+
+            if (!hasProof) {
+                revert InvalidTransientProof();
+            }
+        }
+
+        /*
+         * Cryptographic boundary.
+         *
+         * IMPORTANT:
+         * actualValue is taken directly from this call.
+         * payload is the actual calldata that will execute.
+         *
+         * The authorization contract therefore validates
+         * the exact execution intent before any stateful
+         * policy accounting is committed.
+         */
+        executionAuthorization.verifyAndConsume(intent, payload, msg.value, signature);
+
+        /*
+         * Consume policy budget only after the cryptographic
+         * authorization has succeeded.
+         */
+        if (block.timestamp > policy.lastResetTimestamp + 1 days) {
+            policy.totalSpentToday = 0;
+            policy.lastResetTimestamp = block.timestamp;
+        }
+
+        policy.totalSpentToday += intent.amount;
+
+        (bool success, bytes memory returnData) = intent.target.call{value: msg.value}(payload);
+
+        if (!success) {
+            assembly {
+                revert(add(returnData, 32), mload(returnData))
+            }
+        }
+
+        return returnData;
+    }
+
     function executeAgentCall(
         address operator,
         address targetContract,
@@ -59,21 +151,21 @@ contract AkmenaPolicyBoundary {
         if (agent == address(0)) revert UnauthorizedAgent();
 
         SpendingPolicy storage policy = agentPolicies[operator][agent];
-        
+
         if (policy.maxSpendPerTransaction == 0) revert UnauthorizedAgent();
         if (amountToSpend > policy.maxSpendPerTransaction) revert PolicyExceeded();
-        
+
         if (block.timestamp > policy.lastResetTimestamp + 1 days) {
             policy.totalSpentToday = 0;
             policy.lastResetTimestamp = block.timestamp;
         }
-        
+
         if (policy.totalSpentToday + amountToSpend > policy.dailyLimit) revert PolicyExceeded();
 
         if (policy.requireActiveEscrow) {
-            (address moduleAddr, bool active, ) = core.getModule(proofModuleKey);
+            (address moduleAddr, bool active,) = core.getModule(proofModuleKey);
             require(active, "Proof Module Offline");
-            
+
             // FORTIFICATION: Route the verification to the specific module's transient memory
             bool hasProof = ITransientProofVerifier(moduleAddr).verifyTransientProof(proofId, agent, amountToSpend);
             if (!hasProof) revert InvalidTransientProof();

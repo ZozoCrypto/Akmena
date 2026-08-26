@@ -3,6 +3,7 @@ import os
 from web3 import Web3
 from eth_account import Account
 from .modules.policy import PolicyModule
+from .modules.authorization import AuthorizationModule
 
 class AkmenaClient:
     """
@@ -35,3 +36,14 @@ class AkmenaClient:
         
     def get_policy_module(self, boundary_address: str) -> PolicyModule:
         return PolicyModule(self, boundary_address, self.abis["AkmenaPolicyBoundary"])
+
+
+    def get_authorization_module(
+        self,
+        authorization_address: str,
+    ) -> AuthorizationModule:
+        return AuthorizationModule(
+            self,
+            authorization_address,
+            self.abis["AkmenaExecutionAuthorization"],
+        )

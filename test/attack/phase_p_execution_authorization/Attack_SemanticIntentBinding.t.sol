@@ -30,10 +30,9 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 contract SemanticIntentHarness is EIP712 {
     using ECDSA for bytes32;
 
-    bytes32 public constant TYPEHASH =
-        keccak256(
-            "SemanticIntent(address agent,bytes32 capability,address target,bytes4 selector,uint256 amount,bytes32 contextHash,bytes32 purposeHash,uint256 nonce,uint256 deadline)"
-        );
+    bytes32 public constant TYPEHASH = keccak256(
+        "SemanticIntent(address agent,bytes32 capability,address target,bytes4 selector,uint256 amount,bytes32 contextHash,bytes32 purposeHash,uint256 nonce,uint256 deadline)"
+    );
 
     struct SemanticIntent {
         address agent;
@@ -53,43 +52,28 @@ contract SemanticIntentHarness is EIP712 {
     error Replay();
     error Expired();
 
-    constructor()
-        EIP712("AkmenaSemanticIntent", "1")
-    {}
+    constructor() EIP712("AkmenaSemanticIntent", "1") {}
 
-    function hashIntent(
-        SemanticIntent memory intent
-    )
-        public
-        view
-        returns (bytes32)
-    {
-        bytes32 structHash =
-            keccak256(
-                abi.encode(
-                    TYPEHASH,
-                    intent.agent,
-                    intent.capability,
-                    intent.target,
-                    intent.selector,
-                    intent.amount,
-                    intent.contextHash,
-                    intent.purposeHash,
-                    intent.nonce,
-                    intent.deadline
-                )
-            );
+    function hashIntent(SemanticIntent memory intent) public view returns (bytes32) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                TYPEHASH,
+                intent.agent,
+                intent.capability,
+                intent.target,
+                intent.selector,
+                intent.amount,
+                intent.contextHash,
+                intent.purposeHash,
+                intent.nonce,
+                intent.deadline
+            )
+        );
 
         return _hashTypedDataV4(structHash);
     }
 
-    function execute(
-        SemanticIntent calldata intent,
-        bytes calldata signature
-    )
-        external
-        returns (address signer)
-    {
+    function execute(SemanticIntent calldata intent, bytes calldata signature) external returns (address signer) {
         if (block.timestamp > intent.deadline) {
             revert Expired();
         }
@@ -98,8 +82,7 @@ contract SemanticIntentHarness is EIP712 {
             revert Replay();
         }
 
-        signer =
-            hashIntent(intent).recover(signature);
+        signer = hashIntent(intent).recover(signature);
 
         if (signer != intent.agent) {
             revert InvalidSigner();
@@ -109,362 +92,248 @@ contract SemanticIntentHarness is EIP712 {
     }
 }
 
-
 contract Attack_SemanticIntentBindingTest is Test {
-
     SemanticIntentHarness internal auth;
 
-    uint256 internal constant AGENT_KEY =
-        0xA11CE;
+    uint256 internal constant AGENT_KEY = 0xA11CE;
 
     address internal agent;
 
-    bytes32 internal constant PAYMENT_CAPABILITY =
-        keccak256("akmena.capability.payment");
+    bytes32 internal constant PAYMENT_CAPABILITY = keccak256("akmena.capability.payment");
 
-    address internal constant PAYMENT_ROUTER =
-        address(0x1000);
+    address internal constant PAYMENT_ROUTER = address(0x1000);
 
-    bytes4 internal constant PAY_SELECTOR =
-        bytes4(
-            keccak256("pay(address,uint256)")
-        );
+    bytes4 internal constant PAY_SELECTOR = bytes4(keccak256("pay(address,uint256)"));
 
-    bytes32 internal constant ORIGINAL_CONTEXT =
-        keccak256(
-            "invoice:88492|recipient:alice|account:12345"
-        );
+    bytes32 internal constant ORIGINAL_CONTEXT = keccak256("invoice:88492|recipient:alice|account:12345");
 
-    bytes32 internal constant ORIGINAL_PURPOSE =
-        keccak256(
-            "purpose:aws-infrastructure"
-        );
+    bytes32 internal constant ORIGINAL_PURPOSE = keccak256("purpose:aws-infrastructure");
 
-    function setUp()
-        public
-    {
-        auth =
-            new SemanticIntentHarness();
+    function setUp() public {
+        auth = new SemanticIntentHarness();
 
-        agent =
-            vm.addr(AGENT_KEY);
+        agent = vm.addr(AGENT_KEY);
     }
 
-    function _intent(
-        uint256 nonce
-    )
-        internal
-        view
-        returns (
-            SemanticIntentHarness.SemanticIntent memory
-        )
-    {
-        return
-            SemanticIntentHarness.SemanticIntent({
-                agent: agent,
-                capability: PAYMENT_CAPABILITY,
-                target: PAYMENT_ROUTER,
-                selector: PAY_SELECTOR,
-                amount: 500 ether,
-                contextHash: ORIGINAL_CONTEXT,
-                purposeHash: ORIGINAL_PURPOSE,
-                nonce: nonce,
-                deadline: block.timestamp + 1 hours
-            });
+    function _intent(uint256 nonce) internal view returns (SemanticIntentHarness.SemanticIntent memory) {
+        return SemanticIntentHarness.SemanticIntent({
+            agent: agent,
+            capability: PAYMENT_CAPABILITY,
+            target: PAYMENT_ROUTER,
+            selector: PAY_SELECTOR,
+            amount: 500 ether,
+            contextHash: ORIGINAL_CONTEXT,
+            purposeHash: ORIGINAL_PURPOSE,
+            nonce: nonce,
+            deadline: block.timestamp + 1 hours
+        });
     }
 
-    function _sign(
-        SemanticIntentHarness.SemanticIntent memory intent
-    )
-        internal
-        view
-        returns (bytes memory)
-    {
-        bytes32 digest =
-            auth.hashIntent(intent);
+    function _sign(SemanticIntentHarness.SemanticIntent memory intent) internal view returns (bytes memory) {
+        bytes32 digest = auth.hashIntent(intent);
 
-        (
-            uint8 v,
-            bytes32 r,
-            bytes32 s
-        ) =
-            vm.sign(
-                AGENT_KEY,
-                digest
-            );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(AGENT_KEY, digest);
 
         return abi.encodePacked(r, s, v);
     }
 
-    function test_OriginalSemanticIntentExecutes()
-        public
-    {
-        SemanticIntentHarness.SemanticIntent memory intent =
-            _intent(1);
+    function test_OriginalSemanticIntentExecutes() public {
+        SemanticIntentHarness.SemanticIntent memory intent = _intent(1);
 
-        address signer =
-            auth.execute(
-                intent,
-                _sign(intent)
-            );
+        address signer = auth.execute(intent, _sign(intent));
 
-        assertEq(
-            signer,
-            agent
-        );
+        assertEq(signer, agent);
 
-        assertTrue(
-            auth.used(agent, 1),
-            "authorization must be consumed"
-        );
+        assertTrue(auth.used(agent, 1), "authorization must be consumed");
     }
 
-    function test_PurposeMutationChangesIdentity()
-        public
-        view
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_PurposeMutationChangesIdentity() public view {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: original.contextHash,
-                purposeHash: bytes32(uint256(0x1111)),
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: original.contextHash,
+            purposeHash: bytes32(uint256(0x1111)),
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
+
+        assertTrue(mutated.purposeHash != original.purposeHash, "purpose mutation did not change field");
 
         assertTrue(
-            mutated.purposeHash != original.purposeHash,
-            "purpose mutation did not change field"
-        );
-
-        assertTrue(
-            auth.hashIntent(original) !=
-            auth.hashIntent(mutated),
+            auth.hashIntent(original) != auth.hashIntent(mutated),
             "CRITICAL: purpose mutation preserved authorization identity"
         );
     }
 
-    function test_ContextMutationChangesIdentity()
-        public
-        view
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_ContextMutationChangesIdentity() public view {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: bytes32(uint256(0x2222)),
-                purposeHash: original.purposeHash,
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: bytes32(uint256(0x2222)),
+            purposeHash: original.purposeHash,
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
+
+        assertTrue(mutated.contextHash != original.contextHash, "context mutation did not change field");
 
         assertTrue(
-            mutated.contextHash != original.contextHash,
-            "context mutation did not change field"
-        );
-
-        assertTrue(
-            auth.hashIntent(original) !=
-            auth.hashIntent(mutated),
+            auth.hashIntent(original) != auth.hashIntent(mutated),
             "CRITICAL: context mutation preserved authorization identity"
         );
     }
 
-    function test_RecipientSwapChangesContextIdentity()
-        public
-        view
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_RecipientSwapChangesContextIdentity() public view {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: bytes32(uint256(0x3333)),
-                purposeHash: original.purposeHash,
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: bytes32(uint256(0x3333)),
+            purposeHash: original.purposeHash,
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
 
-        assertTrue(
-            mutated.contextHash != original.contextHash,
-            "recipient mutation did not change field"
-        );
+        assertTrue(mutated.contextHash != original.contextHash, "recipient mutation did not change field");
 
-        assertTrue(
-            auth.hashIntent(original) !=
-            auth.hashIntent(mutated)
-        );
+        assertTrue(auth.hashIntent(original) != auth.hashIntent(mutated));
     }
 
-    function test_InvoiceSwapChangesContextIdentity()
-        public
-        view
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_InvoiceSwapChangesContextIdentity() public view {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: bytes32(uint256(0x4444)),
-                purposeHash: original.purposeHash,
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: bytes32(uint256(0x4444)),
+            purposeHash: original.purposeHash,
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
 
-        assertTrue(
-            mutated.contextHash != original.contextHash,
-            "invoice mutation did not change field"
-        );
+        assertTrue(mutated.contextHash != original.contextHash, "invoice mutation did not change field");
 
-        assertTrue(
-            auth.hashIntent(original) !=
-            auth.hashIntent(mutated)
-        );
+        assertTrue(auth.hashIntent(original) != auth.hashIntent(mutated));
     }
 
-    function test_ContextMutationInvalidatesOriginalSignature()
-        public
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_ContextMutationInvalidatesOriginalSignature() public {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        bytes memory signature =
-            _sign(original);
+        bytes memory signature = _sign(original);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: bytes32(uint256(0x3333)),
-                purposeHash: original.purposeHash,
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: bytes32(uint256(0x3333)),
+            purposeHash: original.purposeHash,
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
 
-        vm.expectRevert(
-            SemanticIntentHarness.InvalidSigner.selector
-        );
+        vm.expectRevert(SemanticIntentHarness.InvalidSigner.selector);
 
-        auth.execute(
-            mutated,
-            signature
-        );
+        auth.execute(mutated, signature);
     }
 
-    function test_PurposeMutationInvalidatesOriginalSignature()
-        public
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_PurposeMutationInvalidatesOriginalSignature() public {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        bytes memory signature =
-            _sign(original);
+        bytes memory signature = _sign(original);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            original;
+        SemanticIntentHarness.SemanticIntent memory mutated = original;
 
-        mutated.purposeHash =
-            bytes32(uint256(0x5555));
+        mutated.purposeHash = bytes32(uint256(0x5555));
 
-        vm.expectRevert(
-            SemanticIntentHarness.InvalidSigner.selector
-        );
+        vm.expectRevert(SemanticIntentHarness.InvalidSigner.selector);
 
-        auth.execute(
-            mutated,
-            signature
-        );
+        auth.execute(mutated, signature);
     }
 
-    function test_InvoiceAndRecipientCannotBothChange()
-        public
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_InvoiceAndRecipientCannotBothChange() public {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        bytes memory signature =
-            _sign(original);
+        bytes memory signature = _sign(original);
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            SemanticIntentHarness.SemanticIntent({
-                agent: original.agent,
-                capability: original.capability,
-                target: original.target,
-                selector: original.selector,
-                amount: original.amount,
-                contextHash: bytes32(uint256(0x2222)),
-                purposeHash: original.purposeHash,
-                nonce: original.nonce,
-                deadline: original.deadline
-            });
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: bytes32(uint256(0x2222)),
+            purposeHash: original.purposeHash,
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
 
-        vm.expectRevert(
-            SemanticIntentHarness.InvalidSigner.selector
-        );
+        vm.expectRevert(SemanticIntentHarness.InvalidSigner.selector);
 
-        auth.execute(
-            mutated,
-            signature
-        );
+        auth.execute(mutated, signature);
     }
 
-    function test_SemanticMutationCannotBypassReplayProtection()
-        public
-    {
-        SemanticIntentHarness.SemanticIntent memory original =
-            _intent(1);
+    function test_SemanticMutationCannotBypassReplayProtection() public {
+        SemanticIntentHarness.SemanticIntent memory original = _intent(1);
 
-        bytes memory signature =
-            _sign(original);
+        bytes memory signature = _sign(original);
 
-        auth.execute(
-            original,
-            signature
-        );
+        /*
+         * Mutate the semantic field BEFORE execution.
+         *
+         * The original signature is bound to the original
+         * purposeHash, so the mutated intent must fail
+         * signature recovery with InvalidSigner.
+         */
+        SemanticIntentHarness.SemanticIntent memory mutated = SemanticIntentHarness.SemanticIntent({
+            agent: original.agent,
+            capability: original.capability,
+            target: original.target,
+            selector: original.selector,
+            amount: original.amount,
+            contextHash: original.contextHash,
+            purposeHash: original.purposeHash ^ bytes32(uint256(1)),
+            nonce: original.nonce,
+            deadline: original.deadline
+        });
 
-        assertTrue(
-            auth.used(agent, 1)
-        );
+        assertTrue(mutated.purposeHash != original.purposeHash, "semantic mutation did not change field");
 
-        SemanticIntentHarness.SemanticIntent memory mutated =
-            original;
+        vm.expectRevert(SemanticIntentHarness.InvalidSigner.selector);
 
-        mutated.purposeHash =
-            bytes32(uint256(0x6666));
+        auth.execute(mutated, signature);
 
-        vm.expectRevert(
-            SemanticIntentHarness.InvalidSigner.selector
-        );
+        /*
+         * The failed semantic mutation must not consume
+         * the original nonce.
+         */
+        assertTrue(!auth.used(agent, 1), "invalid semantic mutation consumed nonce");
 
-        auth.execute(
-            mutated,
-            signature
-        );
+        /*
+         * The original authorization must still execute.
+         */
+        address signer = auth.execute(original, signature);
+
+        assertEq(signer, agent, "original authorization could not execute");
+
+        assertTrue(auth.used(agent, 1), "original authorization did not consume nonce");
     }
 }
