@@ -4,10 +4,7 @@ pragma solidity ^0.8.28;
 import {AkmenaCore} from "../core/AkmenaCore.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
 import {AkmenaExecutionAuthorization} from "./AkmenaExecutionAuthorization.sol";
-
-interface ITransientProofVerifier {
-    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool);
-}
+import {ITransientProofVerifier} from "./ITransientProofVerifier.sol";
 
 contract AkmenaPolicyBoundary {
     AkmenaCore public immutable core;
@@ -28,6 +25,7 @@ contract AkmenaPolicyBoundary {
     error UnauthorizedAgent();
     error ExecutionFailed();
     error InvalidTransientProof();
+    error LegacyExecutionDisabled();
 
     constructor(address _core) {
         core = AkmenaCore(_core);
@@ -87,6 +85,18 @@ contract AkmenaPolicyBoundary {
             revert PolicyExceeded();
         }
 
+        // Reset the rolling 24-hour spending window BEFORE
+        // evaluating the new transaction against dailyLimit.
+        //
+        // Without this ordering, an already-exhausted policy
+        // can remain permanently locked after the reset window
+        // has elapsed because the PolicyExceeded check executes
+        // before the reset.
+        if (block.timestamp > policy.lastResetTimestamp + 1 days) {
+            policy.totalSpentToday = 0;
+            policy.lastResetTimestamp = block.timestamp;
+        }
+
         if (policy.totalSpentToday + intent.amount > policy.dailyLimit) {
             revert PolicyExceeded();
         }
@@ -121,11 +131,6 @@ contract AkmenaPolicyBoundary {
          * Consume policy budget only after the cryptographic
          * authorization has succeeded.
          */
-        if (block.timestamp > policy.lastResetTimestamp + 1 days) {
-            policy.totalSpentToday = 0;
-            policy.lastResetTimestamp = block.timestamp;
-        }
-
         policy.totalSpentToday += intent.amount;
 
         (bool success, bytes memory returnData) = intent.target.call{value: msg.value}(payload);
@@ -139,47 +144,18 @@ contract AkmenaPolicyBoundary {
         return returnData;
     }
 
+    /// @notice Deprecated legacy execution entrypoint.
+    /// @dev Intentionally disabled. All execution MUST use
+    ///      executeAuthorizedAgentCall() so the exact EIP-712
+    ///      execution intent is enforced.
     function executeAgentCall(
-        address operator,
-        address targetContract,
-        uint256 amountToSpend,
-        bytes32 proofModuleKey,
-        uint256 proofId,
-        bytes calldata payload
-    ) external returns (bytes memory) {
-        address agent = msg.sender;
-        if (agent == address(0)) revert UnauthorizedAgent();
-
-        SpendingPolicy storage policy = agentPolicies[operator][agent];
-
-        if (policy.maxSpendPerTransaction == 0) revert UnauthorizedAgent();
-        if (amountToSpend > policy.maxSpendPerTransaction) revert PolicyExceeded();
-
-        if (block.timestamp > policy.lastResetTimestamp + 1 days) {
-            policy.totalSpentToday = 0;
-            policy.lastResetTimestamp = block.timestamp;
-        }
-
-        if (policy.totalSpentToday + amountToSpend > policy.dailyLimit) revert PolicyExceeded();
-
-        if (policy.requireActiveEscrow) {
-            (address moduleAddr, bool active,) = core.getModule(proofModuleKey);
-            require(active, "Proof Module Offline");
-
-            // FORTIFICATION: Route the verification to the specific module's transient memory
-            bool hasProof = ITransientProofVerifier(moduleAddr).verifyTransientProof(proofId, agent, amountToSpend);
-            if (!hasProof) revert InvalidTransientProof();
-        }
-
-        policy.totalSpentToday += amountToSpend;
-
-        (bool success, bytes memory returnData) = targetContract.call(payload);
-        if (!success) {
-            assembly {
-                revert(add(returnData, 32), mload(returnData))
-            }
-        }
-
-        return returnData;
+        address,
+        address,
+        uint256,
+        bytes32,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes memory) {
+        revert LegacyExecutionDisabled();
     }
 }

@@ -2,35 +2,95 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {StdInvariant} from "forge-std/StdInvariant.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {TreasuryEngine} from "../../src/economics/TreasuryEngine.sol";
-import {TreasuryHandler} from "./handlers/TreasuryHandler.sol";
 
-contract TreasuryInvariant is StdInvariant, Test {
+contract TreasuryInvariantTest is Test {
+    AkmenaToken internal token;
     TreasuryEngine internal treasury;
-    TreasuryHandler internal handler;
+
+    address internal owner = address(0x1111);
+    address internal depositor = address(0x2222);
 
     function setUp() public {
-        treasury = new TreasuryEngine();
-        handler = new TreasuryHandler(treasury);
+        token = new AkmenaToken(depositor);
 
-        targetContract(address(handler));
+        treasury = new TreasuryEngine(
+            address(token),
+            owner
+        );
+
+        vm.prank(depositor);
+        token.approve(
+            address(treasury),
+            type(uint256).max
+        );
     }
 
-    function test_SanityCheck() public pure {
-        assertTrue(true);
+    function test_TreasuryBalanceEqualsActualTokenCustody()
+        public
+    {
+        uint256 amount = 10_000 ether;
+
+        vm.prank(depositor);
+        treasury.fundTreasury(amount);
+
+        (, uint256 reported) =
+            treasury.getTreasuryState();
+
+        assertEq(
+            reported,
+            token.balanceOf(address(treasury))
+        );
+
+        assertEq(reported, amount);
     }
 
-    /// INVARIANT: Treasury balance must strictly match total funded minus total disbursed
-    function invariant_balanceMatchesShadowAccounting() public view {
-        (,, uint256 balance) = treasury.getTreasuryState();
-        uint256 expectedBalance = handler.totalFunded() - handler.totalDisbursed();
-        assertEq(balance, expectedBalance);
+    function test_TreasurySupplyEqualsTokenSupply()
+        public
+        view
+    {
+        (uint256 total,) =
+            treasury.getTreasuryState();
+
+        assertEq(
+            total,
+            token.totalSupply()
+        );
     }
 
-    /// INVARIANT: Circulating supply must never exceed total supply
-    function invariant_supplyBoundsValid() public view {
-        (uint256 total, uint256 circulating,) = treasury.getTreasuryState();
-        assertTrue(circulating <= total);
+    function test_DisbursementPreservesCustodyAccounting()
+        public
+    {
+        uint256 deposit = 10_000 ether;
+        uint256 withdrawal = 4_000 ether;
+
+        vm.prank(depositor);
+        treasury.fundTreasury(deposit);
+
+        uint256 before =
+            token.balanceOf(address(treasury));
+
+        vm.prank(owner);
+        treasury.disburseFunds(
+            depositor,
+            withdrawal
+        );
+
+        uint256 afterBalance =
+            token.balanceOf(address(treasury));
+
+        assertEq(
+            afterBalance,
+            before - withdrawal
+        );
+
+        (, uint256 reported) =
+            treasury.getTreasuryState();
+
+        assertEq(
+            reported,
+            afterBalance
+        );
     }
 }

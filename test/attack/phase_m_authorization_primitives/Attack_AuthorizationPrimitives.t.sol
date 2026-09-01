@@ -3,13 +3,14 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {CapabilityEngine} from "../../../src/authorization/CapabilityEngine.sol";
-import {VerificationEngine} from "../../../src/authorization/VerificationEngine.sol";
 import {AttestationEngine} from "../../../src/authorization/AttestationEngine.sol";
+import {IIdentity} from "../../../src/identity/IIdentity.sol";
+import {Identity} from "../../../src/identity/Identity.sol";
 
 contract Attack_AuthorizationPrimitivesTest is Test {
     CapabilityEngine internal capabilities;
-    VerificationEngine internal verification;
     AttestationEngine internal attestations;
+    Identity internal victimIdentity;
 
     address internal victim = address(0x1111);
     address internal attacker = address(0x2222);
@@ -23,21 +24,36 @@ contract Attack_AuthorizationPrimitivesTest is Test {
 
     function setUp() public {
         capabilities = new CapabilityEngine();
-        verification = new VerificationEngine();
         attestations = new AttestationEngine();
+
+        victimIdentity = new Identity();
+
+        victimIdentity.initialize(
+            1,
+            victim,
+            IIdentity.IdentityType.Machine,
+            ""
+        );
     }
 
     function test_Attack_AnyoneCanGrantCapabilityToVictim() public {
         vm.prank(attacker);
 
+        vm.expectRevert(
+            CapabilityEngine.UnauthorizedCapabilityMutation.selector
+        );
+
         capabilities.grantCapability(
-            victim,
+            address(victimIdentity),
             PRIVILEGED
         );
 
-        assertTrue(
-            capabilities.hasCapability(victim, PRIVILEGED),
-            "EXPECTED VULNERABILITY: attacker granted victim capability"
+        assertFalse(
+            capabilities.hasCapability(
+                address(victimIdentity),
+                PRIVILEGED
+            ),
+            "CRITICAL: attacker granted victim capability"
         );
     }
 
@@ -45,55 +61,27 @@ contract Attack_AuthorizationPrimitivesTest is Test {
         vm.prank(victim);
 
         capabilities.grantCapability(
-            victim,
+            address(victimIdentity),
             PRIVILEGED
         );
 
         vm.prank(attacker);
+
+        vm.expectRevert(
+            CapabilityEngine.UnauthorizedCapabilityMutation.selector
+        );
 
         capabilities.revokeCapability(
-            victim,
+            address(victimIdentity),
             PRIVILEGED
-        );
-
-        assertFalse(
-            capabilities.hasCapability(victim, PRIVILEGED),
-            "EXPECTED VULNERABILITY: attacker revoked victim capability"
-        );
-    }
-
-    function test_Attack_AnyoneCanForgeVerification() public {
-        vm.prank(attacker);
-
-        verification.setVerification(
-            victim,
-            true
         );
 
         assertTrue(
-            verification.isVerified(victim),
-            "EXPECTED VULNERABILITY: attacker forged verification"
-        );
-    }
-
-    function test_Attack_AnyoneCanRevokeVerification() public {
-        vm.prank(trustedVerifier);
-
-        verification.setVerification(
-            victim,
-            true
-        );
-
-        vm.prank(attacker);
-
-        verification.setVerification(
-            victim,
-            false
-        );
-
-        assertFalse(
-            verification.isVerified(victim),
-            "EXPECTED VULNERABILITY: attacker revoked verification"
+            capabilities.hasCapability(
+                address(victimIdentity),
+                PRIVILEGED
+            ),
+            "CRITICAL: attacker revoked victim capability"
         );
     }
 

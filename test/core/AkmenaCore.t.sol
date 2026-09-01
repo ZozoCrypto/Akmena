@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {AkmenaCore} from "../../src/core/AkmenaCore.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {TreasuryEngine} from "../../src/economics/TreasuryEngine.sol";
 import {MarketplaceEngine} from "../../src/autonomous/MarketplaceEngine.sol";
 
@@ -19,7 +20,14 @@ contract AkmenaCoreTest is Test {
 
     function setUp() public {
         core = new AkmenaCore();
-        treasuryEngine = new TreasuryEngine();
+
+        AkmenaToken token = new AkmenaToken(deployer);
+
+        treasuryEngine = new TreasuryEngine(
+            address(token),
+            deployer
+        );
+
         marketplaceEngine = new MarketplaceEngine();
     }
 

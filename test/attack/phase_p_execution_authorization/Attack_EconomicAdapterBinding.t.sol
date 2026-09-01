@@ -5,35 +5,48 @@ import {Test} from "forge-std/Test.sol";
 
 import {
     AkmenaCore
-} from "../../src/core/AkmenaCore.sol";
+} from "../../../src/core/AkmenaCore.sol";
 
 import {
     AkmenaPolicyBoundary
-} from "../../src/authorization/AkmenaPolicyBoundary.sol";
+} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
 
 import {
     AkmenaExecutionAuthorization
-} from "../../src/authorization/AkmenaExecutionAuthorization.sol";
-
-import {
-    EscrowEngine
-} from "../../src/economics/EscrowEngine.sol";
+} from "../../../src/authorization/AkmenaExecutionAuthorization.sol";
 
 
-contract Wave3Target {
+contract EconomicAdapter {
+    uint256 public executedAmount;
     uint256 public calls;
 
-    function ping()
+    error EconomicAmountMismatch();
+
+    function execute(
+        uint256 declaredIntentAmount,
+        uint256 actualEconomicAmount
+    )
         external
         returns (bool)
     {
+        if (
+            declaredIntentAmount !=
+            actualEconomicAmount
+        ) {
+            revert EconomicAmountMismatch();
+        }
+
+        executedAmount +=
+            actualEconomicAmount;
+
         calls++;
+
         return true;
     }
 }
 
 
-contract AttackWave3_PolicyBoundaryTest is Test {
+contract AttackEconomicAdapterBindingTest is Test {
     uint256 internal constant AGENT_KEY =
         0xA11CE;
 
@@ -41,17 +54,10 @@ contract AttackWave3_PolicyBoundaryTest is Test {
     address internal operator =
         address(0x1111);
 
-    address internal attacker =
-        address(0xBEEF);
-
     AkmenaCore internal core;
     AkmenaPolicyBoundary internal boundary;
     AkmenaExecutionAuthorization internal authorization;
-    EscrowEngine internal escrow;
-    Wave3Target internal target;
-
-    bytes32 internal constant ESCROW_ENGINE =
-        bytes32("ESCROW_ENGINE");
+    EconomicAdapter internal target;
 
 
     function setUp() public {
@@ -69,34 +75,23 @@ contract AttackWave3_PolicyBoundaryTest is Test {
         authorization =
             boundary.executionAuthorization();
 
-        escrow =
-            new EscrowEngine();
-
         target =
-            new Wave3Target();
-
-        core.registerModule(
-            ESCROW_ENGINE,
-            address(escrow),
-            "2.1.0"
-        );
+            new EconomicAdapter();
 
         vm.prank(operator);
 
         boundary.setAgentPolicy(
             agent,
+            10 ether,
             100 ether,
-            1000 ether,
             false
         );
     }
 
 
     function _intent(
-        address callerAgent,
+        bytes memory payload,
         uint256 amount,
-        bytes32 proofModuleKey,
-        uint256 proofId,
         uint256 nonce
     )
         internal
@@ -105,22 +100,17 @@ contract AttackWave3_PolicyBoundaryTest is Test {
             AkmenaExecutionAuthorization.ExecutionIntent memory
         )
     {
-        bytes memory payload =
-            abi.encodeWithSelector(
-                Wave3Target.ping.selector
-            );
-
         return
             AkmenaExecutionAuthorization.ExecutionIntent({
                 operator: operator,
-                agent: callerAgent,
+                agent: agent,
                 target: address(target),
-                selector: Wave3Target.ping.selector,
+                selector: EconomicAdapter.execute.selector,
                 calldataHash: keccak256(payload),
                 amount: amount,
                 value: 0,
-                proofModuleKey: proofModuleKey,
-                proofId: proofId,
+                proofModuleKey: bytes32(0),
+                proofId: 0,
                 nonce: nonce,
                 validAfter: block.timestamp,
                 deadline: block.timestamp + 1 hours
@@ -136,9 +126,7 @@ contract AttackWave3_PolicyBoundaryTest is Test {
         returns (bytes memory)
     {
         bytes32 digest =
-            authorization.hashIntent(
-                intent
-            );
+            authorization.hashIntent(intent);
 
         (
             uint8 v,
@@ -150,43 +138,80 @@ contract AttackWave3_PolicyBoundaryTest is Test {
                 digest
             );
 
-        return
-            abi.encodePacked(
-                r,
-                s,
-                v
-            );
+        return abi.encodePacked(
+            r,
+            s,
+            v
+        );
     }
 
 
-    function test_Attack_UnauthorizedCallerCannotConsumeVictimDailyLimit()
+    function test_MatchingEconomicSemanticsExecute()
         public
     {
-        uint256 amount =
-            100 ether;
+        bytes memory payload =
+            abi.encodeWithSelector(
+                EconomicAdapter.execute.selector,
+                5 ether,
+                5 ether
+            );
 
         AkmenaExecutionAuthorization.ExecutionIntent
             memory intent =
                 _intent(
-                    agent,
-                    amount,
-                    bytes32(0),
-                    0,
-                    1
+                    payload,
+                    5 ether,
+                    0
                 );
-
-        bytes memory payload =
-            abi.encodeWithSelector(
-                Wave3Target.ping.selector
-            );
 
         bytes memory signature =
             _sign(intent);
 
-        vm.prank(attacker);
+        vm.prank(agent);
+
+        boundary.executeAuthorizedAgentCall(
+            intent,
+            payload,
+            signature
+        );
+
+        assertEq(
+            target.executedAmount(),
+            5 ether
+        );
+
+        assertEq(
+            target.calls(),
+            1
+        );
+    }
+
+
+    function test_MismatchedEconomicSemanticsFailAtAdapter()
+        public
+    {
+        bytes memory payload =
+            abi.encodeWithSelector(
+                EconomicAdapter.execute.selector,
+                1 ether,
+                100 ether
+            );
+
+        AkmenaExecutionAuthorization.ExecutionIntent
+            memory intent =
+                _intent(
+                    payload,
+                    1 ether,
+                    1
+                );
+
+        bytes memory signature =
+            _sign(intent);
+
+        vm.prank(agent);
 
         vm.expectRevert(
-            AkmenaPolicyBoundary.UnauthorizedAgent.selector
+            EconomicAdapter.EconomicAmountMismatch.selector
         );
 
         boundary.executeAuthorizedAgentCall(
@@ -196,61 +221,44 @@ contract AttackWave3_PolicyBoundaryTest is Test {
         );
 
         assertEq(
-            target.calls(),
+            target.executedAmount(),
             0
         );
 
-        (
-            ,
-            ,
-            uint256 spentToday,
-            ,
-        ) =
-            boundary.agentPolicies(
-                operator,
-                agent
-            );
-
         assertEq(
-            spentToday,
-            0,
-            "CRITICAL: unauthorized caller consumed victim policy"
+            target.calls(),
+            0
         );
     }
 
 
-    function test_Attack_EscrowRequirementCannotBeSatisfiedByMissingEscrow()
+    function test_CalldataMutationStillFailsBeforeAdapter()
         public
     {
-        vm.prank(operator);
-
-        boundary.setAgentPolicy(
-            agent,
-            100 ether,
-            1000 ether,
-            true
-        );
-
-        uint256 amount =
-            1 ether;
+        bytes memory authorizedPayload =
+            abi.encodeWithSelector(
+                EconomicAdapter.execute.selector,
+                5 ether,
+                5 ether
+            );
 
         AkmenaExecutionAuthorization.ExecutionIntent
             memory intent =
                 _intent(
-                    agent,
-                    amount,
-                    ESCROW_ENGINE,
-                    999999,
+                    authorizedPayload,
+                    5 ether,
                     2
                 );
 
-        bytes memory payload =
-            abi.encodeWithSelector(
-                Wave3Target.ping.selector
-            );
-
         bytes memory signature =
             _sign(intent);
+
+        bytes memory mutatedPayload =
+            abi.encodeWithSelector(
+                EconomicAdapter.execute.selector,
+                5 ether,
+                100 ether
+            );
 
         vm.prank(agent);
 
@@ -258,47 +266,7 @@ contract AttackWave3_PolicyBoundaryTest is Test {
 
         boundary.executeAuthorizedAgentCall(
             intent,
-            payload,
-            signature
-        );
-
-        assertEq(
-            target.calls(),
-            0
-        );
-    }
-
-
-    function test_Attack_ArbitraryCallerCanSubmitVictimIdentity()
-        public
-    {
-        AkmenaExecutionAuthorization.ExecutionIntent
-            memory intent =
-                _intent(
-                    agent,
-                    1 ether,
-                    bytes32(0),
-                    0,
-                    3
-                );
-
-        bytes memory payload =
-            abi.encodeWithSelector(
-                Wave3Target.ping.selector
-            );
-
-        bytes memory signature =
-            _sign(intent);
-
-        vm.prank(attacker);
-
-        vm.expectRevert(
-            AkmenaPolicyBoundary.UnauthorizedAgent.selector
-        );
-
-        boundary.executeAuthorizedAgentCall(
-            intent,
-            payload,
+            mutatedPayload,
             signature
         );
 

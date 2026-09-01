@@ -1,40 +1,124 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import {ITreasuryEngine} from "./ITreasuryEngine.sol";
-import {LibStorage} from "../storage/LibStorage.sol";
 
+/// @title TreasuryEngine
+/// @notice Canonical AKM treasury custody boundary.
+///
+/// Economic authority:
+/// - AkmenaToken is the source of truth for supply and ownership.
+/// - This contract's AKM balance is its actual treasury custody.
+/// - Treasury accounting does not create or destroy value.
+/// - Funding moves real AKM into this contract.
+/// - Disbursement moves real AKM out of this contract.
+/// - Treasury has no independent supply ledger.
 contract TreasuryEngine is ITreasuryEngine {
-    function fundTreasury(uint256 amount) external override {
-        if (amount == 0) revert InvalidAmount();
+    using SafeERC20 for IERC20;
 
-        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
-        ds.treasuryBalance += amount;
+    address public immutable override token;
+    address public immutable override owner;
 
-        emit TreasuryFunded(amount);
+    IERC20 private immutable _asset;
+
+    constructor(
+        address token_,
+        address owner_
+    ) {
+        if (token_ == address(0)) {
+            revert InvalidToken();
+        }
+
+        if (owner_ == address(0)) {
+            revert InvalidAddress();
+        }
+
+        token = token_;
+        owner = owner_;
+        _asset = IERC20(token_);
     }
 
-    function disburseFunds(address to, uint256 amount) external override {
-        if (to == address(0)) revert InvalidAddress();
-        if (amount == 0) revert InvalidAmount();
-
-        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
-        if (ds.treasuryBalance < amount) revert InsufficientTreasuryFunds();
-
-        ds.treasuryBalance -= amount;
-        emit FundsDisbursed(to, amount);
+    modifier onlyOwner() {
+        if (msg.sender != owner) {
+            revert Unauthorized();
+        }
+        _;
     }
 
-    function updateSupply(uint256 total, uint256 circulating) external override {
-        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
-        ds.totalSupply = total;
-        ds.circulatingSupply = circulating;
+    /// @notice Deposit actual AKM into treasury custody.
+    /// @dev Caller must approve this treasury for the amount.
+    function fundTreasury(
+        uint256 amount
+    )
+        external
+        override
+    {
+        if (amount == 0) {
+            revert InvalidAmount();
+        }
 
-        emit SupplyUpdated(total, circulating);
+        _asset.safeTransferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+
+        emit TreasuryFunded(
+            msg.sender,
+            amount
+        );
     }
 
-    function getTreasuryState() external view override returns (uint256 total, uint256 circulating, uint256 balance) {
-        LibStorage.TreasuryStorage storage ds = LibStorage.treasury();
-        return (ds.totalSupply, ds.circulatingSupply, ds.treasuryBalance);
+    /// @notice Transfer actual AKM out of treasury custody.
+    /// @dev Restricted to the treasury controller.
+    function disburseFunds(
+        address to,
+        uint256 amount
+    )
+        external
+        override
+        onlyOwner
+    {
+        if (to == address(0)) {
+            revert InvalidAddress();
+        }
+
+        if (amount == 0) {
+            revert InvalidAmount();
+        }
+
+        uint256 balance =
+            _asset.balanceOf(address(this));
+
+        if (balance < amount) {
+            revert InsufficientTreasuryFunds();
+        }
+
+        _asset.safeTransfer(to, amount);
+
+        emit FundsDisbursed(
+            to,
+            amount
+        );
+    }
+
+    /// @notice Returns authoritative token supply and actual treasury custody.
+    function getTreasuryState()
+        external
+        view
+        override
+        returns (
+            uint256 totalSupply,
+            uint256 treasuryBalance
+        )
+    {
+        totalSupply =
+            _asset.totalSupply();
+
+        treasuryBalance =
+            _asset.balanceOf(address(this));
     }
 }

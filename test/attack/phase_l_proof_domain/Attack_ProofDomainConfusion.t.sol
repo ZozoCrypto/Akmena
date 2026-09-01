@@ -91,15 +91,17 @@ contract Attack_ProofDomainConfusionTest is Test {
         );
 
         /*
-         * Privacy proof is presented to ESCROW_ENGINE.
+         * The historical exploit used the retired legacy execution
+         * surface. That surface is permanently disabled.
          *
-         * Expected secure behavior:
-         * REJECT
-         *
-         * Current implementation is expected to accept because the
-         * numeric proofId collides with escrowId == 1.
+         * Canonical execution MUST use executeAuthorizedAgentCall(),
+         * where proofModuleKey and proofId are cryptographically bound.
          */
         vm.prank(agent);
+
+        vm.expectRevert(
+            AkmenaPolicyBoundary.LegacyExecutionDisabled.selector
+        );
 
         boundary.executeAgentCall(
             operator,
@@ -114,8 +116,8 @@ contract Attack_ProofDomainConfusionTest is Test {
 
         assertEq(
             target.executed(),
-            1,
-            "Expected current cross-domain authorization behavior"
+            0,
+            "Retired execution path must never reach target"
         );
     }
 

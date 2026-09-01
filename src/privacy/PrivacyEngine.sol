@@ -41,14 +41,22 @@ contract PrivacyEngine {
 
         emit PrivateSettlementExecuted(nullifierHash, stealthRecipient, amount);
 
-        LibTransientProof.setEscrowProof(uint256(nullifierHash), stealthRecipient, amount);
+        LibTransientProof.setPrivacyProof(uint256(nullifierHash), stealthRecipient, amount);
 
         (bool success, ) = stealthRecipient.call{value: amount}("");
         if (!success) revert TransferFailed();
     }
 
     /// @notice Allows the PolicyBoundary to verify transient proofs written in this module's context
-    function verifyTransientProof(uint256 proofId, address operator, uint256 amount) external view returns (bool) {
-        return LibTransientProof.verifyEscrowProof(proofId, operator, amount);
+    function verifyTransientProof(
+        uint256 proofId,
+        address operator,
+        uint256 amount
+    ) external view returns (bool) {
+        return LibTransientProof.verifyPrivacyProof(
+            proofId,
+            operator,
+            amount
+        );
     }
 }

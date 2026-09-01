@@ -328,6 +328,13 @@ contract Attack_AuthorizationLifecycleTest is Test {
         auth.execute(intent);
 
 
+        /*
+         * The EXPIRED assignment occurs immediately before
+         * the function reverts. EVM state changes made in a
+         * reverted call are rolled back, so persistent state
+         * remains NONE. Expiry is therefore a derived
+         * condition, not a persisted terminal state.
+         */
         assertEq(
             uint256(
                 auth.state(
@@ -337,7 +344,7 @@ contract Attack_AuthorizationLifecycleTest is Test {
                 )
             ),
             uint256(
-                AuthorizationLifecycleHarness.State.EXPIRED
+                AuthorizationLifecycleHarness.State.NONE
             )
         );
     }

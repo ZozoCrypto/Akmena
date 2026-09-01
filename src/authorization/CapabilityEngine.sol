@@ -3,11 +3,17 @@ pragma solidity ^0.8.28;
 
 import {ICapabilityEngine} from "./ICapabilityEngine.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
+import {IIdentity} from "../identity/IIdentity.sol";
 
 contract CapabilityEngine is ICapabilityEngine {
+    error UnauthorizedCapabilityMutation();
     function grantCapability(address identity, bytes32 capability) external override {
         if (identity == address(0)) revert InvalidIdentityAddress();
-        
+
+        if (msg.sender != IIdentity(identity).owner()) {
+            revert UnauthorizedCapabilityMutation();
+        }
+
         LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
         
         if (ds.capabilities[identity][capability]) {
@@ -20,7 +26,11 @@ contract CapabilityEngine is ICapabilityEngine {
 
     function revokeCapability(address identity, bytes32 capability) external override {
         if (identity == address(0)) revert InvalidIdentityAddress();
-        
+
+        if (msg.sender != IIdentity(identity).owner()) {
+            revert UnauthorizedCapabilityMutation();
+        }
+
         LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
         
         if (!ds.capabilities[identity][capability]) {
