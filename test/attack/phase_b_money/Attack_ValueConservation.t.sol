@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+import {AkmenaToken} from "../../../src/token/core/AkmenaToken.sol";
 import {EscrowEngine} from "../../../src/economics/EscrowEngine.sol";
 import {LibStorage} from "../../../src/storage/LibStorage.sol";
 
@@ -12,11 +13,16 @@ contract Attack_ValueConservationTest is Test {
     address internal seller = address(0x2222);
 
     function setUp() public {
-        escrow = new EscrowEngine();
+        AkmenaToken token = new AkmenaToken(address(this));
+        escrow = new EscrowEngine(address(token));
+
+        token.transfer(buyer, 100 ether);
 
         // Setup a legitimate escrow
-        vm.prank(buyer);
+        vm.startPrank(buyer);
+        token.approve(address(escrow), 100 ether);
         escrow.createEscrow(buyer, seller, 100 ether);
+        vm.stopPrank();
     }
 
     // =========================================================================

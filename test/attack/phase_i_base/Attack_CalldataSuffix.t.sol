@@ -1,52 +1,124 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Test, console} from "forge-std/Test.sol";
 import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
-import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
 
-contract StatefulTarget {
-    function ping() external pure returns (bool) { return true; }
+import {Test} from "forge-std/Test.sol";
+import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
+import {AkmenaExecutionAuthorization} from "../../../src/authorization/AkmenaExecutionAuthorization.sol";
+
+contract ERC8021Target {
+    bool public executed;
+
+    function ping() external returns (bool) {
+        executed = true;
+        return true;
+    }
 }
 
 contract Attack_CalldataSuffixTest is Test {
-    AkmenaCore core;
-    AkmenaPolicyBoundary boundary;
-    StatefulTarget target;
+    AkmenaPolicyBoundary internal boundary;
+    AkmenaCore internal core;
+    ERC8021Target internal target;
 
-    address agent = address(0x2222);
+    uint256 internal agentPk = 0xA11CE;
+    address internal agent;
 
     function setUp() public {
-        core = new AkmenaCore();
-        boundary = new AkmenaPolicyBoundary(address(core));
-        target = new StatefulTarget();
+        agent = vm.addr(agentPk);
 
-        // 1. Agent sets their own policy
+        core = new AkmenaCore();
+
+        boundary = new AkmenaPolicyBoundary(address(core));
+        target = new ERC8021Target();
+
+        // The agent/operator has an active execution policy.
         vm.prank(agent);
         boundary.setAgentPolicy(agent, 100 ether, 100 ether, false);
     }
 
-    function test_Attack_ERC8021DataSuffixInjection() public {
-        // 2. Prank as the agent so msg.sender matches the policy
-        vm.startPrank(agent);
+    function _intent(uint256 amount, uint256 value, uint256 nonce)
+        internal
+        view
+        returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
+    {
+        bytes memory payload = abi.encodeWithSelector(ERC8021Target.ping.selector);
 
-        bytes memory innerPayload = abi.encodeWithSignature("ping()");
-        
-        bytes memory validCalldata = abi.encodeWithSignature(
-            "executeAgentCall(address,address,uint256,bytes32,uint256,bytes)",
-            agent, // operator matches agent
-            address(target),
-            1 ether,
-            bytes32(0),
-            0,
-            innerPayload
-        );
+        return AkmenaExecutionAuthorization.ExecutionIntent({
+            operator: agent,
+            agent: agent,
+            target: address(target),
+            selector: ERC8021Target.ping.selector,
+            calldataHash: keccak256(payload),
+            amount: amount,
+            value: value,
+            proofModuleKey: bytes32(0),
+            proofId: 0,
+            nonce: nonce,
+            validAfter: block.timestamp,
+            deadline: block.timestamp + 1 hours
+        });
+    }
 
-        bytes memory maliciousCalldata = abi.encodePacked(validCalldata, bytes20(0x8021000000000000000000000000000000000000));
+    function _sign(AkmenaExecutionAuthorization.ExecutionIntent memory intent) internal view returns (bytes memory) {
+        bytes32 digest = boundary.executionAuthorization().hashIntent(intent);
 
-        (bool success, ) = address(boundary).call(maliciousCalldata);
-        
-        assertTrue(success, "CRITICAL: Akmena reverted due to ERC-8021 data suffix (Smart Wallet DoS)!");
-        vm.stopPrank();
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(agentPk, digest);
+
+        return abi.encodePacked(r, s, v);
+    }
+
+    function test_ERC8021SuffixDoesNotDoSAuthorizedExecution() public {
+        bytes memory payload = abi.encodeWithSelector(ERC8021Target.ping.selector);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(1 ether, 0, 0);
+
+        bytes memory signature = _sign(intent);
+
+        /*
+         * Construct the legitimate production call exactly as a wallet
+         * would encode it, then append an ERC-8021-style data suffix.
+         *
+         * The suffix belongs to the OUTER transaction calldata.
+         * It is not part of the signed execution payload.
+         */
+        bytes memory validCalldata =
+            abi.encodeWithSelector(boundary.executeAuthorizedAgentCall.selector, intent, payload, signature);
+
+        bytes memory maliciousCalldata =
+            abi.encodePacked(validCalldata, bytes20(0x8021000000000000000000000000000000000000));
+
+        vm.prank(agent);
+
+        (bool success, bytes memory returnData) = address(boundary).call(maliciousCalldata);
+
+        assertTrue(success, "ERC-8021-style outer calldata suffix caused execution DoS");
+
+        assertTrue(target.executed(), "Authorized target was not executed");
+
+        bytes memory targetReturnData = abi.decode(returnData, (bytes));
+
+        assertTrue(abi.decode(targetReturnData, (bool)), "Target execution did not return true");
+    }
+
+    function test_MutatingAuthorizedPayloadStillFails() public {
+        bytes memory authorizedPayload = abi.encodeWithSelector(ERC8021Target.ping.selector);
+
+        bytes memory maliciousPayload = abi.encodeWithSelector(ERC8021Target.ping.selector, bytes("MALICIOUS"));
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(1 ether, 0, 1);
+
+        // Sign the legitimate payload.
+        intent.calldataHash = keccak256(authorizedPayload);
+
+        bytes memory signature = _sign(intent);
+
+        vm.prank(agent);
+
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidCalldataHash.selector);
+
+        boundary.executeAuthorizedAgentCall(intent, maliciousPayload, signature);
+
+        assertFalse(target.executed(), "Target executed unauthorized payload");
     }
 }

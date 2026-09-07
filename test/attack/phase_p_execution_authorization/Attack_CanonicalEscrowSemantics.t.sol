@@ -18,6 +18,7 @@ import {
 import {
     EscrowEngine
 } from "../../../src/economics/EscrowEngine.sol";
+import {AkmenaToken} from "../../../src/token/core/AkmenaToken.sol";
 
 
 contract EscrowTargetA {
@@ -54,6 +55,7 @@ contract AttackCanonicalEscrowSemanticsTest is Test {
     AkmenaPolicyBoundary internal boundary;
     AkmenaExecutionAuthorization internal authorization;
     EscrowEngine internal escrow;
+    AkmenaToken internal token;
 
     EscrowTargetA internal targetA;
     EscrowTargetB internal targetB;
@@ -77,8 +79,18 @@ contract AttackCanonicalEscrowSemanticsTest is Test {
         authorization =
             boundary.executionAuthorization();
 
-        escrow =
-            new EscrowEngine();
+        token = new AkmenaToken(address(this));
+
+
+
+        escrow = new EscrowEngine(address(token));
+
+
+
+        vm.prank(address(this));
+
+
+        token.approve(address(escrow), type(uint256).max);
 
         targetA =
             new EscrowTargetA();
@@ -192,10 +204,16 @@ contract AttackCanonicalEscrowSemanticsTest is Test {
         internal
         returns (uint256)
     {
-        vm.prank(operator);
+        address buyer = address(0xCAFE);
 
+        token.transfer(buyer, amount);
+
+        vm.prank(buyer);
+        token.approve(address(escrow), amount);
+
+        vm.prank(buyer);
         return escrow.createEscrow(
-            address(0xCAFE),
+            buyer,
             agent,
             amount
         );

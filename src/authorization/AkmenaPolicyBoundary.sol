@@ -25,9 +25,15 @@ contract AkmenaPolicyBoundary {
     error UnauthorizedAgent();
     error ExecutionFailed();
     error InvalidTransientProof();
+    error ProtocolPaused();
+    error InvalidCore();
     error LegacyExecutionDisabled();
 
     constructor(address _core) {
+        if (_core == address(0) || _core.code.length == 0) {
+            revert InvalidCore();
+        }
+
         core = AkmenaCore(_core);
         executionAuthorization = new AkmenaExecutionAuthorization();
     }
@@ -61,6 +67,10 @@ contract AkmenaPolicyBoundary {
         bytes calldata payload,
         bytes calldata signature
     ) external payable returns (bytes memory) {
+        if (core.isPaused()) {
+            revert ProtocolPaused();
+        }
+
         address agent = msg.sender;
 
         if (agent == address(0)) {
@@ -148,14 +158,11 @@ contract AkmenaPolicyBoundary {
     /// @dev Intentionally disabled. All execution MUST use
     ///      executeAuthorizedAgentCall() so the exact EIP-712
     ///      execution intent is enforced.
-    function executeAgentCall(
-        address,
-        address,
-        uint256,
-        bytes32,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes memory) {
+    function executeAgentCall(address, address, uint256, bytes32, uint256, bytes calldata)
+        external
+        pure
+        returns (bytes memory)
+    {
         revert LegacyExecutionDisabled();
     }
 }

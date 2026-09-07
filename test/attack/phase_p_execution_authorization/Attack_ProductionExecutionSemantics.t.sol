@@ -1,24 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
+
 import {Test} from "forge-std/Test.sol";
-import {
-    AkmenaPolicyBoundary
-} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
-import {
-    AkmenaExecutionAuthorization
-} from "../../../src/authorization/AkmenaExecutionAuthorization.sol";
+import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
+import {AkmenaExecutionAuthorization} from "../../../src/authorization/AkmenaExecutionAuthorization.sol";
 
 contract ExecutionSemanticsTarget {
     address public observedSender;
     uint256 public observedValue;
     bytes public observedCalldata;
 
-    function execute(bytes calldata)
-        external
-        payable
-        returns (bool)
-    {
+    function execute(bytes calldata) external payable returns (bool) {
         observedSender = msg.sender;
         observedValue = msg.value;
 
@@ -32,51 +26,36 @@ contract ExecutionSemanticsTarget {
 
 contract AttackProductionExecutionSemanticsTest is Test {
     AkmenaPolicyBoundary internal boundary;
+    AkmenaCore internal core;
     ExecutionSemanticsTarget internal target;
 
     uint256 internal agentPk = 0xA11CE;
     address internal agent;
 
-    address internal operator =
-        address(0x1111);
+    address internal operator = address(0x1111);
 
     function setUp() public {
         agent = vm.addr(agentPk);
 
-        boundary =
-            new AkmenaPolicyBoundary(address(0));
+        core = new AkmenaCore();
 
-        target =
-            new ExecutionSemanticsTarget();
+        boundary = new AkmenaPolicyBoundary(address(core));
+
+        target = new ExecutionSemanticsTarget();
 
         vm.deal(agent, 100 ether);
 
         vm.prank(operator);
 
-        boundary.setAgentPolicy(
-            agent,
-            20 ether,
-            20 ether,
-            false
-        );
+        boundary.setAgentPolicy(agent, 20 ether, 20 ether, false);
     }
 
-    function _intent(
-        uint256 amount,
-        uint256 value,
-        uint256 nonce
-    )
+    function _intent(uint256 amount, uint256 value, uint256 nonce)
         internal
         view
-        returns (
-            AkmenaExecutionAuthorization.ExecutionIntent memory
-        )
+        returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
     {
-        bytes memory payload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("AKMENA")
-            );
+        bytes memory payload = abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("AKMENA"));
 
         return AkmenaExecutionAuthorization.ExecutionIntent({
             operator: operator,
@@ -94,145 +73,75 @@ contract AttackProductionExecutionSemanticsTest is Test {
         });
     }
 
-    function _sign(
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent
-    )
-        internal
-        view
-        returns (bytes memory)
-    {
-        bytes32 digest =
-            boundary.executionAuthorization().hashIntent(intent);
+    function _sign(AkmenaExecutionAuthorization.ExecutionIntent memory intent) internal view returns (bytes memory) {
+        bytes32 digest = boundary.executionAuthorization().hashIntent(intent);
 
-        (uint8 v, bytes32 r, bytes32 s) =
-            vm.sign(agentPk, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(agentPk, digest);
 
         return abi.encodePacked(r, s, v);
     }
 
-    function test_DownstreamTargetSeesPolicyBoundaryAsSender()
-        public
-    {
+    function test_DownstreamTargetSeesPolicyBoundaryAsSender() public {
         uint256 value = 1 ether;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(value, value, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(value, value, 0);
 
-        bytes memory payload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("AKMENA")
-            );
+        bytes memory payload = abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("AKMENA"));
 
-        bytes memory signature =
-            _sign(intent);
+        bytes memory signature = _sign(intent);
 
         vm.prank(agent);
 
-        boundary.executeAuthorizedAgentCall{value: value}(
-            intent,
-            payload,
-            signature
-        );
+        boundary.executeAuthorizedAgentCall{value: value}(intent, payload, signature);
 
-        assertEq(
-            target.observedSender(),
-            address(boundary),
-            "Unexpected downstream msg.sender"
-        );
+        assertEq(target.observedSender(), address(boundary), "Unexpected downstream msg.sender");
     }
 
-    function test_DownstreamTargetReceivesExactAuthorizedValue()
-        public
-    {
+    function test_DownstreamTargetReceivesExactAuthorizedValue() public {
         uint256 value = 1 ether;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(value, value, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(value, value, 0);
 
-        bytes memory payload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("AKMENA")
-            );
+        bytes memory payload = abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("AKMENA"));
 
-        bytes memory signature =
-            _sign(intent);
+        bytes memory signature = _sign(intent);
 
         vm.prank(agent);
 
-        boundary.executeAuthorizedAgentCall{value: value}(
-            intent,
-            payload,
-            signature
-        );
+        boundary.executeAuthorizedAgentCall{value: value}(intent, payload, signature);
 
-        assertEq(
-            target.observedValue(),
-            value,
-            "Downstream value mismatch"
-        );
+        assertEq(target.observedValue(), value, "Downstream value mismatch");
     }
 
-    function test_UnauthorizedValueCannotBeForwarded()
-        public
-    {
+    function test_UnauthorizedValueCannotBeForwarded() public {
         uint256 authorizedValue = 1 ether;
         uint256 suppliedValue = 2 ether;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(
-                authorizedValue,
-                authorizedValue,
-                0
-            );
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(authorizedValue, authorizedValue, 0);
 
-        bytes memory payload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("AKMENA")
-            );
+        bytes memory payload = abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("AKMENA"));
 
-        bytes memory signature =
-            _sign(intent);
+        bytes memory signature = _sign(intent);
 
         vm.prank(agent);
 
-        vm.expectRevert(
-            AkmenaExecutionAuthorization.InvalidCalldataHash.selector
-        );
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidCalldataHash.selector);
 
-        boundary.executeAuthorizedAgentCall{value: suppliedValue}(
-            intent,
-            payload,
-            signature
-        );
+        boundary.executeAuthorizedAgentCall{value: suppliedValue}(intent, payload, signature);
     }
 
-    function test_CalldataActuallyExecutedMatchesAuthorizedHash()
-        public
-    {
+    function test_CalldataActuallyExecutedMatchesAuthorizedHash() public {
         uint256 value = 0;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(0, value, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(0, value, 0);
 
-        bytes memory payload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("AKMENA")
-            );
+        bytes memory payload = abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("AKMENA"));
 
-        bytes memory signature =
-            _sign(intent);
+        bytes memory signature = _sign(intent);
 
         vm.prank(agent);
 
-        boundary.executeAuthorizedAgentCall(
-            intent,
-            payload,
-            signature
-        );
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
 
         assertEq(
             keccak256(target.observedCalldata()),
@@ -241,39 +150,22 @@ contract AttackProductionExecutionSemanticsTest is Test {
         );
     }
 
-    function test_MutatedPayloadCannotReachTarget()
-        public
-    {
+    function test_MutatedPayloadCannotReachTarget() public {
         uint256 value = 0;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(0, value, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(0, value, 0);
 
         bytes memory maliciousPayload =
-            abi.encodeWithSelector(
-                ExecutionSemanticsTarget.execute.selector,
-                bytes("MALICIOUS")
-            );
+            abi.encodeWithSelector(ExecutionSemanticsTarget.execute.selector, bytes("MALICIOUS"));
 
-        bytes memory signature =
-            _sign(intent);
+        bytes memory signature = _sign(intent);
 
         vm.prank(agent);
 
-        vm.expectRevert(
-            AkmenaExecutionAuthorization.InvalidCalldataHash.selector
-        );
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidCalldataHash.selector);
 
-        boundary.executeAuthorizedAgentCall(
-            intent,
-            maliciousPayload,
-            signature
-        );
+        boundary.executeAuthorizedAgentCall(intent, maliciousPayload, signature);
 
-        assertEq(
-            target.observedSender(),
-            address(0),
-            "Target was reached with unauthorized calldata"
-        );
+        assertEq(target.observedSender(), address(0), "Target was reached with unauthorized calldata");
     }
 }

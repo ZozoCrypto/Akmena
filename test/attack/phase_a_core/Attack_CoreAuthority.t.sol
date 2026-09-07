@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+import {AkmenaToken} from "../../../src/token/core/AkmenaToken.sol";
 import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
 import {EscrowEngine} from "../../../src/economics/EscrowEngine.sol";
 
@@ -17,7 +18,7 @@ contract Attack_CoreAuthorityTest is Test {
     function setUp() public {
         vm.startPrank(admin);
         core = new AkmenaCore();
-        escrow = new EscrowEngine();
+        escrow = new EscrowEngine(address(new AkmenaToken(address(this))));
 
         // Admin legitimately registers the Escrow Engine
         core.registerModule(ESCROW_KEY, address(escrow), "2.1.0");

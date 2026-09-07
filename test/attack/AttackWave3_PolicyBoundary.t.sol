@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 
 import {
     AkmenaCore
@@ -70,7 +71,7 @@ contract AttackWave3_PolicyBoundaryTest is Test {
             boundary.executionAuthorization();
 
         escrow =
-            new EscrowEngine();
+            new EscrowEngine(address(new AkmenaToken(address(this))));
 
         target =
             new Wave3Target();

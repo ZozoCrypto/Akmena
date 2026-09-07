@@ -24,7 +24,8 @@ contract ProofSubjectIdentityTest is Test {
                 abi.encodePacked(
                     nullifierHash,
                     secret,
-                    amount
+                    amount,
+                    recipient
                 )
             );
 

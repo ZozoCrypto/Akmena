@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test, console} from "forge-std/Test.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {AkmenaCore} from "../../src/core/AkmenaCore.sol";
 import {EscrowEngine} from "../../src/economics/EscrowEngine.sol";
 
@@ -17,7 +18,7 @@ contract AttackWave2_PrivilegeEscalationTest is Test {
         
         // Deploy Core Router and Escrow
         core = new AkmenaCore();
-        escrow = new EscrowEngine();
+        escrow = new EscrowEngine(address(new AkmenaToken(address(this))));
 
         // Register Escrow into Core
         core.registerModule(bytes32("ESCROW_ENGINE"), address(escrow), "2.0.0");

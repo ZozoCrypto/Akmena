@@ -27,10 +27,20 @@ contract EscrowHandler is Test {
         seller = _nonZero(seller);
         amount = bound(amount, 1, type(uint128).max);
 
+        // Provision the fuzzed buyer with AKM and grant the escrow allowance.
+        // The production EscrowEngine requires msg.sender == buyer.
+        deal(address(escrow.asset()), buyer, amount);
+
+        // Both approval and creation must execute as the actual buyer.
+        vm.startPrank(buyer);
+        escrow.asset().approve(address(escrow), amount);
+
         try escrow.createEscrow(buyer, seller, amount) returns (uint256 id) {
             createdIds.push(id);
             createCount++;
         } catch {}
+
+        vm.stopPrank();
     }
 
     function releaseEscrow(uint256 index, address attacker) external {

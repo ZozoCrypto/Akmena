@@ -2,26 +2,47 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+
+import {AkmenaToken} from "../../../src/token/core/AkmenaToken.sol";
 import {TreasuryEngine} from "../../../src/economics/TreasuryEngine.sol";
 
 contract Attack_TreasurySupplySpoofTest is Test {
+    AkmenaToken internal token;
     TreasuryEngine internal treasury;
 
-    address internal attacker = address(0xBEEF);
+    address internal owner = address(0x1111);
+    address internal holder = address(0x2222);
 
     function setUp() public {
-        treasury = new TreasuryEngine();
+        token = new AkmenaToken(holder);
+
+        treasury = new TreasuryEngine(
+            address(token),
+            owner
+        );
     }
 
-    function test_Attack_AnyoneCanRewriteSupplyAccounting() public {
-        vm.prank(attacker);
+    function test_TreasuryReportsTokenSupply()
+        public
+        view
+    {
+        (uint256 total,) =
+            treasury.getTreasuryState();
 
-        treasury.updateSupply(type(uint256).max, type(uint256).max);
+        assertEq(
+            total,
+            token.totalSupply()
+        );
+    }
 
-        (uint256 total, uint256 circulating, uint256 balance) = treasury.getTreasuryState();
-
-        assertEq(total, type(uint256).max);
-        assertEq(circulating, type(uint256).max);
-        assertEq(balance, 0);
+    function test_TreasuryHasNoIndependentSupplyState()
+        public
+        view
+    {
+        // Supply is owned by the monetary layer.
+        assertEq(
+            treasury.token(),
+            address(token)
+        );
     }
 }

@@ -109,7 +109,8 @@ contract CanonicalPrivacyExecutionTest is Test {
                 abi.encodePacked(
                     nullifierHash,
                     secret,
-                    amount
+                    amount,
+                    payable(agent)
                 )
             );
 

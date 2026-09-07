@@ -6,6 +6,7 @@ import {LibTransientProof} from "../libraries/LibTransientProof.sol";
 contract PrivacyEngine {
     mapping(bytes32 => bool) public commitments;
     mapping(bytes32 => bool) public nullifierHashes;
+    mapping(bytes32 => uint256) public commitmentAmounts;
 
     event CommitmentDeposited(bytes32 indexed commitment, uint256 amount);
     event PrivateSettlementExecuted(bytes32 indexed nullifierHash, address indexed recipient, uint256 amount);
@@ -21,6 +22,7 @@ contract PrivacyEngine {
         if (commitments[commitment]) revert CommitmentAlreadyExists();
 
         commitments[commitment] = true;
+        commitmentAmounts[commitment] = msg.value;
         emit CommitmentDeposited(commitment, msg.value);
     }
 
@@ -33,18 +35,40 @@ contract PrivacyEngine {
         if (stealthRecipient == address(0)) revert InvalidAddress();
         if (nullifierHashes[nullifierHash]) revert NullifierAlreadySpent();
         
-        bytes32 derivedCommitment = keccak256(abi.encodePacked(nullifierHash, secret, amount));
-        if (!commitments[derivedCommitment]) revert InvalidCommitment();
+        bytes32 derivedCommitment = keccak256(
+            abi.encodePacked(
+                nullifierHash,
+                secret,
+                amount,
+                stealthRecipient
+            )
+        );
+        if (
+            !commitments[derivedCommitment] ||
+            commitmentAmounts[derivedCommitment] != amount
+        ) revert InvalidCommitment();
 
         nullifierHashes[nullifierHash] = true;
         commitments[derivedCommitment] = false;
+        delete commitmentAmounts[derivedCommitment];
 
         emit PrivateSettlementExecuted(nullifierHash, stealthRecipient, amount);
 
-        LibTransientProof.setPrivacyProof(uint256(nullifierHash), stealthRecipient, amount);
-
+        /*
+         * Complete the external recipient interaction before publishing
+         * the transient privacy proof.
+         *
+         * This prevents recipient-controlled fallback code from observing
+         * or consuming the proof during settlement.
+         */
         (bool success, ) = stealthRecipient.call{value: amount}("");
         if (!success) revert TransferFailed();
+
+        LibTransientProof.setPrivacyProof(
+            uint256(nullifierHash),
+            stealthRecipient,
+            amount
+        );
     }
 
     /// @notice Allows the PolicyBoundary to verify transient proofs written in this module's context

@@ -3,17 +3,20 @@ pragma solidity ^0.8.28;
 
 import {Test, console} from "forge-std/Test.sol";
 import {EscrowEngine} from "../../src/economics/EscrowEngine.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {LibStorage} from "../../src/storage/LibStorage.sol";
 
 contract AttackWave2_PhantomEscrowTest is Test {
     EscrowEngine internal escrow;
+    AkmenaToken internal token;
 
     address internal attacker = address(0xBAD);
     address internal aiAgent = address(0xA1);
 
     function setUp() public {
         // We deploy the engine raw, exactly as it exists on chain
-        escrow = new EscrowEngine();
+        token = new AkmenaToken(address(this));
+        escrow = new EscrowEngine(address(token));
     }
 
     // =========================================================================
@@ -28,19 +31,22 @@ contract AttackWave2_PhantomEscrowTest is Test {
 
         vm.startPrank(attacker);
 
-        // 1. Attacker creates a massive escrow out of thin air.
-        // It succeeds because there is no `transferFrom` or `msg.value` check.
-        uint256 escrowId = escrow.createEscrow(attacker, aiAgent, fakeAmount);
+        // 1. Attacker has no AKM and has granted no allowance.
+        assertEq(token.balanceOf(attacker), 0);
+        assertEq(token.allowance(attacker, address(escrow)), 0);
 
-        // 2. The AI Agent queries the blockchain to verify the escrow is funded
-        LibStorage.EscrowData memory target = escrow.getEscrow(escrowId);
+        // 2. EXPLOIT ATTEMPT: create a massive escrow without funding.
+        // EXPECTED: The escrow MUST reject phantom funding.
+        vm.expectRevert();
 
-        // 3. EXPLOIT PROVEN: The protocol tells the AI Agent that the escrow 
-        // is valid, fully funded, and ready to go. The attacker just stole the work.
-        assertEq(target.buyer, attacker, "Buyer mismatch");
-        assertEq(target.seller, aiAgent, "Seller mismatch");
-        assertEq(target.amount, fakeAmount, "Amount was not recorded!");
-        assertEq(target.status, 1, "Status is not FUNDED!");
+        escrow.createEscrow(
+            attacker,
+            aiAgent,
+            fakeAmount
+        );
+
+        // No escrow record can be created without actual AKM custody.
+        assertEq(token.balanceOf(address(escrow)), 0);
         
         vm.stopPrank();
     }

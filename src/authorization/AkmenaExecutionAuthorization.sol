@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
@@ -29,8 +29,6 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  * It is intentionally independent from AkmenaPolicyBoundary.
  */
 contract AkmenaExecutionAuthorization is EIP712 {
-    using ECDSA for bytes32;
-
     bytes32 public constant EXECUTION_INTENT_TYPEHASH = keccak256(
         "ExecutionIntent(" "address operator," "address agent," "address target," "bytes4 selector,"
         "bytes32 calldataHash," "uint256 amount," "uint256 value," "bytes32 proofModuleKey," "uint256 proofId,"
@@ -149,11 +147,11 @@ contract AkmenaExecutionAuthorization is EIP712 {
 
         bytes32 digest = hashIntent(intent);
 
-        signer = digest.recover(signature);
-
-        if (signer != intent.agent) {
+        if (!SignatureChecker.isValidSignatureNow(intent.agent, digest, signature)) {
             revert InvalidSigner();
         }
+
+        signer = intent.agent;
 
         usedNonces[intent.agent][intent.nonce] = true;
     }

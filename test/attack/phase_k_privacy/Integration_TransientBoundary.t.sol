@@ -168,7 +168,8 @@ contract IntegrationTransientBoundaryTest is Test {
                 abi.encodePacked(
                     nullifierHash,
                     secret,
-                    amount
+                    amount,
+                    agent
                 )
             );
 
@@ -259,7 +260,8 @@ contract IntegrationTransientBoundaryTest is Test {
                 abi.encodePacked(
                     nullifierHash,
                     secret,
-                    amount
+                    amount,
+                    agent
                 )
             );
 
@@ -384,7 +386,8 @@ contract IntegrationTransientBoundaryTest is Test {
                 abi.encodePacked(
                     nullifierHash,
                     secret,
-                    amount
+                    amount,
+                    agent
                 )
             );
 

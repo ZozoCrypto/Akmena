@@ -8,7 +8,7 @@ library LibStorage {
     struct RegistryStorage { mapping(bytes32 => address) modules; mapping(bytes32 => bool) enabled; mapping(bytes32 => string) version; }
     struct AuthorizationStorage { mapping(address => mapping(bytes32 => bool)) capabilities; mapping(address => mapping(address => bool)) delegates; mapping(address => bool) verified; mapping(address => mapping(address => mapping(bytes32 => bool))) attestations; }
     struct TreasuryStorage { uint256 totalSupply; uint256 circulatingSupply; uint256 treasuryBalance; }
-    struct EscrowData { address buyer; address seller; uint256 amount; uint8 status; }
+    struct EscrowData { address buyer; address seller; uint256 amount; address asset; uint8 status; }
     struct EscrowStorage { uint256 nextEscrowId; mapping(uint256 => EscrowData) escrows; }
     struct SettlementData { address payer; address payee; uint256 amount; uint256 timestamp; }
     struct SettlementStorage { mapping(bytes32 => SettlementData) records; }

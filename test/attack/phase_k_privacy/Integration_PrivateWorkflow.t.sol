@@ -29,7 +29,14 @@ contract Integration_PrivateWorkflowTest is Test {
         bytes32 nullifierHash = keccak256("workflow-task-001");
         uint256 paymentAmount = 5 ether;
         
-        bytes32 commitment = keccak256(abi.encodePacked(nullifierHash, secret, paymentAmount));
+        bytes32 commitment = keccak256(
+            abi.encodePacked(
+                nullifierHash,
+                secret,
+                paymentAmount,
+                stealthRecipient
+            )
+        );
 
         // Step 2: Buyer Agent locks funds into the Privacy Pool
         vm.deal(buyerAgent, 10 ether);

@@ -1,81 +1,48 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {AkmenaCore} from "../../src/core/AkmenaCore.sol";
+
 import {Test} from "forge-std/Test.sol";
-import {
-    AkmenaPolicyBoundary
-} from "../../src/authorization/AkmenaPolicyBoundary.sol";
+import {AkmenaPolicyBoundary} from "../../src/authorization/AkmenaPolicyBoundary.sol";
 
 contract AttackLegacyExecutionRetirementCanonicalTest is Test {
     AkmenaPolicyBoundary internal boundary;
+    AkmenaCore internal core;
 
     address internal attacker = address(0xBEEF);
     address internal target = address(0xCAFE);
 
     function setUp() public {
-        boundary = new AkmenaPolicyBoundary(address(0));
+        core = new AkmenaCore();
+        boundary = new AkmenaPolicyBoundary(address(core));
     }
 
-    function test_LegacyExecutionEntrypointIsPermanentlyDisabled()
-        public
-    {
+    function test_LegacyExecutionEntrypointIsPermanentlyDisabled() public {
         vm.prank(attacker);
 
         vm.expectRevert();
 
-        boundary.executeAgentCall(
-            attacker,
-            target,
-            0,
-            bytes32(0),
-            0,
-            ""
-        );
+        boundary.executeAgentCall(attacker, target, 0, bytes32(0), 0, "");
     }
 
-    function test_LegacyExecutionCannotBeUsedWithArbitraryCalldata()
-        public
-    {
-        bytes memory maliciousPayload =
-            abi.encodeWithSignature(
-                "drain(address,uint256)",
-                attacker,
-                type(uint256).max
-            );
+    function test_LegacyExecutionCannotBeUsedWithArbitraryCalldata() public {
+        bytes memory maliciousPayload = abi.encodeWithSignature("drain(address,uint256)", attacker, type(uint256).max);
 
         vm.prank(attacker);
 
         vm.expectRevert();
 
-        boundary.executeAgentCall(
-            attacker,
-            target,
-            type(uint256).max,
-            bytes32(0),
-            0,
-            maliciousPayload
-        );
+        boundary.executeAgentCall(attacker, target, type(uint256).max, bytes32(0), 0, maliciousPayload);
     }
 
-    function test_LegacyExecutionCannotBecomeCanonicalViaZeroProof()
-        public
-    {
-        bytes memory payload =
-            abi.encodeWithSignature(
-                "execute()"
-            );
+    function test_LegacyExecutionCannotBecomeCanonicalViaZeroProof() public {
+        bytes memory payload = abi.encodeWithSignature("execute()");
 
         vm.prank(attacker);
 
         vm.expectRevert();
 
-        boundary.executeAgentCall(
-            attacker,
-            target,
-            0,
-            bytes32(0),
-            0,
-            payload
-        );
+        boundary.executeAgentCall(attacker, target, 0, bytes32(0), 0, payload);
     }
 }

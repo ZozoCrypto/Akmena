@@ -2,54 +2,117 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+
+import {AkmenaToken} from "../../../src/token/core/AkmenaToken.sol";
 import {TreasuryEngine} from "../../../src/economics/TreasuryEngine.sol";
+import {ITreasuryEngine} from "../../../src/economics/ITreasuryEngine.sol";
 
 contract Attack_TreasuryAccountingSpoofTest is Test {
+    AkmenaToken internal token;
     TreasuryEngine internal treasury;
 
+    address internal owner = address(0x1111);
     address internal attacker = address(0xBEEF);
-    address internal victim = address(0xCAFE);
+    address internal recipient = address(0xCAFE);
+
+    uint256 internal constant INITIAL =
+        1_000_000 ether;
 
     function setUp() public {
-        treasury = new TreasuryEngine();
+        token = new AkmenaToken(attacker);
+
+        treasury = new TreasuryEngine(
+            address(token),
+            owner
+        );
     }
 
-    function test_Attack_AnyoneCanManufactureTreasuryBalance() public {
+    function test_Attack_CannotFabricateTreasuryBalance()
+        public
+    {
+        uint256 before =
+            token.balanceOf(address(treasury));
+
         vm.prank(attacker);
 
-        treasury.fundTreasury(1_000_000 ether);
-
-        (,, uint256 balance) = treasury.getTreasuryState();
-
-        assertEq(balance, 1_000_000 ether, "Expected permissionless phantom treasury balance");
-    }
-
-    function test_Attack_AnyoneCanDisburseManufacturedTreasuryBalance() public {
-        vm.startPrank(attacker);
+        vm.expectRevert();
 
         treasury.fundTreasury(1_000_000 ether);
-        treasury.disburseFunds(attacker, 1_000_000 ether);
 
-        vm.stopPrank();
-
-        (,, uint256 balance) = treasury.getTreasuryState();
-
-        assertEq(balance, 0, "Manufactured treasury balance should have been consumed");
+        assertEq(
+            token.balanceOf(address(treasury)),
+            before
+        );
     }
 
-    function test_Attack_DisbursementDoesNotMoveRealFunds() public {
-        vm.startPrank(attacker);
+    function test_Attack_NonOwnerCannotDisburse()
+        public
+    {
+        uint256 amount = 1_000 ether;
 
-        treasury.fundTreasury(100 ether);
+        vm.prank(attacker);
+        token.approve(
+            address(treasury),
+            amount
+        );
 
-        uint256 attackerBefore = attacker.balance;
+        vm.prank(attacker);
+        treasury.fundTreasury(amount);
 
-        treasury.disburseFunds(attacker, 100 ether);
+        uint256 attackerBefore =
+            token.balanceOf(attacker);
 
-        uint256 attackerAfter = attacker.balance;
+        vm.prank(attacker);
+        vm.expectRevert(
+            ITreasuryEngine.Unauthorized.selector
+        );
 
-        vm.stopPrank();
+        treasury.disburseFunds(
+            recipient,
+            amount
+        );
 
-        assertEq(attackerAfter, attackerBefore, "TreasuryEngine currently performs no real asset transfer");
+        assertEq(
+            token.balanceOf(attacker),
+            attackerBefore
+        );
+    }
+
+    function test_OwnerDisbursementMovesRealAKM()
+        public
+    {
+        uint256 amount = 5_000 ether;
+
+        vm.prank(attacker);
+        token.approve(
+            address(treasury),
+            amount
+        );
+
+        vm.prank(attacker);
+        treasury.fundTreasury(amount);
+
+        uint256 recipientBefore =
+            token.balanceOf(recipient);
+
+        uint256 treasuryBefore =
+            token.balanceOf(address(treasury));
+
+        vm.prank(owner);
+
+        treasury.disburseFunds(
+            recipient,
+            amount
+        );
+
+        assertEq(
+            token.balanceOf(recipient),
+            recipientBefore + amount
+        );
+
+        assertEq(
+            token.balanceOf(address(treasury)),
+            treasuryBefore - amount
+        );
     }
 }

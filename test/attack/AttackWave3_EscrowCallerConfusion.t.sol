@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {EscrowEngine} from "../../src/economics/EscrowEngine.sol";
 
 contract AttackWave3_EscrowCallerConfusionTest is Test {
@@ -12,11 +13,15 @@ contract AttackWave3_EscrowCallerConfusionTest is Test {
     address internal attacker = address(0xBEEF);
 
     function setUp() public {
-        escrow = new EscrowEngine();
+        AkmenaToken token = new AkmenaToken(address(this));
+        escrow = new EscrowEngine(address(token));
 
-        // Must prank as buyer to pass our earlier V2 authorization patch
-        vm.prank(buyer);
+        token.transfer(buyer, 100 ether);
+
+        vm.startPrank(buyer);
+        token.approve(address(escrow), 100 ether);
         escrow.createEscrow(buyer, seller, 100 ether);
+        vm.stopPrank();
     }
 
     function test_Attack_AttackerCannotSpoofBuyer() public {

@@ -5,16 +5,19 @@ import {Test} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 
 import {EscrowEngine} from "../../src/economics/EscrowEngine.sol";
+import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 import {IEscrowEngine} from "../../src/economics/IEscrowEngine.sol";
 import {LibStorage} from "../../src/storage/LibStorage.sol";
 import {EscrowHandler} from "./handlers/EscrowHandler.sol";
 
 contract EscrowInvariant is StdInvariant, Test {
     EscrowEngine internal escrow;
+    AkmenaToken internal token;
     EscrowHandler internal handler;
 
     function setUp() public {
-        escrow = new EscrowEngine();
+        token = new AkmenaToken(address(this));
+        escrow = new EscrowEngine(address(token));
         handler = new EscrowHandler(escrow);
 
         targetContract(address(handler));
@@ -78,13 +81,37 @@ contract EscrowInvariant is StdInvariant, Test {
     }
 
     /*
+     * Explicitly prove that the repaired handler can create a real escrow.
+     * This is a setup/coverage test, not a state invariant.
+     */
+    function test_HandlerCanSuccessfullyCreateEscrow() public {
+        uint256 beforeCount = handler.createCount();
+
+        address buyer = address(0xBEEF);
+        address seller = address(0xCAFE);
+
+        handler.createEscrow(buyer, seller, 1 ether);
+
+        assertEq(handler.createCount(), beforeCount + 1);
+        assertEq(handler.createdIdsLength(), beforeCount + 1);
+
+        uint256 id = handler.createdId(handler.createdIdsLength() - 1);
+        LibStorage.EscrowData memory escrowData = escrow.getEscrow(id);
+
+        assertEq(escrowData.buyer, buyer);
+        assertEq(escrowData.seller, seller);
+        assertEq(escrowData.amount, 1 ether);
+        assertEq(escrowData.status, 1);
+    }
+
+    /*
      * SECURITY INVARIANT:
      *
      * An account that is NOT the buyer must never be able to release
      * an escrow merely by supplying the buyer address as an argument.
      *
-     * The current production implementation is expected to violate this
-     * because releaseEscrow() currently trusts its caller parameter.
+     * The production implementation must enforce this by requiring
+     * msg.sender to be the escrow buyer.
      */
     function invariant_onlyBuyerCanRelease() public view {
         assertEq(handler.unauthorizedReleaseSuccesses(), 0);
@@ -96,8 +123,8 @@ contract EscrowInvariant is StdInvariant, Test {
      * An account that is NOT the seller must never be able to refund
      * an escrow merely by supplying the seller address as an argument.
      *
-     * The current production implementation is expected to violate this
-     * because refundEscrow() currently trusts its caller parameter.
+     * The production implementation must enforce this by requiring
+     * msg.sender to be the escrow seller.
      */
     function invariant_onlySellerCanRefund() public view {
         assertEq(handler.unauthorizedRefundSuccesses(), 0);
