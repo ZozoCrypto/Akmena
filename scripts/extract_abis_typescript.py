@@ -12,9 +12,11 @@ CONTRACTS = {
     "EscrowEngine": "EscrowEngine.sol",
     "PaymentsEngine": "PaymentsEngine.sol",
     "WorkflowEngine": "WorkflowEngine.sol",
-    "AgentRegistry": "AgentRegistry.sol",
     "EconomicCommitmentEngine": "EconomicCommitmentEngine.sol",
     "MarketplaceEngine": "MarketplaceEngine.sol",
+    "IdentityFactory": "IdentityFactory.sol",
+    "Identity": "Identity.sol",
+    "Registry": "Registry.sol",
 }
 
 DEST.mkdir(parents=True, exist_ok=True)
