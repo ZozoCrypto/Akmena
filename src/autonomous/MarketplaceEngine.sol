@@ -7,10 +7,10 @@ import {LibStorage} from "../storage/LibStorage.sol";
 contract MarketplaceEngine is IMarketplaceEngine {
     function createTask(uint256 reward) external override returns (uint256) {
         LibStorage.MarketplaceStorage storage ds = LibStorage.marketplace();
-        
+
         if (ds.nextTaskId == 0) ds.nextTaskId = 1;
         uint256 currentId = ds.nextTaskId;
-        
+
         ds.tasks[currentId] = LibStorage.TaskData({
             creator: msg.sender,
             assignee: address(0),
@@ -20,13 +20,13 @@ contract MarketplaceEngine is IMarketplaceEngine {
 
         ds.nextTaskId++;
         emit TaskCreated(currentId, msg.sender, reward);
-        
+
         return currentId;
     }
 
     function assignTask(uint256 taskId, address assignee) external override {
         if (assignee == address(0)) revert InvalidAddress();
-        
+
         LibStorage.MarketplaceStorage storage ds = LibStorage.marketplace();
         LibStorage.TaskData storage taskData = ds.tasks[taskId];
 

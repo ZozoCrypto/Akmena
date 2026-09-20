@@ -22,7 +22,7 @@ contract MarketplaceEngineTest is Test {
 
         uint256 id = engine.createTask(1000);
         assertEq(id, 1);
-        
+
         LibStorage.TaskData memory data = engine.getTask(id);
         assertEq(data.creator, creator);
         assertEq(data.status, 1); // Open
@@ -55,7 +55,7 @@ contract MarketplaceEngineTest is Test {
         emit IMarketplaceEngine.TaskCompleted(id);
 
         engine.completeTask(id, assignee);
-        
+
         LibStorage.TaskData memory data = engine.getTask(id);
         assertEq(data.status, 3); // Completed
     }
