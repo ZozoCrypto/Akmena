@@ -6,7 +6,7 @@ const errors_1 = require("../errors");
 const modules_1 = require("../constants/modules");
 const AkmenaCore_1 = require("../abis/AkmenaCore");
 const WorkflowModule_1 = require("../modules/WorkflowModule");
-const AgentModule_1 = require("../modules/AgentModule");
+const IdentityModule_1 = require("../modules/IdentityModule");
 const EscrowModule_1 = require("../modules/EscrowModule");
 const PaymentsModule_1 = require("../modules/PaymentsModule");
 const MarketplaceModule_1 = require("../modules/MarketplaceModule");
@@ -20,7 +20,7 @@ class AkmenaClient {
     versionVerified = false;
     // Business Wrappers
     workflow;
-    agent;
+    identity;
     escrow;
     payments;
     marketplace;
@@ -30,7 +30,7 @@ class AkmenaClient {
         this.walletClient = config.wallet;
         this.publicClient = (0, viem_1.createPublicClient)({ chain: this.chain, transport: (0, viem_1.http)(config.rpcUrl) });
         this.workflow = new WorkflowModule_1.WorkflowModule(this);
-        this.agent = new AgentModule_1.AgentModule(this);
+        this.identity = new IdentityModule_1.IdentityModule(this);
         this.escrow = new EscrowModule_1.EscrowModule(this);
         this.payments = new PaymentsModule_1.PaymentsModule(this);
         this.marketplace = new MarketplaceModule_1.MarketplaceModule(this);

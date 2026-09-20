@@ -3,7 +3,7 @@ export * from './errors';
 export * from './constants/modules';
 export * from './types/protocol';
 export * from './modules/WorkflowModule';
-export * from './modules/AgentModule';
+export * from './modules/IdentityModule';
 export * from './modules/EscrowModule';
 export * from './modules/PaymentsModule';
 export * from './modules/MarketplaceModule';

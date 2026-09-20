@@ -5,7 +5,7 @@ import { HealthStatus, ModuleInfo } from '../types/protocol';
 import { AkmenaCoreABI } from '../abis/AkmenaCore';
 
 import { WorkflowModule } from '../modules/WorkflowModule';
-import { AgentModule } from '../modules/AgentModule';
+import { IdentityModule } from '../modules/IdentityModule';
 import { EscrowModule } from '../modules/EscrowModule';
 import { PaymentsModule } from '../modules/PaymentsModule';
 import { MarketplaceModule } from '../modules/MarketplaceModule';
@@ -29,7 +29,7 @@ export class AkmenaClient {
 
     // Business Wrappers
     public readonly workflow: WorkflowModule;
-    public readonly agent: AgentModule;
+    public readonly identity: IdentityModule;
     public readonly escrow: EscrowModule;
     public readonly payments: PaymentsModule;
     public readonly marketplace: MarketplaceModule;
@@ -41,7 +41,7 @@ export class AkmenaClient {
         this.publicClient = createPublicClient({ chain: this.chain, transport: http(config.rpcUrl) });
         
         this.workflow = new WorkflowModule(this);
-        this.agent = new AgentModule(this);
+        this.identity = new IdentityModule(this);
         this.escrow = new EscrowModule(this);
         this.payments = new PaymentsModule(this);
         this.marketplace = new MarketplaceModule(this);

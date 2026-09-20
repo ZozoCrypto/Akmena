@@ -3,7 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.translateContractError = exports.UnsupportedProtocolVersionError = exports.WalletRequiredError = exports.ModuleUnavailableError = exports.WorkflowError = exports.CapabilityError = exports.AuthorizationError = exports.AkmenaError = void 0;
 const viem_1 = require("viem");
 const AkmenaCore_1 = require("../abis/AkmenaCore");
-const AgentRegistry_1 = require("../abis/AgentRegistry");
+const IdentityFactory_1 = require("../abis/IdentityFactory");
+const Identity_1 = require("../abis/Identity");
+const Registry_1 = require("../abis/Registry");
 const EscrowEngine_1 = require("../abis/EscrowEngine");
 const PaymentsEngine_1 = require("../abis/PaymentsEngine");
 const WorkflowEngine_1 = require("../abis/WorkflowEngine");
@@ -49,7 +51,9 @@ exports.UnsupportedProtocolVersionError = UnsupportedProtocolVersionError;
 // Master ABI registry for decoding custom Solidity errors deterministically
 const MASTER_ABIS = [
     ...AkmenaCore_1.AkmenaCoreABI,
-    ...AgentRegistry_1.AgentRegistryABI,
+    ...IdentityFactory_1.IdentityFactoryABI,
+    ...Identity_1.IdentityABI,
+    ...Registry_1.RegistryABI,
     ...EscrowEngine_1.EscrowEngineABI,
     ...PaymentsEngine_1.PaymentsEngineABI,
     ...WorkflowEngine_1.WorkflowEngineABI,

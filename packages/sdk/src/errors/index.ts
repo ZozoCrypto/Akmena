@@ -1,6 +1,8 @@
 import { decodeErrorResult, Hex } from 'viem';
 import { AkmenaCoreABI } from '../abis/AkmenaCore';
-import { AgentRegistryABI } from '../abis/AgentRegistry';
+import { IdentityFactoryABI } from '../abis/IdentityFactory';
+import { IdentityABI } from '../abis/Identity';
+import { RegistryABI } from '../abis/Registry';
 import { EscrowEngineABI } from '../abis/EscrowEngine';
 import { PaymentsEngineABI } from '../abis/PaymentsEngine';
 import { WorkflowEngineABI } from '../abis/WorkflowEngine';
@@ -42,7 +44,9 @@ export class UnsupportedProtocolVersionError extends AkmenaError {
 // Master ABI registry for decoding custom Solidity errors deterministically
 const MASTER_ABIS = [
     ...AkmenaCoreABI,
-    ...AgentRegistryABI,
+    ...IdentityFactoryABI,
+    ...IdentityABI,
+    ...RegistryABI,
     ...EscrowEngineABI,
     ...PaymentsEngineABI,
     ...WorkflowEngineABI,

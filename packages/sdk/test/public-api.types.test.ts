@@ -1,22 +1,40 @@
 import { describe, expect, it } from 'vitest';
 import type {
-    AgentRegisteredEvent,
-} from '../src/modules/AgentModule';
+    IdentityCreatedEvent,
+    IdentityInfo,
+} from '../src/modules/IdentityModule';
 import type {
     HealthStatus,
 } from '../src/types/protocol';
 
 describe('Akmena public API types', () => {
-    it('defines a typed AgentRegistered event', () => {
-        const event: AgentRegisteredEvent = {
-            id: '0x1111111111111111111111111111111111111111111111111111111111111111',
-            owner: '0x1111111111111111111111111111111111111111',
-            metadataURI: 'ipfs://agent',
+    it('defines a typed IdentityCreated event', () => {
+        const event: IdentityCreatedEvent = {
+            clone: '0x1111111111111111111111111111111111111111',
+            id: 1n,
+            identityType: 1,
         };
 
-        expect(event.id).toMatch(/^0x[a-f0-9]{64}$/);
-        expect(event.owner).toMatch(/^0x[a-f0-9]{40}$/);
-        expect(event.metadataURI).toBe('ipfs://agent');
+        expect(event.clone).toMatch(/^0x[a-f0-9]{40}$/);
+        expect(event.id).toBe(1n);
+        expect(event.identityType).toBe(1);
+    });
+
+    it('defines a typed IdentityInfo object', () => {
+        const identity: IdentityInfo = {
+            address: '0x1111111111111111111111111111111111111111',
+            identityId: 1n,
+            owner: '0x2222222222222222222222222222222222222222',
+            identityType: 1,
+            isActive: true,
+            protocolVersion: '2.0.0',
+            metadataURI: 'ipfs://identity',
+        };
+
+        expect(identity.address).toMatch(/^0x[a-f0-9]{40}$/);
+        expect(identity.identityId).toBe(1n);
+        expect(identity.owner).toMatch(/^0x[a-f0-9]{40}$/);
+        expect(identity.metadataURI).toBe('ipfs://identity');
     });
 
     it('defines diagnostic health fields', () => {

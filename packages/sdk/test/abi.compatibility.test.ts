@@ -3,7 +3,9 @@ import { EscrowEngineABI } from '../src/abis/EscrowEngine';
 import { PaymentsEngineABI } from '../src/abis/PaymentsEngine';
 import { WorkflowEngineABI } from '../src/abis/WorkflowEngine';
 import { EconomicCommitmentEngineABI } from '../src/abis/EconomicCommitmentEngine';
-import { AgentRegistryABI } from '../src/abis/AgentRegistry';
+import { IdentityFactoryABI } from '../src/abis/IdentityFactory';
+import { IdentityABI } from '../src/abis/Identity';
+import { RegistryABI } from '../src/abis/Registry';
 import { MarketplaceEngineABI } from '../src/abis/MarketplaceEngine';
 
 function findFunction(abi: readonly any[], name: string) {
@@ -103,15 +105,30 @@ describe('Akmena ABI compatibility', () => {
         ]);
     });
 
-    it('matches the canonical AgentRegistry API', () => {
-        expect(inputTypes(AgentRegistryABI, 'register')).toEqual([
-            'bytes32',
+    it('matches the canonical Identity API', () => {
+        expect(inputTypes(IdentityFactoryABI, 'createIdentity')).toEqual([
+            'uint8',
             'string',
         ]);
 
-        expect(inputTypes(AgentRegistryABI, 'updateMetadata')).toEqual([
-            'bytes32',
+        expect(inputTypes(IdentityABI, 'updateMetadata')).toEqual([
             'string',
+        ]);
+
+        expect(inputTypes(IdentityABI, 'transferOwnership')).toEqual([
+            'address',
+        ]);
+
+        expect(inputTypes(RegistryABI, 'identityAddress')).toEqual([
+            'uint256',
+        ]);
+
+        expect(inputTypes(RegistryABI, 'identityId')).toEqual([
+            'address',
+        ]);
+
+        expect(inputTypes(RegistryABI, 'exists')).toEqual([
+            'uint256',
         ]);
     });
 });

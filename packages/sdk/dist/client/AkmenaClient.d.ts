@@ -2,7 +2,7 @@ import { PublicClient, WalletClient, Chain } from 'viem';
 import { MODULE_KEYS } from '../constants/modules';
 import { HealthStatus, ModuleInfo } from '../types/protocol';
 import { WorkflowModule } from '../modules/WorkflowModule';
-import { AgentModule } from '../modules/AgentModule';
+import { IdentityModule } from '../modules/IdentityModule';
 import { EscrowModule } from '../modules/EscrowModule';
 import { PaymentsModule } from '../modules/PaymentsModule';
 import { MarketplaceModule } from '../modules/MarketplaceModule';
@@ -21,7 +21,7 @@ export declare class AkmenaClient {
     private addressCache;
     private versionVerified;
     readonly workflow: WorkflowModule;
-    readonly agent: AgentModule;
+    readonly identity: IdentityModule;
     readonly escrow: EscrowModule;
     readonly payments: PaymentsModule;
     readonly marketplace: MarketplaceModule;

@@ -20,7 +20,7 @@ __exportStar(require("./constants/modules"), exports);
 __exportStar(require("./types/protocol"), exports);
 // Export Module Wrappers
 __exportStar(require("./modules/WorkflowModule"), exports);
-__exportStar(require("./modules/AgentModule"), exports);
+__exportStar(require("./modules/IdentityModule"), exports);
 __exportStar(require("./modules/EscrowModule"), exports);
 __exportStar(require("./modules/PaymentsModule"), exports);
 __exportStar(require("./modules/MarketplaceModule"), exports);

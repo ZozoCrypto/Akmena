@@ -35,7 +35,7 @@ describe('Akmena SDK E2E & Integration Suite', () => {
             rpcUrl: 'http://127.0.0.1:8545'
         });
 
-        expect(client.agent).toBeDefined();
+        expect(client.identity).toBeDefined();
         expect(client.escrow).toBeDefined();
         expect(client.payments).toBeDefined();
         expect(client.workflow).toBeDefined();
