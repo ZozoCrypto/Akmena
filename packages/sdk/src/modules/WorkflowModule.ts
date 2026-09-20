@@ -1,6 +1,6 @@
 import { decodeEventLog } from 'viem';
 import { AkmenaClient } from '../client/AkmenaClient';
-import { translateContractError } from '../errors';
+import { translateContractError, WalletRequiredError } from '../errors';
 import { WorkflowEngineABI } from '../abis/WorkflowEngine';
 
 export interface WorkflowCompletionResult {
@@ -17,7 +17,7 @@ export class WorkflowModule {
 
     public async complete(workflowId: `0x${string}`, data: { settlement: `0x${string}`, memory: `0x${string}`, reputation: `0x${string}` }): Promise<WorkflowCompletionResult> {
         if (!this.client.walletClient || !this.client.walletClient.account) {
-            throw new Error("Write operations require a connected wallet.");
+            throw new WalletRequiredError();
         }
 
         const address = await this.client.resolveModule('workflow');

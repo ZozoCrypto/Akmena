@@ -11,7 +11,7 @@ class WorkflowModule {
     }
     async complete(workflowId, data) {
         if (!this.client.walletClient || !this.client.walletClient.account) {
-            throw new Error("Write operations require a connected wallet.");
+            throw new errors_1.WalletRequiredError();
         }
         const address = await this.client.resolveModule('workflow');
         try {

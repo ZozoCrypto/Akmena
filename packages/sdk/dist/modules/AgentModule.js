@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AgentModule = void 0;
+const viem_1 = require("viem");
 const errors_1 = require("../errors");
 const AgentRegistry_1 = require("../abis/AgentRegistry");
 class AgentModule {
@@ -10,7 +11,7 @@ class AgentModule {
     }
     async register(agentId, metadataURI) {
         if (!this.client.walletClient?.account)
-            throw new Error("Wallet required.");
+            throw new errors_1.WalletRequiredError();
         const address = await this.client.resolveModule('identity');
         try {
             const { request } = await this.client.publicClient.simulateContract({
@@ -27,7 +28,7 @@ class AgentModule {
     }
     async updateMetadata(agentId, metadataURI) {
         if (!this.client.walletClient?.account)
-            throw new Error("Wallet required.");
+            throw new errors_1.WalletRequiredError();
         const address = await this.client.resolveModule('identity');
         try {
             const { request } = await this.client.publicClient.simulateContract({
@@ -44,8 +45,31 @@ class AgentModule {
     async onRegistered(callback) {
         const address = await this.client.resolveModule('identity');
         return this.client.publicClient.watchContractEvent({
-            address, abi: AgentRegistry_1.AgentRegistryABI, eventName: 'AgentRegistered',
-            onLogs: logs => logs.forEach(log => callback(log))
+            address,
+            abi: AgentRegistry_1.AgentRegistryABI,
+            eventName: 'AgentRegistered',
+            onLogs: logs => {
+                for (const log of logs) {
+                    try {
+                        const decoded = (0, viem_1.decodeEventLog)({
+                            abi: AgentRegistry_1.AgentRegistryABI,
+                            data: log.data,
+                            topics: log.topics,
+                        });
+                        if (decoded.eventName === 'AgentRegistered') {
+                            const args = decoded.args;
+                            callback({
+                                id: args.id,
+                                owner: args.owner,
+                                metadataURI: args.metadataURI,
+                            });
+                        }
+                    }
+                    catch {
+                        // Ignore malformed or unrelated logs.
+                    }
+                }
+            },
         });
     }
 }

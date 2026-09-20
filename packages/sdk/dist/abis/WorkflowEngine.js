@@ -1,4 +1,7 @@
 "use strict";
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/WorkflowEngine.sol/WorkflowEngine.json
+// DO NOT EDIT MANUALLY.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkflowEngineABI = void 0;
 exports.WorkflowEngineABI = [
@@ -6,7 +9,12 @@ exports.WorkflowEngineABI = [
         "type": "constructor",
         "inputs": [
             {
-                "name": "_akmenaCore",
+                "name": "akmenaCore_",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "authorizationResolver_",
                 "type": "address",
                 "internalType": "address"
             }
@@ -42,6 +50,19 @@ exports.WorkflowEngineABI = [
     {
         "type": "function",
         "name": "SETTLEMENT_KEY",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "WORKFLOW_CAPABILITY",
         "inputs": [],
         "outputs": [
             {
@@ -95,12 +116,25 @@ exports.WorkflowEngineABI = [
     },
     {
         "type": "function",
+        "name": "authorizationResolver",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IAuthorizationResolver"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "initializeWorkflow",
         "inputs": [
             {
-                "name": "agentIdentityId",
-                "type": "bytes32",
-                "internalType": "bytes32"
+                "name": "identityId",
+                "type": "uint256",
+                "internalType": "uint256"
             },
             {
                 "name": "agreementId",
@@ -152,6 +186,12 @@ exports.WorkflowEngineABI = [
                 "internalType": "bytes32"
             },
             {
+                "name": "identityId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
                 "name": "initiator",
                 "type": "address",
                 "indexed": true,
@@ -159,6 +199,16 @@ exports.WorkflowEngineABI = [
             }
         ],
         "anonymous": false
+    },
+    {
+        "type": "error",
+        "name": "InvalidAuthorizationResolver",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidCore",
+        "inputs": []
     },
     {
         "type": "error",
@@ -189,8 +239,24 @@ exports.WorkflowEngineABI = [
     },
     {
         "type": "error",
-        "name": "UnauthorizedInitiator",
+        "name": "ReentrancyGuardReentrantCall",
         "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "UnauthorizedWorkflow",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "WorkflowAlreadyExists",
+        "inputs": [
+            {
+                "name": "workflowId",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ]
     },
     {
         "type": "error",

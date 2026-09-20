@@ -15,6 +15,9 @@ export declare class WorkflowError extends AkmenaError {
 export declare class ModuleUnavailableError extends AkmenaError {
     constructor(moduleKey: string);
 }
+export declare class WalletRequiredError extends AkmenaError {
+    constructor();
+}
 export declare class UnsupportedProtocolVersionError extends AkmenaError {
     constructor(expected: string, actual: string);
 }

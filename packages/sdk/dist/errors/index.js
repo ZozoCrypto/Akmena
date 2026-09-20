@@ -1,11 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.translateContractError = exports.UnsupportedProtocolVersionError = exports.ModuleUnavailableError = exports.WorkflowError = exports.CapabilityError = exports.AuthorizationError = exports.AkmenaError = void 0;
+exports.translateContractError = exports.UnsupportedProtocolVersionError = exports.WalletRequiredError = exports.ModuleUnavailableError = exports.WorkflowError = exports.CapabilityError = exports.AuthorizationError = exports.AkmenaError = void 0;
 const viem_1 = require("viem");
 const AkmenaCore_1 = require("../abis/AkmenaCore");
 const AgentRegistry_1 = require("../abis/AgentRegistry");
 const EscrowEngine_1 = require("../abis/EscrowEngine");
 const PaymentsEngine_1 = require("../abis/PaymentsEngine");
+const WorkflowEngine_1 = require("../abis/WorkflowEngine");
+const EconomicCommitmentEngine_1 = require("../abis/EconomicCommitmentEngine");
+const MarketplaceEngine_1 = require("../abis/MarketplaceEngine");
 class AkmenaError extends Error {
     code;
     metadata;
@@ -33,6 +36,12 @@ class ModuleUnavailableError extends AkmenaError {
     constructor(moduleKey) { super("MODULE_UNAVAILABLE", `Module ${moduleKey} is not registered or disabled.`); this.name = "ModuleUnavailableError"; }
 }
 exports.ModuleUnavailableError = ModuleUnavailableError;
+class WalletRequiredError extends AkmenaError {
+    constructor() {
+        super("WALLET_REQUIRED", "A connected wallet is required for this operation.");
+    }
+}
+exports.WalletRequiredError = WalletRequiredError;
 class UnsupportedProtocolVersionError extends AkmenaError {
     constructor(expected, actual) { super("UNSUPPORTED_VERSION", `SDK requires protocol v${expected}. Found v${actual}`); this.name = "UnsupportedProtocolVersionError"; }
 }
@@ -42,7 +51,10 @@ const MASTER_ABIS = [
     ...AkmenaCore_1.AkmenaCoreABI,
     ...AgentRegistry_1.AgentRegistryABI,
     ...EscrowEngine_1.EscrowEngineABI,
-    ...PaymentsEngine_1.PaymentsEngineABI
+    ...PaymentsEngine_1.PaymentsEngineABI,
+    ...WorkflowEngine_1.WorkflowEngineABI,
+    ...EconomicCommitmentEngine_1.EconomicCommitmentEngineABI,
+    ...MarketplaceEngine_1.MarketplaceEngineABI,
 ];
 function translateContractError(err) {
     // Extract raw hex revert data from Viem simulation/transaction errors

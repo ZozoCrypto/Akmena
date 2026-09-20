@@ -9,11 +9,13 @@ const WorkflowModule_1 = require("../modules/WorkflowModule");
 const AgentModule_1 = require("../modules/AgentModule");
 const EscrowModule_1 = require("../modules/EscrowModule");
 const PaymentsModule_1 = require("../modules/PaymentsModule");
+const MarketplaceModule_1 = require("../modules/MarketplaceModule");
 class AkmenaClient {
     publicClient;
     walletClient;
     coreAddress;
     chain;
+    rpcUrl;
     addressCache = {};
     versionVerified = false;
     // Business Wrappers
@@ -21,6 +23,7 @@ class AkmenaClient {
     agent;
     escrow;
     payments;
+    marketplace;
     constructor(config) {
         this.coreAddress = config.coreAddress;
         this.chain = config.chain;
@@ -30,6 +33,7 @@ class AkmenaClient {
         this.agent = new AgentModule_1.AgentModule(this);
         this.escrow = new EscrowModule_1.EscrowModule(this);
         this.payments = new PaymentsModule_1.PaymentsModule(this);
+        this.marketplace = new MarketplaceModule_1.MarketplaceModule(this);
     }
     withWallet(wallet) {
         return new AkmenaClient({ coreAddress: this.coreAddress, chain: this.chain, rpcUrl: this.publicClient.transport?.url, wallet });
@@ -73,20 +77,61 @@ class AkmenaClient {
         this.versionVerified = false;
     }
     async health() {
-        const core = (0, viem_1.getContract)({ address: this.coreAddress, abi: AkmenaCore_1.AkmenaCoreABI, client: this.publicClient });
-        const [version, paused, chainId] = await Promise.all([
-            core.read.PROTOCOL_VERSION().catch(() => "unknown"),
-            core.read.isPaused().catch(() => false),
-            this.publicClient.getChainId()
-        ]);
+        const failureReasons = [];
+        let rpcReachable = false;
+        let coreReachable = false;
+        let version = "unknown";
+        let paused = false;
+        let network = 0;
+        try {
+            network = await this.publicClient.getChainId();
+            rpcReachable = true;
+        }
+        catch {
+            failureReasons.push("RPC_UNREACHABLE");
+        }
+        if (rpcReachable) {
+            try {
+                const core = (0, viem_1.getContract)({
+                    address: this.coreAddress,
+                    abi: AkmenaCore_1.AkmenaCoreABI,
+                    client: this.publicClient,
+                });
+                version = await core.read.PROTOCOL_VERSION();
+                coreReachable = true;
+                try {
+                    paused = await core.read.isPaused();
+                }
+                catch {
+                    failureReasons.push("CORE_PAUSE_STATUS_UNAVAILABLE");
+                }
+            }
+            catch {
+                failureReasons.push("CORE_UNREACHABLE");
+            }
+        }
+        const versionSupported = version.startsWith("2.");
+        if (!versionSupported) {
+            failureReasons.push("UNSUPPORTED_PROTOCOL_VERSION");
+        }
+        if (paused) {
+            failureReasons.push("PROTOCOL_PAUSED");
+        }
         return {
-            healthy: !paused && version.startsWith("2."),
-            network: chainId,
+            healthy: rpcReachable &&
+                coreReachable &&
+                versionSupported &&
+                !paused,
+            network,
             coreAddress: this.coreAddress,
             protocolVersion: version,
-            paused: paused,
-            modules: this.addressCache,
-            readOnly: !this.walletClient
+            paused,
+            modules: { ...this.addressCache },
+            readOnly: !this.walletClient,
+            rpcReachable,
+            coreReachable,
+            versionSupported,
+            failureReasons,
         };
     }
 }

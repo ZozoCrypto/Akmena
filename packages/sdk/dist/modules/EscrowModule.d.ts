@@ -1,7 +1,22 @@
 import { AkmenaClient } from '../client/AkmenaClient';
+export interface EscrowTransactionResult {
+    transactionHash: `0x${string}`;
+    gasUsed: bigint;
+    escrowId?: bigint;
+}
 export declare class EscrowModule {
-    private client;
+    private readonly client;
     constructor(client: AkmenaClient);
-    create(escrowId: `0x${string}`, payee: `0x${string}`, amount: bigint): Promise<import("viem").TransactionReceipt>;
-    release(escrowId: `0x${string}`): Promise<import("viem").TransactionReceipt>;
+    private requireAccount;
+    create(buyer: `0x${string}`, seller: `0x${string}`, amount: bigint, referenceId?: `0x${string}`): Promise<EscrowTransactionResult>;
+    release(escrowId: bigint): Promise<EscrowTransactionResult>;
+    refund(escrowId: bigint): Promise<EscrowTransactionResult>;
+    get(escrowId: bigint): Promise<{
+        buyer: `0x${string}`;
+        seller: `0x${string}`;
+        amount: bigint;
+        asset: `0x${string}`;
+        status: number;
+        referenceId: `0x${string}`;
+    }>;
 }

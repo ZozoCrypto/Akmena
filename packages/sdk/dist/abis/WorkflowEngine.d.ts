@@ -1,7 +1,11 @@
 export declare const WorkflowEngineABI: readonly [{
     readonly type: "constructor";
     readonly inputs: readonly [{
-        readonly name: "_akmenaCore";
+        readonly name: "akmenaCore_";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "authorizationResolver_";
         readonly type: "address";
         readonly internalType: "address";
     }];
@@ -29,6 +33,16 @@ export declare const WorkflowEngineABI: readonly [{
 }, {
     readonly type: "function";
     readonly name: "SETTLEMENT_KEY";
+    readonly inputs: readonly [];
+    readonly outputs: readonly [{
+        readonly name: "";
+        readonly type: "bytes32";
+        readonly internalType: "bytes32";
+    }];
+    readonly stateMutability: "view";
+}, {
+    readonly type: "function";
+    readonly name: "WORKFLOW_CAPABILITY";
     readonly inputs: readonly [];
     readonly outputs: readonly [{
         readonly name: "";
@@ -70,11 +84,21 @@ export declare const WorkflowEngineABI: readonly [{
     readonly stateMutability: "view";
 }, {
     readonly type: "function";
+    readonly name: "authorizationResolver";
+    readonly inputs: readonly [];
+    readonly outputs: readonly [{
+        readonly name: "";
+        readonly type: "address";
+        readonly internalType: "contract IAuthorizationResolver";
+    }];
+    readonly stateMutability: "view";
+}, {
+    readonly type: "function";
     readonly name: "initializeWorkflow";
     readonly inputs: readonly [{
-        readonly name: "agentIdentityId";
-        readonly type: "bytes32";
-        readonly internalType: "bytes32";
+        readonly name: "identityId";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
     }, {
         readonly name: "agreementId";
         readonly type: "bytes32";
@@ -114,12 +138,25 @@ export declare const WorkflowEngineABI: readonly [{
         readonly indexed: true;
         readonly internalType: "bytes32";
     }, {
+        readonly name: "identityId";
+        readonly type: "uint256";
+        readonly indexed: true;
+        readonly internalType: "uint256";
+    }, {
         readonly name: "initiator";
         readonly type: "address";
         readonly indexed: true;
         readonly internalType: "address";
     }];
     readonly anonymous: false;
+}, {
+    readonly type: "error";
+    readonly name: "InvalidAuthorizationResolver";
+    readonly inputs: readonly [];
+}, {
+    readonly type: "error";
+    readonly name: "InvalidCore";
+    readonly inputs: readonly [];
 }, {
     readonly type: "error";
     readonly name: "InvalidWorkflowState";
@@ -142,8 +179,20 @@ export declare const WorkflowEngineABI: readonly [{
     }];
 }, {
     readonly type: "error";
-    readonly name: "UnauthorizedInitiator";
+    readonly name: "ReentrancyGuardReentrantCall";
     readonly inputs: readonly [];
+}, {
+    readonly type: "error";
+    readonly name: "UnauthorizedWorkflow";
+    readonly inputs: readonly [];
+}, {
+    readonly type: "error";
+    readonly name: "WorkflowAlreadyExists";
+    readonly inputs: readonly [{
+        readonly name: "workflowId";
+        readonly type: "bytes32";
+        readonly internalType: "bytes32";
+    }];
 }, {
     readonly type: "error";
     readonly name: "WorkflowNotFound";

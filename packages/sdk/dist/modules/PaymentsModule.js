@@ -8,18 +8,40 @@ class PaymentsModule {
     constructor(client) {
         this.client = client;
     }
-    async execute(paymentId, to, amount) {
-        if (!this.client.walletClient?.account)
-            throw new Error("Wallet required.");
-        // Note: For demonstration. Core module keys might need a 'payments' key added if it's separate from Settlement.
-        const address = await this.client.resolveModule('settlement');
+    async execute(from, to, amount) {
+        const account = this.client.walletClient?.account;
+        if (!account) {
+            throw new errors_1.WalletRequiredError();
+        }
+        const address = await this.client.resolveModule('payments');
         try {
             const { request } = await this.client.publicClient.simulateContract({
-                address, abi: PaymentsEngine_1.PaymentsEngineABI, functionName: 'executePayment',
-                args: [paymentId, to, amount], account: this.client.walletClient.account
+                address,
+                abi: PaymentsEngine_1.PaymentsEngineABI,
+                functionName: 'executePayment',
+                args: [from, to, amount],
+                account,
             });
             const hash = await this.client.walletClient.writeContract(request);
-            return await this.client.publicClient.waitForTransactionReceipt({ hash });
+            const receipt = await this.client.publicClient.waitForTransactionReceipt({ hash });
+            return {
+                transactionHash: hash,
+                gasUsed: receipt.gasUsed,
+                success: receipt.status === 'success',
+            };
+        }
+        catch (error) {
+            (0, errors_1.translateContractError)(error);
+        }
+    }
+    async getTotalVolume() {
+        const address = await this.client.resolveModule('payments');
+        try {
+            return await this.client.publicClient.readContract({
+                address,
+                abi: PaymentsEngine_1.PaymentsEngineABI,
+                functionName: 'getTotalVolume',
+            });
         }
         catch (error) {
             (0, errors_1.translateContractError)(error);

@@ -1,13 +1,19 @@
-import { WatchContractEventReturnType } from 'viem';
+import { decodeEventLog, WatchContractEventReturnType } from 'viem';
 import { AkmenaClient } from '../client/AkmenaClient';
-import { translateContractError } from '../errors';
+import { translateContractError, WalletRequiredError } from '../errors';
 import { AgentRegistryABI } from '../abis/AgentRegistry';
+
+export interface AgentRegisteredEvent {
+    id: `0x${string}`;
+    owner: `0x${string}`;
+    metadataURI: string;
+}
 
 export class AgentModule {
     constructor(private client: AkmenaClient) {}
 
     public async register(agentId: `0x${string}`, metadataURI: string) {
-        if (!this.client.walletClient?.account) throw new Error("Wallet required.");
+        if (!this.client.walletClient?.account) throw new WalletRequiredError();
         const address = await this.client.resolveModule('identity');
 
         try {
@@ -24,7 +30,7 @@ export class AgentModule {
     }
 
     public async updateMetadata(agentId: `0x${string}`, metadataURI: string) {
-        if (!this.client.walletClient?.account) throw new Error("Wallet required.");
+        if (!this.client.walletClient?.account) throw new WalletRequiredError();
         const address = await this.client.resolveModule('identity');
 
         try {
@@ -39,11 +45,42 @@ export class AgentModule {
         }
     }
 
-    public async onRegistered(callback: (log: any) => void): Promise<WatchContractEventReturnType> {
+    public async onRegistered(
+        callback: (event: AgentRegisteredEvent) => void,
+    ): Promise<WatchContractEventReturnType> {
         const address = await this.client.resolveModule('identity');
+
         return this.client.publicClient.watchContractEvent({
-            address, abi: AgentRegistryABI, eventName: 'AgentRegistered',
-            onLogs: logs => logs.forEach(log => callback(log))
+            address,
+            abi: AgentRegistryABI,
+            eventName: 'AgentRegistered',
+            onLogs: logs => {
+                for (const log of logs) {
+                    try {
+                        const decoded = decodeEventLog({
+                            abi: AgentRegistryABI,
+                            data: log.data,
+                            topics: log.topics,
+                        });
+
+                        if (decoded.eventName === 'AgentRegistered') {
+                            const args = decoded.args as {
+                                id: `0x${string}`;
+                                owner: `0x${string}`;
+                                metadataURI: string;
+                            };
+
+                            callback({
+                                id: args.id,
+                                owner: args.owner,
+                                metadataURI: args.metadataURI,
+                            });
+                        }
+                    } catch {
+                        // Ignore malformed or unrelated logs.
+                    }
+                }
+            },
         });
     }
 }

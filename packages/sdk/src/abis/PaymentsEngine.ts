@@ -1,3 +1,7 @@
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/PaymentsEngine.sol/PaymentsEngine.json
+// DO NOT EDIT MANUALLY.
+
 export const PaymentsEngineABI = [
   {
     "type": "function",

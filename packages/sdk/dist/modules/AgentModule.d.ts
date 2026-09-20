@@ -1,5 +1,10 @@
 import { WatchContractEventReturnType } from 'viem';
 import { AkmenaClient } from '../client/AkmenaClient';
+export interface AgentRegisteredEvent {
+    id: `0x${string}`;
+    owner: `0x${string}`;
+    metadataURI: string;
+}
 export declare class AgentModule {
     private client;
     constructor(client: AkmenaClient);
@@ -9,5 +14,5 @@ export declare class AgentModule {
         success: boolean;
     }>;
     updateMetadata(agentId: `0x${string}`, metadataURI: string): Promise<import("viem").TransactionReceipt>;
-    onRegistered(callback: (log: any) => void): Promise<WatchContractEventReturnType>;
+    onRegistered(callback: (event: AgentRegisteredEvent) => void): Promise<WatchContractEventReturnType>;
 }

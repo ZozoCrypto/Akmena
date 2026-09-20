@@ -1,3 +1,7 @@
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/AkmenaCore.sol/AkmenaCore.json
+// DO NOT EDIT MANUALLY.
+
 export const AkmenaCoreABI = [
   {
     "type": "constructor",

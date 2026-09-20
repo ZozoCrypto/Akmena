@@ -1,3 +1,7 @@
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/AgentRegistry.sol/AgentRegistry.json
+// DO NOT EDIT MANUALLY.
+
 export const AgentRegistryABI = [
   {
     "type": "constructor",

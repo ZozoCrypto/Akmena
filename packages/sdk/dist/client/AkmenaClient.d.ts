@@ -5,6 +5,7 @@ import { WorkflowModule } from '../modules/WorkflowModule';
 import { AgentModule } from '../modules/AgentModule';
 import { EscrowModule } from '../modules/EscrowModule';
 import { PaymentsModule } from '../modules/PaymentsModule';
+import { MarketplaceModule } from '../modules/MarketplaceModule';
 export interface ClientConfig {
     coreAddress: `0x${string}`;
     chain: Chain;
@@ -16,12 +17,14 @@ export declare class AkmenaClient {
     walletClient?: WalletClient;
     coreAddress: `0x${string}`;
     chain: Chain;
+    private readonly rpcUrl?;
     private addressCache;
     private versionVerified;
     readonly workflow: WorkflowModule;
     readonly agent: AgentModule;
     readonly escrow: EscrowModule;
     readonly payments: PaymentsModule;
+    readonly marketplace: MarketplaceModule;
     constructor(config: ClientConfig);
     withWallet(wallet: WalletClient): AkmenaClient;
     private verifyProtocolVersion;

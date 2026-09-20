@@ -1,30 +1,203 @@
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/EscrowEngine.sol/EscrowEngine.json
+// DO NOT EDIT MANUALLY.
+
 export const EscrowEngineABI = [
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "asset_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "asset",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IERC20"
+      }
+    ],
+    "stateMutability": "view"
+  },
   {
     "type": "function",
     "name": "createEscrow",
     "inputs": [
       {
-        "name": "escrowId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "payee",
+        "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "referenceId",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
-    "outputs": [],
-    "stateMutability": "payable"
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
-    "name": "exists",
+    "name": "createEscrow",
+    "inputs": [
+      {
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getEscrow",
     "inputs": [
       {
         "name": "escrowId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct LibStorage.EscrowData",
+        "components": [
+          {
+            "name": "buyer",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "seller",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "asset",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "referenceId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "refundEscrow",
+    "inputs": [
+      {
+        "name": "escrowId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "releaseEscrow",
+    "inputs": [
+      {
+        "name": "escrowId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "totalLocked",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "verifyTransientProof",
+    "inputs": [
+      {
+        "name": "proofId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "outputs": [
@@ -37,100 +210,23 @@ export const EscrowEngineABI = [
     "stateMutability": "view"
   },
   {
-    "type": "function",
-    "name": "getEscrow",
-    "inputs": [
-      {
-        "name": "escrowId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct IEscrowEngine.Escrow",
-        "components": [
-          {
-            "name": "id",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "payer",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "payee",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "released",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "refunded",
-            "type": "bool",
-            "internalType": "bool"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "refund",
-    "inputs": [
-      {
-        "name": "escrowId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "release",
-    "inputs": [
-      {
-        "name": "escrowId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
     "type": "event",
     "name": "EscrowCreated",
     "inputs": [
       {
         "name": "escrowId",
-        "type": "bytes32",
+        "type": "uint256",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "uint256"
       },
       {
-        "name": "payer",
+        "name": "buyer",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "payee",
+        "name": "seller",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -150,9 +246,9 @@ export const EscrowEngineABI = [
     "inputs": [
       {
         "name": "escrowId",
-        "type": "bytes32",
+        "type": "uint256",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -163,26 +259,16 @@ export const EscrowEngineABI = [
     "inputs": [
       {
         "name": "escrowId",
-        "type": "bytes32",
+        "type": "uint256",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
   },
   {
     "type": "error",
-    "name": "EscrowAlreadyExists",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "EscrowAlreadyRefunded",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "EscrowAlreadyReleased",
+    "name": "EscrowNotActive",
     "inputs": []
   },
   {
@@ -192,12 +278,38 @@ export const EscrowEngineABI = [
   },
   {
     "type": "error",
+    "name": "EscrowReferenceAlreadyUsed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientEscrowBalance",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidAmount",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "InvalidPayee",
+    "name": "SafeERC20FailedOperation",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UnauthorizedAccess",
     "inputs": []
   }
 ] as const;

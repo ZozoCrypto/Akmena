@@ -39,6 +39,7 @@ describe('Akmena SDK E2E & Integration Suite', () => {
         expect(client.escrow).toBeDefined();
         expect(client.payments).toBeDefined();
         expect(client.workflow).toBeDefined();
+        expect(client.marketplace).toBeDefined();
         
         // Verify module keys are cryptographic bytes32 hashes
         expect(MODULE_KEYS.identity).toMatch(/^0x[a-fA-F0-9]{64}$/);

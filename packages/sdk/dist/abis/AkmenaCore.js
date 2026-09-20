@@ -1,4 +1,7 @@
 "use strict";
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/AkmenaCore.sol/AkmenaCore.json
+// DO NOT EDIT MANUALLY.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AkmenaCoreABI = void 0;
 exports.AkmenaCoreABI = [

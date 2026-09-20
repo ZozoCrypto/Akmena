@@ -8,6 +8,7 @@ import { WorkflowModule } from '../modules/WorkflowModule';
 import { AgentModule } from '../modules/AgentModule';
 import { EscrowModule } from '../modules/EscrowModule';
 import { PaymentsModule } from '../modules/PaymentsModule';
+import { MarketplaceModule } from '../modules/MarketplaceModule';
 
 export interface ClientConfig {
     coreAddress: `0x${string}`;
@@ -21,7 +22,8 @@ export class AkmenaClient {
     public walletClient?: WalletClient;
     public coreAddress: `0x${string}`;
     public chain: Chain;
-    
+    private readonly rpcUrl?: string;
+
     private addressCache: Record<string, ModuleInfo> = {};
     private versionVerified = false;
 
@@ -30,6 +32,7 @@ export class AkmenaClient {
     public readonly agent: AgentModule;
     public readonly escrow: EscrowModule;
     public readonly payments: PaymentsModule;
+    public readonly marketplace: MarketplaceModule;
 
     constructor(config: ClientConfig) {
         this.coreAddress = config.coreAddress;
@@ -41,6 +44,7 @@ export class AkmenaClient {
         this.agent = new AgentModule(this);
         this.escrow = new EscrowModule(this);
         this.payments = new PaymentsModule(this);
+        this.marketplace = new MarketplaceModule(this);
     }
 
     public withWallet(wallet: WalletClient): AkmenaClient {
@@ -90,21 +94,68 @@ export class AkmenaClient {
     }
 
     public async health(): Promise<HealthStatus> {
-        const core = getContract({ address: this.coreAddress, abi: AkmenaCoreABI, client: this.publicClient });
-        const [version, paused, chainId] = await Promise.all([
-            core.read.PROTOCOL_VERSION().catch(() => "unknown"),
-            core.read.isPaused().catch(() => false),
-            this.publicClient.getChainId()
-        ]);
-        
+        const failureReasons: string[] = [];
+
+        let rpcReachable = false;
+        let coreReachable = false;
+        let version = "unknown";
+        let paused = false;
+        let network = 0;
+
+        try {
+            network = await this.publicClient.getChainId();
+            rpcReachable = true;
+        } catch {
+            failureReasons.push("RPC_UNREACHABLE");
+        }
+
+        if (rpcReachable) {
+            try {
+                const core = getContract({
+                    address: this.coreAddress,
+                    abi: AkmenaCoreABI,
+                    client: this.publicClient,
+                });
+
+                version = await core.read.PROTOCOL_VERSION();
+                coreReachable = true;
+
+                try {
+                    paused = await core.read.isPaused();
+                } catch {
+                    failureReasons.push("CORE_PAUSE_STATUS_UNAVAILABLE");
+                }
+            } catch {
+                failureReasons.push("CORE_UNREACHABLE");
+            }
+        }
+
+        const versionSupported = version.startsWith("2.");
+
+        if (!versionSupported) {
+            failureReasons.push("UNSUPPORTED_PROTOCOL_VERSION");
+        }
+
+        if (paused) {
+            failureReasons.push("PROTOCOL_PAUSED");
+        }
+
         return {
-            healthy: !paused && version.startsWith("2."),
-            network: chainId,
+            healthy:
+                rpcReachable &&
+                coreReachable &&
+                versionSupported &&
+                !paused,
+            network,
             coreAddress: this.coreAddress,
             protocolVersion: version,
-            paused: paused,
-            modules: this.addressCache,
-            readOnly: !this.walletClient
+            paused,
+            modules: { ...this.addressCache },
+            readOnly: !this.walletClient,
+            rpcReachable,
+            coreReachable,
+            versionSupported,
+            failureReasons,
         };
     }
 }

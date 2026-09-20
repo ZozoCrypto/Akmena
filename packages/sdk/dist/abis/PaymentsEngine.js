@@ -1,4 +1,7 @@
 "use strict";
+// AUTO-GENERATED FROM FOUNDRY ARTIFACT
+// Source: /home/cryptozozo/projects/akmena/out/PaymentsEngine.sol/PaymentsEngine.json
+// DO NOT EDIT MANUALLY.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentsEngineABI = void 0;
 exports.PaymentsEngineABI = [

@@ -3,6 +3,9 @@ import { AkmenaCoreABI } from '../abis/AkmenaCore';
 import { AgentRegistryABI } from '../abis/AgentRegistry';
 import { EscrowEngineABI } from '../abis/EscrowEngine';
 import { PaymentsEngineABI } from '../abis/PaymentsEngine';
+import { WorkflowEngineABI } from '../abis/WorkflowEngine';
+import { EconomicCommitmentEngineABI } from '../abis/EconomicCommitmentEngine';
+import { MarketplaceEngineABI } from '../abis/MarketplaceEngine';
 
 export class AkmenaError extends Error {
     constructor(public code: string, message: string, public metadata?: any) {
@@ -23,6 +26,15 @@ export class WorkflowError extends AkmenaError {
 export class ModuleUnavailableError extends AkmenaError {
     constructor(moduleKey: string) { super("MODULE_UNAVAILABLE", `Module ${moduleKey} is not registered or disabled.`); this.name = "ModuleUnavailableError"; }
 }
+export class WalletRequiredError extends AkmenaError {
+    constructor() {
+        super(
+            "WALLET_REQUIRED",
+            "A connected wallet is required for this operation.",
+        );
+    }
+}
+
 export class UnsupportedProtocolVersionError extends AkmenaError {
     constructor(expected: string, actual: string) { super("UNSUPPORTED_VERSION", `SDK requires protocol v${expected}. Found v${actual}`); this.name = "UnsupportedProtocolVersionError"; }
 }
@@ -32,7 +44,10 @@ const MASTER_ABIS = [
     ...AkmenaCoreABI,
     ...AgentRegistryABI,
     ...EscrowEngineABI,
-    ...PaymentsEngineABI
+    ...PaymentsEngineABI,
+    ...WorkflowEngineABI,
+    ...EconomicCommitmentEngineABI,
+    ...MarketplaceEngineABI,
 ] as const;
 
 export function translateContractError(err: any): never {

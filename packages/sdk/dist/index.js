@@ -23,4 +23,5 @@ __exportStar(require("./modules/WorkflowModule"), exports);
 __exportStar(require("./modules/AgentModule"), exports);
 __exportStar(require("./modules/EscrowModule"), exports);
 __exportStar(require("./modules/PaymentsModule"), exports);
+__exportStar(require("./modules/MarketplaceModule"), exports);
 //# sourceMappingURL=index.js.map
