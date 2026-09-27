@@ -1,8 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-enum ProposalState { Pending, Active, Succeeded, Defeated, Queued, Executed, Expired, Canceled }
-enum ActionType { REGISTER_MODULE, REMOVE_MODULE, UPDATE_PARAMETER, PAUSE_MODULE, UNPAUSE_MODULE, SET_GOVERNANCE_PARAMETER }
+enum ProposalState {
+    Pending,
+    Active,
+    Succeeded,
+    Defeated,
+    Queued,
+    Executed,
+    Expired,
+    Canceled
+}
+enum ActionType {
+    REGISTER_MODULE,
+    REMOVE_MODULE,
+    UPDATE_PARAMETER,
+    PAUSE_MODULE,
+    UNPAUSE_MODULE,
+    SET_GOVERNANCE_PARAMETER
+}
 
 struct ProtocolAction {
     ActionType actionType;

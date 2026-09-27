@@ -4,7 +4,9 @@ pragma solidity ^0.8.28;
 import {LibStorage} from "../storage/LibStorage.sol";
 
 interface ISettlementEngine {
-    event SettlementRecorded(bytes32 indexed settlementId, address indexed payer, address indexed payee, uint256 amount);
+    event SettlementRecorded(
+        bytes32 indexed settlementId, address indexed payer, address indexed payee, uint256 amount
+    );
 
     error InvalidAddress();
     error InvalidAmount();

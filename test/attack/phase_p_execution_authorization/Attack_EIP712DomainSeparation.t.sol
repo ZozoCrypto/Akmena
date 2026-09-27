@@ -8,10 +8,9 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 contract DomainSeparatedAuthorization is EIP712 {
     using ECDSA for bytes32;
 
-    bytes32 public constant TYPEHASH =
-        keccak256(
-            "ExecutionIntent(address operator,address agent,address target,uint256 amount,uint256 nonce,uint256 deadline)"
-        );
+    bytes32 public constant TYPEHASH = keccak256(
+        "ExecutionIntent(address operator,address agent,address target,uint256 amount,uint256 nonce,uint256 deadline)"
+    );
 
     struct ExecutionIntent {
         address operator;
@@ -28,32 +27,24 @@ contract DomainSeparatedAuthorization is EIP712 {
     error Expired();
     error Replay();
 
-    constructor()
-        EIP712("AkmenaExecutionAuthorization", "1")
-    {}
+    constructor() EIP712("AkmenaExecutionAuthorization", "1") {}
 
-    function hashIntent(
-        ExecutionIntent memory intent
-    ) public view returns (bytes32) {
+    function hashIntent(ExecutionIntent memory intent) public view returns (bytes32) {
         bytes32 structHash = keccak256(
             abi.encode(
-                TYPEHASH,
-                intent.operator,
-                intent.agent,
-                intent.target,
-                intent.amount,
-                intent.nonce,
-                intent.deadline
+                TYPEHASH, intent.operator, intent.agent, intent.target, intent.amount, intent.nonce, intent.deadline
             )
         );
 
         return _hashTypedDataV4(structHash);
     }
 
-    function verifyAndConsume(
-        ExecutionIntent calldata intent,
-        bytes calldata signature
-    ) external returns (address signer) {
+    function verifyAndConsume(ExecutionIntent calldata intent, bytes calldata signature)
+        external
+        returns (address signer)
+    {
+        // Intentional timestamp check in adversarial test: models the protocol's deadline boundary.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > intent.deadline) {
             revert Expired();
         }
@@ -76,16 +67,13 @@ contract Attack_EIP712DomainSeparationTest is Test {
     DomainSeparatedAuthorization internal authA;
     DomainSeparatedAuthorization internal authB;
 
-    uint256 internal constant AGENT_KEY =
-        0xA11CE;
+    uint256 internal constant AGENT_KEY = 0xA11CE;
 
     address internal agent;
 
-    address internal constant OPERATOR =
-        address(0x1111);
+    address internal constant OPERATOR = address(0x1111);
 
-    address internal constant TARGET =
-        address(0x2222);
+    address internal constant TARGET = address(0x2222);
 
     function setUp() public {
         authA = new DomainSeparatedAuthorization();
@@ -94,13 +82,7 @@ contract Attack_EIP712DomainSeparationTest is Test {
         agent = vm.addr(AGENT_KEY);
     }
 
-    function _intent(uint256 nonce)
-        internal
-        view
-        returns (
-            DomainSeparatedAuthorization.ExecutionIntent memory
-        )
-    {
+    function _intent(uint256 nonce) internal view returns (DomainSeparatedAuthorization.ExecutionIntent memory) {
         return DomainSeparatedAuthorization.ExecutionIntent({
             operator: OPERATOR,
             agent: agent,
@@ -111,155 +93,87 @@ contract Attack_EIP712DomainSeparationTest is Test {
         });
     }
 
-    function _signA(
-        DomainSeparatedAuthorization.ExecutionIntent memory intent
-    )
-        internal
-        view
-        returns (bytes memory)
-    {
+    function _signA(DomainSeparatedAuthorization.ExecutionIntent memory intent) internal view returns (bytes memory) {
         bytes32 digest = authA.hashIntent(intent);
 
-        (uint8 v, bytes32 r, bytes32 s) =
-            vm.sign(AGENT_KEY, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(AGENT_KEY, digest);
 
         return abi.encodePacked(r, s, v);
     }
 
-    function test_SameIntentSameDomainProducesSameDigest()
-        public
-        view
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_SameIntentSameDomainProducesSameDigest() public view {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
-        assertEq(
-            authA.hashIntent(intent),
-            authA.hashIntent(intent)
-        );
+        assertEq(authA.hashIntent(intent), authA.hashIntent(intent));
     }
 
-    function test_DifferentVerifyingContractChangesDigest()
-        public
-        view
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_DifferentVerifyingContractChangesDigest() public view {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
         assertTrue(
-            authA.hashIntent(intent) !=
-            authB.hashIntent(intent),
-            "CRITICAL: verifying contract not bound to digest"
+            authA.hashIntent(intent) != authB.hashIntent(intent), "CRITICAL: verifying contract not bound to digest"
         );
     }
 
-    function test_SignatureCannotCrossVerifyingContract()
-        public
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_SignatureCannotCrossVerifyingContract() public {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
         bytes memory signature = _signA(intent);
 
-        vm.expectRevert(
-            DomainSeparatedAuthorization.InvalidSigner.selector
-        );
+        vm.expectRevert(DomainSeparatedAuthorization.InvalidSigner.selector);
 
-        authB.verifyAndConsume(
-            intent,
-            signature
-        );
+        authB.verifyAndConsume(intent, signature);
     }
 
-    function test_SignatureWorksOnOriginalContract()
-        public
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_SignatureWorksOnOriginalContract() public {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
         bytes memory signature = _signA(intent);
 
-        address recovered =
-            authA.verifyAndConsume(
-                intent,
-                signature
-            );
+        address recovered = authA.verifyAndConsume(intent, signature);
 
-        assertEq(
-            recovered,
-            agent
-        );
+        assertEq(recovered, agent);
     }
 
-    function test_ChainIdChangesDomainDigest()
-        public
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_ChainIdChangesDomainDigest() public {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
-        bytes32 beforeChainChange =
-            authA.hashIntent(intent);
+        bytes32 beforeChainChange = authA.hashIntent(intent);
 
         vm.chainId(8453);
 
-        bytes32 afterChainChange =
-            authA.hashIntent(intent);
+        bytes32 afterChainChange = authA.hashIntent(intent);
 
-        assertTrue(
-            beforeChainChange != afterChainChange,
-            "CRITICAL: chainId not bound to EIP-712 domain"
-        );
+        assertTrue(beforeChainChange != afterChainChange, "CRITICAL: chainId not bound to EIP-712 domain");
     }
 
-    function test_ChainIdMutationInvalidatesExistingSignature()
-        public
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory intent =
-            _intent(1);
+    function test_ChainIdMutationInvalidatesExistingSignature() public {
+        DomainSeparatedAuthorization.ExecutionIntent memory intent = _intent(1);
 
         bytes memory signature = _signA(intent);
 
         vm.chainId(8453);
 
-        vm.expectRevert(
-            DomainSeparatedAuthorization.InvalidSigner.selector
-        );
+        vm.expectRevert(DomainSeparatedAuthorization.InvalidSigner.selector);
 
-        authA.verifyAndConsume(
-            intent,
-            signature
-        );
+        authA.verifyAndConsume(intent, signature);
     }
 
-    function test_DifferentNonceStillProducesDifferentDigest()
-        public
-        view
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory a =
-            _intent(1);
+    function test_DifferentNonceStillProducesDifferentDigest() public view {
+        DomainSeparatedAuthorization.ExecutionIntent memory a = _intent(1);
 
-        DomainSeparatedAuthorization.ExecutionIntent memory b =
-            _intent(2);
+        DomainSeparatedAuthorization.ExecutionIntent memory b = _intent(2);
 
-        assertTrue(
-            authA.hashIntent(a) != authA.hashIntent(b)
-        );
+        assertTrue(authA.hashIntent(a) != authA.hashIntent(b));
     }
 
-    function test_DifferentTargetStillProducesDifferentDigest()
-        public
-        view
-    {
-        DomainSeparatedAuthorization.ExecutionIntent memory a =
-            _intent(1);
+    function test_DifferentTargetStillProducesDifferentDigest() public view {
+        DomainSeparatedAuthorization.ExecutionIntent memory a = _intent(1);
 
-        DomainSeparatedAuthorization.ExecutionIntent memory b =
-            _intent(1);
+        DomainSeparatedAuthorization.ExecutionIntent memory b = _intent(1);
 
         b.target = address(0x9999);
 
-        assertTrue(
-            authA.hashIntent(a) != authA.hashIntent(b)
-        );
+        assertTrue(authA.hashIntent(a) != authA.hashIntent(b));
     }
 }

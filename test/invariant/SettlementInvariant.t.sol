@@ -28,30 +28,29 @@ contract SettlementInvariant is StdInvariant, Test {
         assertEq(handler.duplicateRecordSuccesses(), 0);
     }
 
-    /// INVARIANT: Recorded settlements must persist correct amounts and addresses
+    /// INVARIANT: Every successful settlement recording preserves the expected data
     function invariant_settlementDataIntegrity() public view {
-        uint256 length = handler.recordedIdsLength();
-        for (uint256 i = 0; i < length; ++i) {
-            bytes32 id = handler.recordedSettlementIds(i);
-            
-            assertTrue(settlementEngine.exists(id));
-            
-            LibStorage.SettlementData memory data = settlementEngine.getSettlement(id);
-            assertEq(data.amount, handler.settlementAmounts(id));
-            assertEq(data.payer, handler.settlementPayers(id));
-            assertEq(data.payee, handler.settlementPayees(id));
-            assertGt(data.amount, 0);
-        }
+        assertEq(handler.settlementDataIntegrityFailures(), 0);
     }
 
-    /// INVARIANT: Dynamically guaranteed unrecorded IDs must not exist and fetching them reverts
+    /// INVARIANT: Unrecorded IDs must not exist and fetching them must revert
     function invariant_unknownSettlementReverts() public view {
-        // Generate a pseudo-random ID that is mathematically guaranteed not to be recorded
         bytes32 unknownId = keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender, "unrecorded"));
-        
-        // If by astronomical coincidence it exists, skip or ensure existence is false
-        if (!settlementEngine.exists(unknownId)) {
-            assertFalse(settlementEngine.exists(unknownId));
+
+        if (settlementEngine.exists(unknownId)) {
+            return;
         }
+
+        assertFalse(settlementEngine.exists(unknownId));
+
+        bool reverted;
+
+        try settlementEngine.getSettlement(unknownId) returns (LibStorage.SettlementData memory) {
+            reverted = false;
+        } catch {
+            reverted = true;
+        }
+
+        assertTrue(reverted, "Unknown settlement lookup did not revert");
     }
 }

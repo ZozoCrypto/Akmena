@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {AkmenaCore} from "../src/core/AkmenaCore.sol";
 import {EscrowEngine} from "../src/economics/EscrowEngine.sol";
+import {AkmenaToken} from "../src/token/core/AkmenaToken.sol";
 import {AgreementEngine} from "../src/autonomous/AgreementEngine.sol";
 import {AgentRegistry} from "../src/registry/AgentRegistry.sol";
 
@@ -12,7 +13,7 @@ contract LiveIntegrationScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
-        
+
         console.log("Deploying Akmena V2 Masterpiece from:", deployer);
 
         vm.startBroadcast(deployerPrivateKey);
@@ -21,8 +22,12 @@ contract LiveIntegrationScript is Script {
         AkmenaCore core = new AkmenaCore();
         console.log("AkmenaCore deployed at:", address(core));
 
-        // 2. Deploy Protocol Engines
-        EscrowEngine escrowEngine = new EscrowEngine();
+        // 2. Deploy canonical AKM monetary asset
+        AkmenaToken token = new AkmenaToken(msg.sender);
+        console.log("AkmenaToken deployed at:", address(token));
+
+        // 3. Deploy Protocol Engines
+        EscrowEngine escrowEngine = new EscrowEngine(address(token));
         console.log("EscrowEngine deployed at:", address(escrowEngine));
 
         AgreementEngine agreementEngine = new AgreementEngine();
@@ -32,9 +37,9 @@ contract LiveIntegrationScript is Script {
         console.log("AgentRegistry deployed at:", address(agentRegistry));
 
         // 3. Register Modules into Core Router (ERC-8109 Introspection Compliant)
-        core.registerModule(bytes32("ESCROW_ENGINE"), address(escrowEngine), "2.0.0");
-        core.registerModule(bytes32("AGREEMENT_ENGINE"), address(agreementEngine), "2.0.0");
-        core.registerModule(bytes32("AGENT_REGISTRY"), address(agentRegistry), "2.0.0");
+        core.registerModule("ESCROW_ENGINE", address(escrowEngine), "2.0.0");
+        core.registerModule("AGREEMENT_ENGINE", address(agreementEngine), "2.0.0");
+        core.registerModule("AGENT_REGISTRY", address(agentRegistry), "2.0.0");
 
         vm.stopBroadcast();
         console.log("Akmena V2 Live Integration Handshake Complete.");

@@ -42,6 +42,40 @@ export const EscrowEngineABI = [
         "internalType": "address"
       },
       {
+        "name": "asset_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "createEscrow",
+    "inputs": [
+      {
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
@@ -79,6 +113,45 @@ export const EscrowEngineABI = [
         "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "createEscrow",
+    "inputs": [
+      {
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "asset_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "referenceId",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "outputs": [
@@ -182,6 +255,25 @@ export const EscrowEngineABI = [
   },
   {
     "type": "function",
+    "name": "totalLockedByAsset",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "verifyTransientProof",
     "inputs": [
       {
@@ -191,6 +283,11 @@ export const EscrowEngineABI = [
       },
       {
         "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "asset_",
         "type": "address",
         "internalType": "address"
       },
@@ -242,6 +339,43 @@ export const EscrowEngineABI = [
   },
   {
     "type": "event",
+    "name": "EscrowCreatedWithAsset",
+    "inputs": [
+      {
+        "name": "escrowId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "asset",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "EscrowRefunded",
     "inputs": [
       {
@@ -265,6 +399,11 @@ export const EscrowEngineABI = [
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "EscrowFundingMismatch",
+    "inputs": []
   },
   {
     "type": "error",
@@ -294,6 +433,11 @@ export const EscrowEngineABI = [
   {
     "type": "error",
     "name": "InvalidAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAsset",
     "inputs": []
   },
   {

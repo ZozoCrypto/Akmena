@@ -4,8 +4,13 @@ pragma solidity ^0.8.28;
 import {IRegistry} from "../registry/IRegistry.sol";
 import {IIdentity} from "./IIdentity.sol";
 
-interface IIdentityClone {
-    function initialize(uint256 id_, IIdentity.IdentityType type_, address owner_) external;
+interface IIdentityImplementation {
+    function initialize(
+        uint256 identityId_,
+        address owner_,
+        IIdentity.IdentityType identityType_,
+        string calldata metadataURI_
+    ) external;
 }
 
 /// @title IdentityFactory
@@ -17,24 +22,38 @@ contract IdentityFactory {
     event IdentityCreated(address indexed clone, uint256 indexed id, IIdentity.IdentityType indexed identityType);
 
     error CloneCreationFailed();
+    error InvalidImplementation();
+    error InvalidRegistry();
 
     constructor(address implementation_, address registry_) {
+        if (implementation_ == address(0) || implementation_.code.length == 0) {
+            revert InvalidImplementation();
+        }
+
+        if (registry_ == address(0) || registry_.code.length == 0) {
+            revert InvalidRegistry();
+        }
+
         implementation = implementation_;
         registry = IRegistry(registry_);
     }
 
     /// @notice Deploys a new identity clone and registers it canonically.
-    function createIdentity(IIdentity.IdentityType identityType) external returns (address) {
-        // 1. Deploy the ERC-1167 clone using memory-safe assembly
+    function createIdentity(IIdentity.IdentityType identityType, string calldata metadataURI)
+        external
+        returns (address)
+    {
+        // 1. Allocate the canonical ID from the Registry.
+        //    A later revert rolls this state change back atomically.
+        uint256 newId = registry.allocateIdentityId();
+
+        // 2. Deploy the ERC-1167 clone using memory-safe assembly.
         address clone = _clone(implementation);
 
-        // 2. Allocate the ID from the canonical Registry
-        uint256 newId = registry.allocateIdentityId();
-        
-        // 3. Initialize the proxy's state
-        IIdentityClone(clone).initialize(newId, identityType, msg.sender);
-        
-        // 4. Register the clone mapping in the Registry
+        // 3. Initialize the proxy's complete canonical identity state.
+        IIdentityImplementation(clone).initialize(newId, msg.sender, identityType, metadataURI);
+
+        // 4. Register the fully initialized identity canonically.
         registry.registerIdentity(clone);
 
         emit IdentityCreated(clone, newId, identityType);

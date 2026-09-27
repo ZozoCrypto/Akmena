@@ -23,10 +23,7 @@ contract AkmenaCoreTest is Test {
 
         AkmenaToken token = new AkmenaToken(deployer);
 
-        treasuryEngine = new TreasuryEngine(
-            address(token),
-            deployer
-        );
+        treasuryEngine = new TreasuryEngine(address(token), deployer);
 
         marketplaceEngine = new MarketplaceEngine();
     }
@@ -51,9 +48,9 @@ contract AkmenaCoreTest is Test {
 
     function test_SetModuleStatus() public {
         core.registerModule(TREASURY_KEY, address(treasuryEngine), "v2.0.0");
-        
+
         core.setModuleStatus(TREASURY_KEY, false);
-        (, bool status, ) = core.getModule(TREASURY_KEY);
+        (, bool status,) = core.getModule(TREASURY_KEY);
         assertFalse(status);
     }
 

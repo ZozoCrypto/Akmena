@@ -80,7 +80,7 @@ contract WorkflowEconomicSettlementAdapterTest is Test {
         // Build a real released economic commitment
         // -------------------------------------------------------------
 
-        token.transfer(buyer, AMOUNT);
+        require(token.transfer(buyer, AMOUNT));
 
         bytes32 economicTermsHash = economic.computeEconomicTermsHash(buyer, seller, address(token), AMOUNT);
 

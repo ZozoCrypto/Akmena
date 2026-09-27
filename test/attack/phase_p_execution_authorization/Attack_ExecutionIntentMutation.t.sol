@@ -21,14 +21,11 @@ contract Attack_ExecutionIntentMutationTest is Test {
     PhasePExecutionTarget internal targetA;
     PhasePExecutionTarget internal targetB;
 
-    address internal constant OPERATOR =
-        address(0x1111);
+    address internal constant OPERATOR = address(0x1111);
 
-    address internal constant AGENT =
-        address(0x2222);
+    address internal constant AGENT = address(0x2222);
 
-    bytes32 internal constant INTENT_DOMAIN =
-        keccak256("akmena.execution.intent");
+    bytes32 internal constant INTENT_DOMAIN = keccak256("akmena.execution.intent");
 
     struct ExecutionIntent {
         address operator;
@@ -77,22 +74,13 @@ contract Attack_ExecutionIntentMutationTest is Test {
         });
     }
 
-    function _baseIntent()
-        internal
-        view
-        returns (ExecutionIntent memory)
-    {
+    function _baseIntent() internal view returns (ExecutionIntent memory) {
         return _intent(
             OPERATOR,
             AGENT,
             address(targetA),
             PhasePExecutionTarget.execute.selector,
-            keccak256(
-                abi.encodeWithSelector(
-                    PhasePExecutionTarget.execute.selector,
-                    1 ether
-                )
-            ),
+            keccak256(abi.encodeWithSelector(PhasePExecutionTarget.execute.selector, 1 ether)),
             1 ether,
             0,
             bytes32(0),
@@ -102,9 +90,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
     }
 
-    function _intentHash(
-        ExecutionIntent memory intent
-    ) internal pure returns (bytes32) {
+    function _intentHash(ExecutionIntent memory intent) internal pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 INTENT_DOMAIN,
@@ -130,11 +116,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         ExecutionIntent memory a = _baseIntent();
         ExecutionIntent memory b = _baseIntent();
 
-        assertEq(
-            _intentHash(a),
-            _intentHash(b),
-            "IDENTICAL INTENTS MUST HASH IDENTICALLY"
-        );
+        assertEq(_intentHash(a), _intentHash(b), "IDENTICAL INTENTS MUST HASH IDENTICALLY");
     }
 
     function test_Attack_MutateOperatorChangesIntent() public view {
@@ -155,8 +137,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: operator mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: operator mutation did not change authorization"
         );
     }
 
@@ -178,8 +159,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: agent mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: agent mutation did not change authorization"
         );
     }
 
@@ -201,8 +181,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: target mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: target mutation did not change authorization"
         );
     }
 
@@ -224,8 +203,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: selector mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: selector mutation did not change authorization"
         );
     }
 
@@ -237,12 +215,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
             original.agent,
             original.target,
             original.selector,
-            keccak256(
-                abi.encodeWithSelector(
-                    PhasePExecutionTarget.execute.selector,
-                    100 ether
-                )
-            ),
+            keccak256(abi.encodeWithSelector(PhasePExecutionTarget.execute.selector, 100 ether)),
             original.amount,
             original.value,
             original.proofModuleKey,
@@ -252,8 +225,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: calldata mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: calldata mutation did not change authorization"
         );
     }
 
@@ -275,8 +247,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: amount mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: amount mutation did not change authorization"
         );
     }
 
@@ -298,8 +269,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: value mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: value mutation did not change authorization"
         );
     }
 
@@ -344,8 +314,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: proof ID mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: proof ID mutation did not change authorization"
         );
     }
 
@@ -367,8 +336,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: nonce mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: nonce mutation did not change authorization"
         );
     }
 
@@ -390,8 +358,7 @@ contract Attack_ExecutionIntentMutationTest is Test {
         );
 
         assertTrue(
-            _intentHash(original) != _intentHash(mutated),
-            "CRITICAL: deadline mutation did not change authorization"
+            _intentHash(original) != _intentHash(mutated), "CRITICAL: deadline mutation did not change authorization"
         );
     }
 }

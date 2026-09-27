@@ -49,6 +49,7 @@ contract Attack_CalldataSuffixTest is Test {
             agent: agent,
             target: address(target),
             selector: ERC8021Target.ping.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
             value: value,

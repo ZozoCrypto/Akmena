@@ -50,7 +50,7 @@ def test_execution_intent_type_hash_matches_production():
         "0x"
         + module.execution_intent_type_hash().hex()
         ==
-        "0xfbad3ac99ebab7a8672aada196f2f59ef0336807b51f80bc0e51757f78002dc8"
+        "0x434d4081110346a715fea42f2b6438b5774f9115417f52d641645515b2e02dbc"
     )
 
 
@@ -83,6 +83,7 @@ def test_build_intent_contains_exact_execution_binding():
         agent=AGENT,
         target=TARGET,
         payload=PAYLOAD,
+        asset="0x0000000000000000000000000000000000000000",
         amount=10**18,
         value=0,
         proof_module_key=PROOF_MODULE_KEY,
@@ -97,6 +98,7 @@ def test_build_intent_contains_exact_execution_binding():
     assert intent.target == TARGET
     assert intent.selector == bytes.fromhex("fe0d94c1")
     assert intent.calldata_hash == keccak(PAYLOAD)
+    assert intent.asset == "0x0000000000000000000000000000000000000000"
     assert intent.amount == 10**18
     assert intent.value == 0
     assert intent.proof_module_key == PROOF_MODULE_KEY
@@ -113,6 +115,7 @@ def test_intent_tuple_matches_solidity_field_order():
         target=TARGET,
         selector=bytes.fromhex("fe0d94c1"),
         calldata_hash=keccak(PAYLOAD),
+        asset="0x0000000000000000000000000000000000000000",
         amount=10**18,
         value=0,
         proof_module_key=PROOF_MODULE_KEY,
@@ -124,20 +127,21 @@ def test_intent_tuple_matches_solidity_field_order():
 
     values = intent.as_contract_tuple()
 
-    assert len(values) == 12
+    assert len(values) == 13
 
     assert values[0] == OPERATOR
     assert values[1] == AGENT
     assert values[2] == TARGET
     assert values[3] == bytes.fromhex("fe0d94c1")
     assert values[4] == keccak(PAYLOAD)
-    assert values[5] == 10**18
-    assert values[6] == 0
-    assert values[7] == PROOF_MODULE_KEY
-    assert values[8] == 0
-    assert values[9] == 12345
-    assert values[10] == 1
-    assert values[11] == 3600
+    assert values[5] == "0x0000000000000000000000000000000000000000"
+    assert values[6] == 10**18
+    assert values[7] == 0
+    assert values[8] == PROOF_MODULE_KEY
+    assert values[9] == 0
+    assert values[10] == 12345
+    assert values[11] == 1
+    assert values[12] == 3600
 
 
 def test_signing_recovers_expected_agent():
@@ -159,6 +163,7 @@ def test_signing_recovers_expected_agent():
         agent=AGENT,
         target=TARGET,
         payload=PAYLOAD,
+        asset="0x0000000000000000000000000000000000000000",
         amount=10**18,
         value=0,
         proof_module_key=PROOF_MODULE_KEY,

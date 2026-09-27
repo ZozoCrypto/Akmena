@@ -10,151 +10,75 @@ contract Attack_ProofDomainConfusionTest is Test {
     uint256 internal constant AMOUNT = 1 ether;
 
     function test_EscrowProofCannotValidateAsPrivacyProof() public {
-        LibTransientProof.setEscrowProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertTrue(
-            LibTransientProof.verifyEscrowProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            ),
+            LibTransientProof.verifyEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT),
             "exact escrow proof should validate"
         );
 
         assertFalse(
-            LibTransientProof.verifyPrivacyProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            ),
+            LibTransientProof.verifyPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT),
             "CRITICAL: escrow proof crossed into privacy domain"
         );
     }
 
     function test_PrivacyProofCannotValidateAsEscrowProof() public {
-        LibTransientProof.setPrivacyProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertTrue(
-            LibTransientProof.verifyPrivacyProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            ),
+            LibTransientProof.verifyPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT),
             "exact privacy proof should validate"
         );
 
         assertFalse(
-            LibTransientProof.verifyEscrowProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            ),
+            LibTransientProof.verifyEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT),
             "CRITICAL: privacy proof crossed into escrow domain"
         );
     }
 
     function test_SameProofIdRemainsDomainSeparated() public {
-        LibTransientProof.setEscrowProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
-        LibTransientProof.setPrivacyProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
-        assertTrue(
-            LibTransientProof.verifyEscrowProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            )
-        );
+        assertTrue(LibTransientProof.verifyEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT));
 
-        assertTrue(
-            LibTransientProof.verifyPrivacyProof(
-                PROOF_ID,
-                SUBJECT,
-                AMOUNT
-            )
-        );
+        assertTrue(LibTransientProof.verifyPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT));
     }
 
     function test_EscrowProofBindsSubject() public {
-        LibTransientProof.setEscrowProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertFalse(
-            LibTransientProof.verifyEscrowProof(
-                PROOF_ID,
-                address(0x3333),
-                AMOUNT
-            ),
+            LibTransientProof.verifyEscrowProof(PROOF_ID, address(0x3333), address(0), AMOUNT),
             "CRITICAL: escrow proof crossed subject boundary"
         );
     }
 
     function test_EscrowProofBindsAmount() public {
-        LibTransientProof.setEscrowProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setEscrowProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertFalse(
-            LibTransientProof.verifyEscrowProof(
-                PROOF_ID,
-                SUBJECT,
-                2 ether
-            ),
+            LibTransientProof.verifyEscrowProof(PROOF_ID, SUBJECT, address(0), 2 ether),
             "CRITICAL: escrow proof crossed amount boundary"
         );
     }
 
     function test_PrivacyProofBindsSubject() public {
-        LibTransientProof.setPrivacyProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertFalse(
-            LibTransientProof.verifyPrivacyProof(
-                PROOF_ID,
-                address(0x3333),
-                AMOUNT
-            ),
+            LibTransientProof.verifyPrivacyProof(PROOF_ID, address(0x3333), address(0), AMOUNT),
             "CRITICAL: privacy proof crossed subject boundary"
         );
     }
 
     function test_PrivacyProofBindsAmount() public {
-        LibTransientProof.setPrivacyProof(
-            PROOF_ID,
-            SUBJECT,
-            AMOUNT
-        );
+        LibTransientProof.setPrivacyProof(PROOF_ID, SUBJECT, address(0), AMOUNT);
 
         assertFalse(
-            LibTransientProof.verifyPrivacyProof(
-                PROOF_ID,
-                SUBJECT,
-                2 ether
-            ),
+            LibTransientProof.verifyPrivacyProof(PROOF_ID, SUBJECT, address(0), 2 ether),
             "CRITICAL: privacy proof crossed amount boundary"
         );
     }

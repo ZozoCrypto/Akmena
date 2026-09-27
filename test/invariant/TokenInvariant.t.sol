@@ -33,7 +33,7 @@ contract TokenInvariant is StdInvariant, Test {
         // Since initial supply is in treasury and fuzzer transfers to random recipients
         uint256 treasuryBalance = token.balanceOf(TREASURY);
         uint256 totalSupply = token.totalSupply();
-        
+
         assertTrue(treasuryBalance <= totalSupply);
     }
 

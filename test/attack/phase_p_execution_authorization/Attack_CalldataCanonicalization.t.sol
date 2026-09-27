@@ -58,6 +58,7 @@ contract AttackCalldataCanonicalizationTest is Test {
             agent: agent,
             target: address(target),
             selector: CalldataCanonicalizationTarget.transferLike.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: 1 ether,
             value: 0,

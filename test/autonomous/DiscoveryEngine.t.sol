@@ -22,7 +22,7 @@ contract DiscoveryEngineTest is Test {
         emit IDiscoveryEngine.AgentRegistered(agent, CATEGORY, URI);
 
         engine.registerProfile(CATEGORY, URI);
-        
+
         LibStorage.DiscoveryData memory data = engine.getProfile(agent);
         assertEq(data.category, CATEGORY);
         assertEq(data.metadataURI, URI);
@@ -32,10 +32,10 @@ contract DiscoveryEngineTest is Test {
     function test_UpdateStatus() public {
         vm.startPrank(agent);
         engine.registerProfile(CATEGORY, URI);
-        
+
         vm.expectEmit(true, true, true, true);
         emit IDiscoveryEngine.AgentStatusUpdated(agent, false);
-        
+
         engine.updateStatus(false);
         vm.stopPrank();
 

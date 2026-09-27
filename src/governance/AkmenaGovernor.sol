@@ -8,7 +8,9 @@ contract AkmenaGovernor {
     IVotes public immutable token;
     IAkmenaTimelock public timelock;
 
-    event ProposalCreated(bytes32 indexed proposalId, address indexed proposer, string title, bytes32 adrHash, uint256 snapshotBlock);
+    event ProposalCreated(
+        bytes32 indexed proposalId, address indexed proposer, string title, bytes32 adrHash, uint256 snapshotBlock
+    );
     event VoteCast(address indexed voter, bytes32 indexed proposalId, bool support, uint256 weight);
 
     error InsufficientProposalPower();
@@ -18,7 +20,7 @@ contract AkmenaGovernor {
     constructor(address _token) {
         token = IVotes(_token);
         LibGovernanceStorage.GovernanceStorage storage gs = LibGovernanceStorage.governanceStorage();
-        gs.params.proposalThreshold = 1_000_000 * 10**18;
+        gs.params.proposalThreshold = 1_000_000 * 10 ** 18;
         gs.params.quorumBps = 400;
         gs.params.votingPeriodBlocks = 50400;
         gs.params.votingDelayBlocks = 1;
@@ -30,9 +32,14 @@ contract AkmenaGovernor {
         timelock = IAkmenaTimelock(_timelock);
     }
 
-    function propose(ProtocolAction[] calldata actions, string calldata title, string calldata descriptionURI, bytes32 adrHash) external returns (bytes32) {
+    function propose(
+        ProtocolAction[] calldata actions,
+        string calldata title,
+        string calldata descriptionURI,
+        bytes32 adrHash
+    ) external returns (bytes32) {
         LibGovernanceStorage.GovernanceStorage storage gs = LibGovernanceStorage.governanceStorage();
-        
+
         uint256 snapshotBlock = block.number - gs.params.votingDelayBlocks;
         if (token.getPastVotes(msg.sender, snapshotBlock) < gs.params.proposalThreshold) {
             revert InsufficientProposalPower();
@@ -104,6 +111,8 @@ contract AkmenaGovernor {
 
         if (p.yesVotes + p.noVotes < quorumRequired || p.yesVotes <= p.noVotes) return ProposalState.Defeated;
         if (eta == 0) return ProposalState.Succeeded;
+        // Intentional timestamp boundary: queued governance proposals expire after the execution window.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp >= eta + 14 days) return ProposalState.Expired;
 
         return ProposalState.Queued;

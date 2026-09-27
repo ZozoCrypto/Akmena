@@ -54,6 +54,7 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
             agent: aiAgentHotWallet,
             target: address(target),
             selector: DummyTarget.ping.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
             value: 0,

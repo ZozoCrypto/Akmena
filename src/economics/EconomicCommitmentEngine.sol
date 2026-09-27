@@ -67,6 +67,8 @@ contract EconomicCommitmentEngine is IEconomicCommitmentEngine {
             revert AgreementNotExecuted();
         }
 
+        // Intentional timestamp boundary: economic commitments cannot use expired agreements.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > agreementData.validUntil) {
             revert AgreementExpired();
         }

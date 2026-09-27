@@ -14,17 +14,8 @@ contract LegacyExecutionRetirementTest is Test {
     }
 
     function test_LegacyExecutionPathIsPermanentlyDisabled() public {
-        vm.expectRevert(
-            AkmenaPolicyBoundary.LegacyExecutionDisabled.selector
-        );
+        vm.expectRevert(AkmenaPolicyBoundary.LegacyExecutionDisabled.selector);
 
-        boundary.executeAgentCall(
-            address(0x1111),
-            address(0x2222),
-            1 ether,
-            bytes32(0),
-            1,
-            hex""
-        );
+        boundary.executeAgentCall(address(0x1111), address(0x2222), 1 ether, bytes32(0), 1, hex"");
     }
 }

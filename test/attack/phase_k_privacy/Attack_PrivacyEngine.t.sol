@@ -18,21 +18,14 @@ contract Attack_PrivacyEngineTest is Test {
         bytes32 secret = keccak256("secret-1");
         uint256 amount = 1 ether;
 
-        bytes32 commitment = keccak256(
-            abi.encodePacked(
-                nullifierHash,
-                secret,
-                amount,
-                recipient
-            )
-        );
+        bytes32 commitment = keccak256(abi.encodePacked(nullifierHash, secret, amount, recipient));
 
         // 1. Initial Deposit
         vm.deal(attacker, 2 ether);
         vm.prank(attacker);
         privacy.depositPrivateEscrow{value: amount}(commitment);
 
-        // 2. Legitimate First Withdrawal 
+        // 2. Legitimate First Withdrawal
         privacy.executePrivateSettlement(nullifierHash, secret, amount, payable(recipient));
         assertEq(recipient.balance, amount);
 

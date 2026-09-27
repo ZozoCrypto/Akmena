@@ -1,4 +1,9 @@
 import { AkmenaClient } from '../client/AkmenaClient';
+export interface WorkflowInitializationResult {
+    workflowId: `0x${string}`;
+    transactionHash: `0x${string}`;
+    gasUsed: bigint;
+}
 export interface WorkflowCompletionResult {
     workflowId: `0x${string}`;
     transactionHash: `0x${string}`;
@@ -10,6 +15,7 @@ export interface WorkflowCompletionResult {
 export declare class WorkflowModule {
     private client;
     constructor(client: AkmenaClient);
+    initialize(identityId: bigint, agreementId: `0x${string}`, escrowId: `0x${string}`): Promise<WorkflowInitializationResult>;
     complete(workflowId: `0x${string}`, data: {
         settlement: `0x${string}`;
         memory: `0x${string}`;

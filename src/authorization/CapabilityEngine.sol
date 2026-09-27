@@ -7,6 +7,7 @@ import {IIdentity} from "../identity/IIdentity.sol";
 
 contract CapabilityEngine is ICapabilityEngine {
     error UnauthorizedCapabilityMutation();
+
     function grantCapability(address identity, bytes32 capability) external override {
         if (identity == address(0)) revert InvalidIdentityAddress();
 
@@ -15,7 +16,7 @@ contract CapabilityEngine is ICapabilityEngine {
         }
 
         LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
-        
+
         if (ds.capabilities[identity][capability]) {
             revert CapabilityAlreadyGranted();
         }
@@ -32,7 +33,7 @@ contract CapabilityEngine is ICapabilityEngine {
         }
 
         LibStorage.AuthorizationStorage storage ds = LibStorage.authorization();
-        
+
         if (!ds.capabilities[identity][capability]) {
             revert CapabilityNotFound();
         }

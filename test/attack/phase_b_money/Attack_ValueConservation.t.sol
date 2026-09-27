@@ -16,7 +16,7 @@ contract Attack_ValueConservationTest is Test {
         AkmenaToken token = new AkmenaToken(address(this));
         escrow = new EscrowEngine(address(token));
 
-        token.transfer(buyer, 100 ether);
+        require(token.transfer(buyer, 100 ether));
 
         // Setup a legitimate escrow
         vm.startPrank(buyer);

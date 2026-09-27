@@ -6,7 +6,7 @@ import {ActionType, ProtocolAction, IAkmenaCoreExecutable, IAkmenaTimelock} from
 contract AkmenaTimelock is IAkmenaTimelock {
     address public immutable governor;
     address public immutable akmenaCore;
-    
+
     address public guardian;
     bool public guardianSunset;
     uint256 public constant GRACE_PERIOD = 14 days;
@@ -44,23 +44,18 @@ contract AkmenaTimelock is IAkmenaTimelock {
     }
 
     function queue(bytes32 proposalId, uint256 eta, bytes32 proposalHash) external override onlyGovernor {
-        records[proposalId] = TimelockRecord({
-            eta: eta,
-            proposalHash: proposalHash,
-            executed: false,
-            canceled: false
-        });
+        records[proposalId] = TimelockRecord({eta: eta, proposalHash: proposalHash, executed: false, canceled: false});
         emit ProposalQueued(proposalId, eta);
     }
 
     function cancel(bytes32 proposalId) external override {
         if (guardianSunset) revert GuardianSunset();
         if (msg.sender != guardian) revert Unauthorized();
-        
+
         TimelockRecord storage r = records[proposalId];
         if (r.eta == 0) revert NotQueued();
         if (r.executed) revert ProposalAlreadyExecuted();
-        
+
         r.canceled = true;
         r.eta = 0;
         emit ProposalCanceled(proposalId);
@@ -75,10 +70,14 @@ contract AkmenaTimelock is IAkmenaTimelock {
 
     function execute(bytes32 proposalId, ProtocolAction[] calldata actions, bytes32 adrHash) external override {
         TimelockRecord storage r = records[proposalId];
-        
+
         if (r.executed) revert ProposalAlreadyExecuted();
         if (r.eta == 0 || r.canceled) revert NotQueued();
+        // Intentional timestamp boundary: queued proposals cannot execute before ETA.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp < r.eta) revert TimelockNotExpired();
+        // Intentional timestamp boundary: queued proposals expire after the grace period.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > r.eta + GRACE_PERIOD) revert TimelockExpired();
 
         bytes32 computedHash = keccak256(abi.encode(actions, adrHash));
@@ -88,16 +87,18 @@ contract AkmenaTimelock is IAkmenaTimelock {
         r.eta = 0;
 
         for (uint256 i = 0; i < actions.length; i++) {
-            IAkmenaCoreExecutable(akmenaCore).executeGovernanceAction(
-                actions[i].actionType,
-                actions[i].payload
-            );
+            IAkmenaCoreExecutable(akmenaCore).executeGovernanceAction(actions[i].actionType, actions[i].payload);
         }
 
         emit ProposalExecuted(proposalId);
     }
 
-    function getProposalStatus(bytes32 proposalId) external view override returns (uint256 eta, bool executed, bool canceled) {
+    function getProposalStatus(bytes32 proposalId)
+        external
+        view
+        override
+        returns (uint256 eta, bool executed, bool canceled)
+    {
         TimelockRecord memory r = records[proposalId];
         return (r.eta, r.executed, r.canceled);
     }

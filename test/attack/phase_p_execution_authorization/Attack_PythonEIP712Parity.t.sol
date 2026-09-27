@@ -29,6 +29,7 @@ contract Attack_PythonEIP712ParityTest is Test {
             agent: agent,
             target: target,
             selector: selector,
+            asset: address(0),
             calldataHash: calldataHash,
             amount: 1 ether,
             value: 0,
@@ -76,6 +77,6 @@ contract Attack_PythonEIP712ParityTest is Test {
 
         assertEq(name, "AkmenaExecutionAuthorization", "EIP712 name mismatch");
 
-        assertEq(version, "1", "EIP712 version mismatch");
+        assertEq(version, "2", "EIP712 version mismatch");
     }
 }

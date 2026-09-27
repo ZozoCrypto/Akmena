@@ -9,6 +9,48 @@ class WorkflowModule {
     constructor(client) {
         this.client = client;
     }
+    async initialize(identityId, agreementId, escrowId) {
+        if (!this.client.walletClient || !this.client.walletClient.account) {
+            throw new errors_1.WalletRequiredError();
+        }
+        const address = await this.client.resolveModule('workflow');
+        try {
+            const { request } = await this.client.publicClient.simulateContract({
+                address,
+                abi: WorkflowEngine_1.WorkflowEngineABI,
+                functionName: 'initializeWorkflow',
+                args: [identityId, agreementId, escrowId],
+                account: this.client.walletClient.account,
+            });
+            const txHash = await this.client.walletClient.writeContract(request);
+            const receipt = await this.client.publicClient.waitForTransactionReceipt({
+                hash: txHash,
+            });
+            for (const log of receipt.logs) {
+                try {
+                    const decoded = (0, viem_1.decodeEventLog)({
+                        abi: WorkflowEngine_1.WorkflowEngineABI,
+                        data: log.data,
+                        topics: log.topics,
+                    });
+                    if (decoded.eventName === 'WorkflowInitialized') {
+                        return {
+                            workflowId: decoded.args.workflowId,
+                            transactionHash: receipt.transactionHash,
+                            gasUsed: receipt.gasUsed,
+                        };
+                    }
+                }
+                catch {
+                    // Ignore unrelated logs.
+                }
+            }
+            throw new Error('WorkflowInitialized event not found');
+        }
+        catch (error) {
+            (0, errors_1.translateContractError)(error);
+        }
+    }
     async complete(workflowId, data) {
         if (!this.client.walletClient || !this.client.walletClient.account) {
             throw new errors_1.WalletRequiredError();

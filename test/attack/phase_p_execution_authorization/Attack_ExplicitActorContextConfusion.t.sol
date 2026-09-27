@@ -55,6 +55,7 @@ contract AttackExplicitActorContextConfusionTest is Test {
             agent: agent,
             target: address(probe),
             selector: ActorContextProbe.consumeContext.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: 0,
             value: 0,

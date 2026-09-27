@@ -29,13 +29,7 @@ contract MockAuthorization is AKMAuthorization {
         bytes32 s
     ) external override {}
 
-    function cancelAuthorization(
-        address authorizer, 
-        bytes32 nonce, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
-    ) external override {}
+    function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external override {}
 }
 
 contract AKMAuthorizationTest is Test {

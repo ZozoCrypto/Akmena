@@ -13,6 +13,7 @@ EXECUTION_INTENT_TYPE = (
     "address target,"
     "bytes4 selector,"
     "bytes32 calldataHash,"
+    "address asset,"
     "uint256 amount,"
     "uint256 value,"
     "bytes32 proofModuleKey,"
@@ -38,6 +39,7 @@ class ExecutionIntent:
     target: str
     selector: bytes
     calldata_hash: bytes
+    asset: str
     amount: int
     value: int
     proof_module_key: bytes
@@ -56,6 +58,7 @@ class ExecutionIntent:
             self.target,
             self.selector,
             self.calldata_hash,
+            self.asset,
             self.amount,
             self.value,
             self.proof_module_key,
@@ -128,6 +131,7 @@ class AuthorizationModule:
         agent: str,
         target: str,
         payload: bytes,
+        asset: str,
         amount: int,
         value: int,
         proof_module_key: bytes,
@@ -155,6 +159,7 @@ class AuthorizationModule:
         agent = self.client.w3.to_checksum_address(agent)
         target = self.client.w3.to_checksum_address(target)
 
+        asset = self.client.w3.to_checksum_address(asset)
         selector = self.selector_from_payload(payload)
         calldata_hash = self.calldata_hash(payload)
 
@@ -164,6 +169,7 @@ class AuthorizationModule:
             target=target,
             selector=selector,
             calldata_hash=calldata_hash,
+            asset=asset,
             amount=amount,
             value=value,
             proof_module_key=proof_module_key,
@@ -184,7 +190,7 @@ class AuthorizationModule:
 
         domain = {
             "name": "AkmenaExecutionAuthorization",
-            "version": "1",
+            "version": "2",
             "chainId": chain_id,
             "verifyingContract": self.authorization_address,
         }
@@ -210,6 +216,10 @@ class AuthorizationModule:
                 {
                     "name": "calldataHash",
                     "type": "bytes32",
+                },
+                {
+                    "name": "asset",
+                    "type": "address",
                 },
                 {
                     "name": "amount",
@@ -248,6 +258,7 @@ class AuthorizationModule:
             "target": intent.target,
             "selector": intent.selector,
             "calldataHash": intent.calldata_hash,
+            "asset": intent.asset,
             "amount": intent.amount,
             "value": intent.value,
             "proofModuleKey": intent.proof_module_key,

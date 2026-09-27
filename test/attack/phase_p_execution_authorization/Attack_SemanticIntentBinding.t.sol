@@ -74,6 +74,8 @@ contract SemanticIntentHarness is EIP712 {
     }
 
     function execute(SemanticIntent calldata intent, bytes calldata signature) external returns (address signer) {
+        // Intentional timestamp check in adversarial test: models the protocol's deadline boundary.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > intent.deadline) {
             revert Expired();
         }

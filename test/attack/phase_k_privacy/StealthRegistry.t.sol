@@ -16,11 +16,11 @@ contract StealthRegistryTest is Test {
         vm.startPrank(agent);
         uint256 schemeId = 1; // secp256k1
         bytes memory metaAddress = hex"020000000000000000000000000000000000000000000000000000000000000001";
-        
+
         vm.expectEmit(true, true, false, true);
         emit StealthAddressRegistry.StealthMetaAddressSet(agent, schemeId, metaAddress);
         registry.registerStealthMetaAddress(schemeId, metaAddress);
-        
+
         bytes memory retrieved = registry.getStealthMetaAddress(agent, schemeId);
         assertEq(retrieved, metaAddress);
         vm.stopPrank();
@@ -35,7 +35,7 @@ contract StealthRegistryTest is Test {
 
         vm.expectEmit(true, true, true, true);
         emit StealthAddressRegistry.Announcement(schemeId, ephemeralStealthAddress, agent, ephemeralPubKey, viewTag);
-        
+
         registry.announce(schemeId, ephemeralStealthAddress, ephemeralPubKey, viewTag);
         vm.stopPrank();
     }

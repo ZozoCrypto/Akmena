@@ -14,6 +14,9 @@ interface IRegistry {
     error IdentityAlreadyRegistered();
     error IdentityNotFound();
     error InvalidIdentity();
+    error UnauthorizedBinder();
+    error FactoryAlreadyBound();
+    error InvalidFactory();
 
     // ---------------------------------------------------------------------
     // Events
@@ -21,7 +24,13 @@ interface IRegistry {
 
     event IdentityRegistered(uint256 indexed identityId, address indexed identity, IIdentity.IdentityType identityType);
 
-    event IdentityRemoved(uint256 indexed identityId, address indexed identity);
+    // ---------------------------------------------------------------------
+    // Factory Binding
+    // ---------------------------------------------------------------------
+
+    /// @notice Binds the canonical IdentityFactory exactly once.
+    /// @dev Only the Registry deployer may perform this bootstrap operation.
+    function bindIdentityFactory(address factory) external;
 
     // ---------------------------------------------------------------------
     // Identity Allocation
@@ -39,8 +48,6 @@ interface IRegistry {
     // ---------------------------------------------------------------------
 
     function registerIdentity(address identity) external;
-
-    function removeIdentity(uint256 identityId) external;
 
     // ---------------------------------------------------------------------
     // Views

@@ -120,7 +120,7 @@ contract AttackPolicyMutationAuthorityTest is Test {
         assertTrue(attackerEscrow);
     }
 
-    function test_ZeroPolicyIsStillNotImplicitAuthorization() public {
+    function test_ZeroPolicyIsStillNotImplicitAuthorization() public view {
         (uint256 maxSpend, uint256 dailyLimit, uint256 spentToday,, bool requireEscrow) =
             boundary.agentPolicies(operatorA, agent);
 

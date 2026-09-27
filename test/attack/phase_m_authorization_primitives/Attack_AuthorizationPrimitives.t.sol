@@ -16,11 +16,9 @@ contract Attack_AuthorizationPrimitivesTest is Test {
     address internal attacker = address(0x2222);
     address internal trustedVerifier = address(0x3333);
 
-    bytes32 internal constant PRIVILEGED =
-        keccak256("akmena.capability.privileged");
+    bytes32 internal constant PRIVILEGED = keccak256("akmena.capability.privileged");
 
-    bytes32 internal constant ATTESTATION =
-        keccak256("akmena.attestation.approved");
+    bytes32 internal constant ATTESTATION = keccak256("akmena.attestation.approved");
 
     function setUp() public {
         capabilities = new CapabilityEngine();
@@ -28,31 +26,18 @@ contract Attack_AuthorizationPrimitivesTest is Test {
 
         victimIdentity = new Identity();
 
-        victimIdentity.initialize(
-            1,
-            victim,
-            IIdentity.IdentityType.Machine,
-            ""
-        );
+        victimIdentity.initialize(1, victim, IIdentity.IdentityType.Machine, "");
     }
 
     function test_Attack_AnyoneCanGrantCapabilityToVictim() public {
         vm.prank(attacker);
 
-        vm.expectRevert(
-            CapabilityEngine.UnauthorizedCapabilityMutation.selector
-        );
+        vm.expectRevert(CapabilityEngine.UnauthorizedCapabilityMutation.selector);
 
-        capabilities.grantCapability(
-            address(victimIdentity),
-            PRIVILEGED
-        );
+        capabilities.grantCapability(address(victimIdentity), PRIVILEGED);
 
         assertFalse(
-            capabilities.hasCapability(
-                address(victimIdentity),
-                PRIVILEGED
-            ),
+            capabilities.hasCapability(address(victimIdentity), PRIVILEGED),
             "CRITICAL: attacker granted victim capability"
         );
     }
@@ -60,27 +45,16 @@ contract Attack_AuthorizationPrimitivesTest is Test {
     function test_Attack_AnyoneCanRevokeVictimCapability() public {
         vm.prank(victim);
 
-        capabilities.grantCapability(
-            address(victimIdentity),
-            PRIVILEGED
-        );
+        capabilities.grantCapability(address(victimIdentity), PRIVILEGED);
 
         vm.prank(attacker);
 
-        vm.expectRevert(
-            CapabilityEngine.UnauthorizedCapabilityMutation.selector
-        );
+        vm.expectRevert(CapabilityEngine.UnauthorizedCapabilityMutation.selector);
 
-        capabilities.revokeCapability(
-            address(victimIdentity),
-            PRIVILEGED
-        );
+        capabilities.revokeCapability(address(victimIdentity), PRIVILEGED);
 
         assertTrue(
-            capabilities.hasCapability(
-                address(victimIdentity),
-                PRIVILEGED
-            ),
+            capabilities.hasCapability(address(victimIdentity), PRIVILEGED),
             "CRITICAL: attacker revoked victim capability"
         );
     }
@@ -88,17 +62,10 @@ contract Attack_AuthorizationPrimitivesTest is Test {
     function test_Attack_AnyoneCanCreateSelfAttestation() public {
         vm.prank(attacker);
 
-        attestations.recordAttestation(
-            victim,
-            ATTESTATION
-        );
+        attestations.recordAttestation(victim, ATTESTATION);
 
         assertTrue(
-            attestations.hasAttestation(
-                victim,
-                attacker,
-                ATTESTATION
-            ),
+            attestations.hasAttestation(victim, attacker, ATTESTATION),
             "EXPECTED VULNERABILITY: attacker created attestation"
         );
     }

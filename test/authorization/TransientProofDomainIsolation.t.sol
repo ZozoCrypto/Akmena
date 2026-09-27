@@ -5,36 +5,20 @@ import {Test} from "forge-std/Test.sol";
 import {LibTransientProof} from "../../src/libraries/LibTransientProof.sol";
 
 contract TransientProofDomainIsolationHarness {
-    function writeEscrow(
-        uint256 id,
-        address subject,
-        uint256 amount
-    ) external {
-        LibTransientProof.setEscrowProof(id, subject, amount);
+    function writeEscrow(uint256 id, address subject, uint256 amount) external {
+        LibTransientProof.setEscrowProof(id, subject, address(0), amount);
     }
 
-    function writePrivacy(
-        uint256 id,
-        address subject,
-        uint256 amount
-    ) external {
-        LibTransientProof.setPrivacyProof(id, subject, amount);
+    function writePrivacy(uint256 id, address subject, uint256 amount) external {
+        LibTransientProof.setPrivacyProof(id, subject, address(0), amount);
     }
 
-    function readEscrow(
-        uint256 id,
-        address subject,
-        uint256 amount
-    ) external view returns (bool) {
-        return LibTransientProof.verifyEscrowProof(id, subject, amount);
+    function readEscrow(uint256 id, address subject, uint256 amount) external view returns (bool) {
+        return LibTransientProof.verifyEscrowProof(id, subject, address(0), amount);
     }
 
-    function readPrivacy(
-        uint256 id,
-        address subject,
-        uint256 amount
-    ) external view returns (bool) {
-        return LibTransientProof.verifyPrivacyProof(id, subject, amount);
+    function readPrivacy(uint256 id, address subject, uint256 amount) external view returns (bool) {
+        return LibTransientProof.verifyPrivacyProof(id, subject, address(0), amount);
     }
 }
 
@@ -52,29 +36,17 @@ contract TransientProofDomainIsolationTest is Test {
     function test_EscrowAndPrivacyDomainsAreIndependent() public {
         harness.writeEscrow(ID, subject, AMOUNT);
 
-        assertTrue(
-            harness.readEscrow(ID, subject, AMOUNT),
-            "escrow proof was not written"
-        );
+        assertTrue(harness.readEscrow(ID, subject, AMOUNT), "escrow proof was not written");
 
-        assertFalse(
-            harness.readPrivacy(ID, subject, AMOUNT),
-            "escrow proof leaked into privacy domain"
-        );
+        assertFalse(harness.readPrivacy(ID, subject, AMOUNT), "escrow proof leaked into privacy domain");
     }
 
     function test_PrivacyAndEscrowDomainsAreIndependent() public {
         harness.writePrivacy(ID, subject, AMOUNT);
 
-        assertTrue(
-            harness.readPrivacy(ID, subject, AMOUNT),
-            "privacy proof was not written"
-        );
+        assertTrue(harness.readPrivacy(ID, subject, AMOUNT), "privacy proof was not written");
 
-        assertFalse(
-            harness.readEscrow(ID, subject, AMOUNT),
-            "privacy proof leaked into escrow domain"
-        );
+        assertFalse(harness.readEscrow(ID, subject, AMOUNT), "privacy proof leaked into escrow domain");
     }
 
     function test_SameIdDifferentDomainCannotCrossAuthenticate() public {

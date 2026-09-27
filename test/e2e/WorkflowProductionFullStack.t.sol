@@ -126,7 +126,7 @@ contract WorkflowProductionFullStackTest is Test {
         core.registerModule(ModuleKeys.REPUTATION, address(reputationAdapter), "2.0.0");
 
         // Fund buyer.
-        token.transfer(buyer, AMOUNT);
+        require(token.transfer(buyer, AMOUNT));
 
         // Real agreement.
         bytes32 economicTermsHash = economic.computeEconomicTermsHash(buyer, seller, address(token), AMOUNT);

@@ -24,10 +24,7 @@ contract TreasuryEngine is ITreasuryEngine {
 
     IERC20 private immutable _asset;
 
-    constructor(
-        address token_,
-        address owner_
-    ) {
+    constructor(address token_, address owner_) {
         if (token_ == address(0)) {
             revert InvalidToken();
         }
@@ -50,38 +47,19 @@ contract TreasuryEngine is ITreasuryEngine {
 
     /// @notice Deposit actual AKM into treasury custody.
     /// @dev Caller must approve this treasury for the amount.
-    function fundTreasury(
-        uint256 amount
-    )
-        external
-        override
-    {
+    function fundTreasury(uint256 amount) external override {
         if (amount == 0) {
             revert InvalidAmount();
         }
 
-        _asset.safeTransferFrom(
-            msg.sender,
-            address(this),
-            amount
-        );
+        _asset.safeTransferFrom(msg.sender, address(this), amount);
 
-        emit TreasuryFunded(
-            msg.sender,
-            amount
-        );
+        emit TreasuryFunded(msg.sender, amount);
     }
 
     /// @notice Transfer actual AKM out of treasury custody.
     /// @dev Restricted to the treasury controller.
-    function disburseFunds(
-        address to,
-        uint256 amount
-    )
-        external
-        override
-        onlyOwner
-    {
+    function disburseFunds(address to, uint256 amount) external override onlyOwner {
         if (to == address(0)) {
             revert InvalidAddress();
         }
@@ -90,8 +68,7 @@ contract TreasuryEngine is ITreasuryEngine {
             revert InvalidAmount();
         }
 
-        uint256 balance =
-            _asset.balanceOf(address(this));
+        uint256 balance = _asset.balanceOf(address(this));
 
         if (balance < amount) {
             revert InsufficientTreasuryFunds();
@@ -99,26 +76,13 @@ contract TreasuryEngine is ITreasuryEngine {
 
         _asset.safeTransfer(to, amount);
 
-        emit FundsDisbursed(
-            to,
-            amount
-        );
+        emit FundsDisbursed(to, amount);
     }
 
     /// @notice Returns authoritative token supply and actual treasury custody.
-    function getTreasuryState()
-        external
-        view
-        override
-        returns (
-            uint256 totalSupply,
-            uint256 treasuryBalance
-        )
-    {
-        totalSupply =
-            _asset.totalSupply();
+    function getTreasuryState() external view override returns (uint256 totalSupply, uint256 treasuryBalance) {
+        totalSupply = _asset.totalSupply();
 
-        treasuryBalance =
-            _asset.balanceOf(address(this));
+        treasuryBalance = _asset.balanceOf(address(this));
     }
 }

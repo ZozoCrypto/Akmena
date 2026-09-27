@@ -5,22 +5,21 @@ import {IAgreementEngine} from "./IAgreementEngine.sol";
 import {LibStorage} from "../storage/LibStorage.sol";
 
 contract AgreementEngine is IAgreementEngine {
-    function createAgreement(bytes32 agreementId, address partyB, bytes32 termsHash, uint256 validUntil) external override {
+    function createAgreement(bytes32 agreementId, address partyB, bytes32 termsHash, uint256 validUntil)
+        external
+        override
+    {
         if (partyB == address(0)) revert InvalidAddress();
         if (termsHash == bytes32(0)) revert InvalidTerms();
 
         LibStorage.AgreementStorage storage ds = LibStorage.agreement();
-        
+
         if (ds.agreements[agreementId].partyA != address(0)) {
             revert AgreementAlreadyExists();
         }
 
         ds.agreements[agreementId] = LibStorage.AgreementData({
-            partyA: msg.sender,
-            partyB: partyB,
-            termsHash: termsHash,
-            validUntil: validUntil,
-            isExecuted: false
+            partyA: msg.sender, partyB: partyB, termsHash: termsHash, validUntil: validUntil, isExecuted: false
         });
 
         emit AgreementCreated(agreementId, msg.sender, partyB);
@@ -31,6 +30,8 @@ contract AgreementEngine is IAgreementEngine {
         LibStorage.AgreementData storage agreementData = ds.agreements[agreementId];
 
         if (msg.sender != agreementData.partyB) revert UnauthorizedAccess();
+        // Intentional timestamp boundary: agreements expire at their declared validUntil.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > agreementData.validUntil) revert AgreementExpired();
         if (agreementData.isExecuted) revert("AgreementAlreadyExecuted");
 

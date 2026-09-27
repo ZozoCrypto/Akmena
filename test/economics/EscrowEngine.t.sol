@@ -23,19 +23,12 @@ contract EscrowEngineTest is Test {
         escrow = new EscrowEngine(address(token));
     }
 
-    function _createFundedEscrow()
-        internal
-        returns (uint256 id)
-    {
+    function _createFundedEscrow() internal returns (uint256 id) {
         vm.prank(buyer);
         token.approve(address(escrow), FUNDING);
 
         vm.prank(buyer);
-        id = escrow.createEscrow(
-            buyer,
-            seller,
-            FUNDING
-        );
+        id = escrow.createEscrow(buyer, seller, FUNDING);
     }
 
     function test_CreateEscrow_TransfersActualAKMIntoCustody() public {
@@ -44,8 +37,7 @@ contract EscrowEngineTest is Test {
 
         uint256 id = _createFundedEscrow();
 
-        LibStorage.EscrowData memory data =
-            escrow.getEscrow(id);
+        LibStorage.EscrowData memory data = escrow.getEscrow(id);
 
         assertEq(data.buyer, buyer);
         assertEq(data.seller, seller);
@@ -53,20 +45,11 @@ contract EscrowEngineTest is Test {
         assertEq(data.asset, address(token));
         assertEq(data.status, 1);
 
-        assertEq(
-            token.balanceOf(buyer),
-            buyerBefore - FUNDING
-        );
+        assertEq(token.balanceOf(buyer), buyerBefore - FUNDING);
 
-        assertEq(
-            token.balanceOf(address(escrow)),
-            escrowBefore + FUNDING
-        );
+        assertEq(token.balanceOf(address(escrow)), escrowBefore + FUNDING);
 
-        assertEq(
-            escrow.totalLocked(),
-            FUNDING
-        );
+        assertEq(escrow.totalLocked(), FUNDING);
     }
 
     function test_CreateEscrow_WithoutApprovalReverts() public {
@@ -74,11 +57,7 @@ contract EscrowEngineTest is Test {
 
         vm.expectRevert();
 
-        escrow.createEscrow(
-            buyer,
-            seller,
-            FUNDING
-        );
+        escrow.createEscrow(buyer, seller, FUNDING);
     }
 
     function test_CreateEscrow_InsufficientBalanceReverts() public {
@@ -90,11 +69,7 @@ contract EscrowEngineTest is Test {
         vm.prank(poorBuyer);
         vm.expectRevert();
 
-        escrow.createEscrow(
-            poorBuyer,
-            seller,
-            1 ether
-        );
+        escrow.createEscrow(poorBuyer, seller, 1 ether);
     }
 
     function test_ReleaseEscrowTransfersToSeller() public {
@@ -106,23 +81,13 @@ contract EscrowEngineTest is Test {
         vm.prank(buyer);
         escrow.releaseEscrow(id);
 
-        assertEq(
-            token.balanceOf(seller),
-            sellerBefore + FUNDING
-        );
+        assertEq(token.balanceOf(seller), sellerBefore + FUNDING);
 
-        assertEq(
-            token.balanceOf(address(escrow)),
-            escrowBefore - FUNDING
-        );
+        assertEq(token.balanceOf(address(escrow)), escrowBefore - FUNDING);
 
-        assertEq(
-            escrow.totalLocked(),
-            0
-        );
+        assertEq(escrow.totalLocked(), 0);
 
-        LibStorage.EscrowData memory data =
-            escrow.getEscrow(id);
+        LibStorage.EscrowData memory data = escrow.getEscrow(id);
 
         assertEq(data.status, 2);
     }
@@ -130,40 +95,26 @@ contract EscrowEngineTest is Test {
     function test_RefundEscrowTransfersToBuyer() public {
         uint256 id = _createFundedEscrow();
 
-        uint256 buyerBefore =
-            token.balanceOf(buyer);
+        uint256 buyerBefore = token.balanceOf(buyer);
 
-        uint256 escrowBefore =
-            token.balanceOf(address(escrow));
+        uint256 escrowBefore = token.balanceOf(address(escrow));
 
         vm.prank(seller);
         escrow.refundEscrow(id);
 
-        assertEq(
-            token.balanceOf(buyer),
-            buyerBefore + FUNDING
-        );
+        assertEq(token.balanceOf(buyer), buyerBefore + FUNDING);
 
-        assertEq(
-            token.balanceOf(address(escrow)),
-            escrowBefore - FUNDING
-        );
+        assertEq(token.balanceOf(address(escrow)), escrowBefore - FUNDING);
 
-        assertEq(
-            escrow.totalLocked(),
-            0
-        );
+        assertEq(escrow.totalLocked(), 0);
 
-        LibStorage.EscrowData memory data =
-            escrow.getEscrow(id);
+        LibStorage.EscrowData memory data = escrow.getEscrow(id);
 
         assertEq(data.status, 3);
     }
 
     function test_RevertWhen_EscrowNotFound() public {
-        vm.expectRevert(
-            IEscrowEngine.EscrowNotFound.selector
-        );
+        vm.expectRevert(IEscrowEngine.EscrowNotFound.selector);
 
         escrow.getEscrow(999);
     }
@@ -173,9 +124,7 @@ contract EscrowEngineTest is Test {
 
         vm.prank(seller);
 
-        vm.expectRevert(
-            IEscrowEngine.UnauthorizedAccess.selector
-        );
+        vm.expectRevert(IEscrowEngine.UnauthorizedAccess.selector);
 
         escrow.releaseEscrow(id);
     }
@@ -185,9 +134,7 @@ contract EscrowEngineTest is Test {
 
         vm.prank(buyer);
 
-        vm.expectRevert(
-            IEscrowEngine.UnauthorizedAccess.selector
-        );
+        vm.expectRevert(IEscrowEngine.UnauthorizedAccess.selector);
 
         escrow.refundEscrow(id);
     }
@@ -195,15 +142,9 @@ contract EscrowEngineTest is Test {
     function test_RevertWhen_ZeroAmount() public {
         vm.prank(buyer);
 
-        vm.expectRevert(
-            IEscrowEngine.InvalidAmount.selector
-        );
+        vm.expectRevert(IEscrowEngine.InvalidAmount.selector);
 
-        escrow.createEscrow(
-            buyer,
-            seller,
-            0
-        );
+        escrow.createEscrow(buyer, seller, 0);
     }
 
     function test_RevertWhen_DoubleRelease() public {
@@ -213,9 +154,7 @@ contract EscrowEngineTest is Test {
         escrow.releaseEscrow(id);
 
         vm.prank(buyer);
-        vm.expectRevert(
-            IEscrowEngine.EscrowNotActive.selector
-        );
+        vm.expectRevert(IEscrowEngine.EscrowNotActive.selector);
 
         escrow.releaseEscrow(id);
     }
@@ -227,9 +166,7 @@ contract EscrowEngineTest is Test {
         escrow.refundEscrow(id);
 
         vm.prank(buyer);
-        vm.expectRevert(
-            IEscrowEngine.EscrowNotActive.selector
-        );
+        vm.expectRevert(IEscrowEngine.EscrowNotActive.selector);
 
         escrow.releaseEscrow(id);
     }
@@ -241,9 +178,7 @@ contract EscrowEngineTest is Test {
         escrow.releaseEscrow(id);
 
         vm.prank(seller);
-        vm.expectRevert(
-            IEscrowEngine.EscrowNotActive.selector
-        );
+        vm.expectRevert(IEscrowEngine.EscrowNotActive.selector);
 
         escrow.refundEscrow(id);
     }

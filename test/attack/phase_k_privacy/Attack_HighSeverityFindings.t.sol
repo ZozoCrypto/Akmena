@@ -36,27 +36,17 @@ contract AttackableERC20 is IERC20 {
         return true;
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256) {
+    function allowance(address owner, address spender) external view returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(
-        address spender,
-        uint256 amount
-    ) external returns (bool) {
+    function approve(address spender, uint256 amount) external returns (bool) {
         _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         uint256 allowed = _allowances[from][msg.sender];
 
         require(allowed >= amount, "allowance");
@@ -67,11 +57,7 @@ contract AttackableERC20 is IERC20 {
         return true;
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal {
+    function _transfer(address from, address to, uint256 amount) internal {
         require(_balances[from] >= amount, "balance");
 
         _balances[from] -= amount;
@@ -114,15 +100,7 @@ contract Attack_HighSeverityFindingsTest is Test {
         bytes32 secret = keccak256("victim-secret");
         bytes32 nullifierHash = keccak256("victim-nullifier");
 
-        bytes32 commitment =
-            keccak256(
-                abi.encodePacked(
-                    nullifierHash,
-                    secret,
-                    amount,
-                    intendedRecipient
-                )
-            );
+        bytes32 commitment = keccak256(abi.encodePacked(nullifierHash, secret, amount, intendedRecipient));
 
         vm.deal(victim, amount);
 
@@ -135,34 +113,15 @@ contract Attack_HighSeverityFindingsTest is Test {
         vm.prank(attacker);
         vm.expectRevert(PrivacyEngine.InvalidCommitment.selector);
 
-        privacy.executePrivateSettlement(
-            nullifierHash,
-            secret,
-            amount,
-            payable(attackerRecipient)
-        );
+        privacy.executePrivateSettlement(nullifierHash, secret, amount, payable(attackerRecipient));
 
-        assertEq(
-            attackerRecipient.balance,
-            attackerBefore,
-            "CRITICAL: attacker-controlled recipient received funds"
-        );
+        assertEq(attackerRecipient.balance, attackerBefore, "CRITICAL: attacker-controlled recipient received funds");
 
-        assertEq(
-            address(privacy).balance,
-            privacyBefore,
-            "CRITICAL: privacy funds moved during rejected substitution"
-        );
+        assertEq(address(privacy).balance, privacyBefore, "CRITICAL: privacy funds moved during rejected substitution");
 
-        assertFalse(
-            privacy.nullifierHashes(nullifierHash),
-            "Rejected substitution consumed the nullifier"
-        );
+        assertFalse(privacy.nullifierHashes(nullifierHash), "Rejected substitution consumed the nullifier");
 
-        assertTrue(
-            privacy.commitments(commitment),
-            "Rejected substitution consumed the commitment"
-        );
+        assertTrue(privacy.commitments(commitment), "Rejected substitution consumed the commitment");
     }
 
     /*
@@ -173,9 +132,7 @@ contract Attack_HighSeverityFindingsTest is Test {
      *
      * Current production code is expected to reject this.
      */
-    function test_Attack_EscrowCannotPullVictimFundsViaArbitraryBuyer()
-        public
-    {
+    function test_Attack_EscrowCannotPullVictimFundsViaArbitraryBuyer() public {
         uint256 amount = 100 ether;
 
         token.mint(victim, amount);
@@ -188,27 +145,13 @@ contract Attack_HighSeverityFindingsTest is Test {
 
         vm.prank(attacker);
 
-        vm.expectRevert(
-            IEscrowEngine.UnauthorizedAccess.selector
-        );
+        vm.expectRevert(IEscrowEngine.UnauthorizedAccess.selector);
 
-        escrow.createEscrow(
-            victim,
-            seller,
-            amount
-        );
+        escrow.createEscrow(victim, seller, amount);
 
-        assertEq(
-            token.balanceOf(victim),
-            victimBefore,
-            "CRITICAL: attacker pulled victim tokens"
-        );
+        assertEq(token.balanceOf(victim), victimBefore, "CRITICAL: attacker pulled victim tokens");
 
-        assertEq(
-            token.balanceOf(address(escrow)),
-            escrowBefore,
-            "CRITICAL: escrow received unauthorized tokens"
-        );
+        assertEq(token.balanceOf(address(escrow)), escrowBefore, "CRITICAL: escrow received unauthorized tokens");
     }
 
     /*
@@ -225,17 +168,12 @@ contract Attack_HighSeverityFindingsTest is Test {
 
         vm.prank(victim);
 
-        uint256 escrowId = escrow.createEscrow(
-            victim,
-            seller,
-            amount
-        );
+        uint256 escrowId = escrow.createEscrow(victim, seller, amount);
 
         assertEq(escrowId, 1);
         assertEq(token.balanceOf(address(escrow)), amount);
 
-        LibStorage.EscrowData memory data =
-            escrow.getEscrow(escrowId);
+        LibStorage.EscrowData memory data = escrow.getEscrow(escrowId);
 
         assertEq(data.buyer, victim);
         assertEq(data.seller, seller);

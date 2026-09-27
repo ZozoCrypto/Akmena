@@ -4,15 +4,9 @@ pragma solidity ^0.8.28;
 /// @title ITreasuryEngine
 /// @notice Canonical single-asset Treasury boundary for Akmena.
 interface ITreasuryEngine {
-    event TreasuryFunded(
-        address indexed from,
-        uint256 amount
-    );
+    event TreasuryFunded(address indexed from, uint256 amount);
 
-    event FundsDisbursed(
-        address indexed to,
-        uint256 amount
-    );
+    event FundsDisbursed(address indexed to, uint256 amount);
 
     error InvalidAddress();
     error InvalidAmount();
@@ -24,20 +18,9 @@ interface ITreasuryEngine {
 
     function owner() external view returns (address);
 
-    function fundTreasury(
-        uint256 amount
-    ) external;
+    function fundTreasury(uint256 amount) external;
 
-    function disburseFunds(
-        address to,
-        uint256 amount
-    ) external;
+    function disburseFunds(address to, uint256 amount) external;
 
-    function getTreasuryState()
-        external
-        view
-        returns (
-            uint256 totalSupply,
-            uint256 treasuryBalance
-        );
+    function getTreasuryState() external view returns (uint256 totalSupply, uint256 treasuryBalance);
 }

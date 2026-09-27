@@ -26,6 +26,7 @@ contract Attack_PythonEIP712ComponentsTest is Test {
             agent: agent,
             target: target,
             selector: selector,
+            asset: address(0),
             calldataHash: calldataHash,
             amount: 1 ether,
             value: 0,
@@ -46,6 +47,7 @@ contract Attack_PythonEIP712ComponentsTest is Test {
                 intent.target,
                 intent.selector,
                 intent.calldataHash,
+                intent.asset,
                 intent.amount,
                 intent.value,
                 intent.proofModuleKey,
@@ -93,6 +95,6 @@ contract Attack_PythonEIP712ComponentsTest is Test {
 
         assertEq(name, "AkmenaExecutionAuthorization");
 
-        assertEq(version, "1");
+        assertEq(version, "2");
     }
 }

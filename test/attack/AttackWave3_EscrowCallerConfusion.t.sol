@@ -16,7 +16,7 @@ contract AttackWave3_EscrowCallerConfusionTest is Test {
         AkmenaToken token = new AkmenaToken(address(this));
         escrow = new EscrowEngine(address(token));
 
-        token.transfer(buyer, 100 ether);
+        require(token.transfer(buyer, 100 ether));
 
         vm.startPrank(buyer);
         token.approve(address(escrow), 100 ether);

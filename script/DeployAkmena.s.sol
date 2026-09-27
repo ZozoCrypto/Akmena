@@ -145,6 +145,7 @@ contract DeployAkmena is Script {
         d.core.registerModule(ModuleKeys.MEMORY, address(d.memoryAdapter), "2.0.0");
         d.core.registerModule(ModuleKeys.REPUTATION, address(d.reputationAdapter), "2.0.0");
         d.core.registerModule(ModuleKeys.MARKETPLACE, address(d.marketplace), "2.0.0");
+        d.core.registerModule(ModuleKeys.IDENTITY, address(d.identityFactory), "2.0.0");
 
         d.core.registerModule(keccak256("akmena.module.policy_boundary"), address(d.policyBoundary), "2.0.0");
 

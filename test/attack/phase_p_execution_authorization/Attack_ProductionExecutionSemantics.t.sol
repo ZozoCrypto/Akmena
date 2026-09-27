@@ -62,6 +62,7 @@ contract AttackProductionExecutionSemanticsTest is Test {
             agent: agent,
             target: address(target),
             selector: ExecutionSemanticsTarget.execute.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
             value: value,
@@ -125,7 +126,7 @@ contract AttackProductionExecutionSemanticsTest is Test {
 
         vm.prank(agent);
 
-        vm.expectRevert(AkmenaExecutionAuthorization.InvalidCalldataHash.selector);
+        vm.expectRevert(AkmenaPolicyBoundary.NativeValueMismatch.selector);
 
         boundary.executeAuthorizedAgentCall{value: suppliedValue}(intent, payload, signature);
     }

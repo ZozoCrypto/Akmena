@@ -34,19 +34,11 @@ contract PrivacyEngine {
     ) external {
         if (stealthRecipient == address(0)) revert InvalidAddress();
         if (nullifierHashes[nullifierHash]) revert NullifierAlreadySpent();
-        
-        bytes32 derivedCommitment = keccak256(
-            abi.encodePacked(
-                nullifierHash,
-                secret,
-                amount,
-                stealthRecipient
-            )
-        );
-        if (
-            !commitments[derivedCommitment] ||
-            commitmentAmounts[derivedCommitment] != amount
-        ) revert InvalidCommitment();
+
+        bytes32 derivedCommitment = keccak256(abi.encodePacked(nullifierHash, secret, amount, stealthRecipient));
+        if (!commitments[derivedCommitment] || commitmentAmounts[derivedCommitment] != amount) {
+            revert InvalidCommitment();
+        }
 
         nullifierHashes[nullifierHash] = true;
         commitments[derivedCommitment] = false;
@@ -61,26 +53,23 @@ contract PrivacyEngine {
          * This prevents recipient-controlled fallback code from observing
          * or consuming the proof during settlement.
          */
-        (bool success, ) = stealthRecipient.call{value: amount}("");
+        (bool success,) = stealthRecipient.call{value: amount}("");
         if (!success) revert TransferFailed();
 
-        LibTransientProof.setPrivacyProof(
-            uint256(nullifierHash),
-            stealthRecipient,
-            amount
-        );
+        LibTransientProof.setPrivacyProof(uint256(nullifierHash), stealthRecipient, address(0), amount);
     }
 
     /// @notice Allows the PolicyBoundary to verify transient proofs written in this module's context
-    function verifyTransientProof(
-        uint256 proofId,
-        address operator,
-        uint256 amount
-    ) external view returns (bool) {
-        return LibTransientProof.verifyPrivacyProof(
-            proofId,
-            operator,
-            amount
-        );
+    function verifyTransientProof(uint256 proofId, address operator, address asset, uint256 amount)
+        external
+        view
+        returns (bool)
+    {
+        // PrivacyEngine settles native value, represented by address(0).
+        if (asset != address(0)) {
+            return false;
+        }
+
+        return LibTransientProof.verifyPrivacyProof(proofId, operator, address(0), amount);
     }
 }

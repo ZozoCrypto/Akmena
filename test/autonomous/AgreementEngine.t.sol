@@ -40,7 +40,7 @@ contract AgreementEngineTest is Test {
         emit IAgreementEngine.AgreementExecuted(agreementId);
 
         engine.executeAgreement(agreementId);
-        
+
         LibStorage.AgreementData memory data = engine.getAgreement(agreementId);
         assertTrue(data.isExecuted);
     }

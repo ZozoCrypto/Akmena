@@ -30,14 +30,6 @@ abstract contract IdentityBase is Initializable, IIdentity {
         emit IdentityActivated(identityId_);
     }
 
-    function initialize(uint256 identityId_, address owner_, string calldata metadataURI_)
-        external
-        virtual
-        initializer
-    {
-        __IdentityBase_init(identityId_, owner_, metadataURI_);
-    }
-
     function identityId() external view override returns (uint256) {
         return _identityId;
     }

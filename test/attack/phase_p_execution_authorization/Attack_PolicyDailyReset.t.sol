@@ -59,6 +59,7 @@ contract AttackPolicyDailyResetTest is Test {
             agent: agent,
             target: address(target),
             selector: DailyResetTarget.execute.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
             value: 0,

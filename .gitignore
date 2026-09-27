@@ -39,3 +39,9 @@ audit/redteam/reports/redteam-hits.txt
 audit/redteam/reports/sdk-agent-security-map.txt
 audit/redteam/reports/autonomous-stack-map.txt
 audit/redteam/reports/mcp-map.txt
+
+__pycache__/
+*.py[cod]
+
+# Frontend build output
+frontend/dist/

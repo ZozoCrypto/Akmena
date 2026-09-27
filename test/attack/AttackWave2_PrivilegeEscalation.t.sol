@@ -15,13 +15,15 @@ contract AttackWave2_PrivilegeEscalationTest is Test {
 
     function setUp() public {
         vm.startPrank(admin);
-        
+
         // Deploy Core Router and Escrow
         core = new AkmenaCore();
         escrow = new EscrowEngine(address(new AkmenaToken(address(this))));
 
         // Register Escrow into Core
-        core.registerModule(bytes32("ESCROW_ENGINE"), address(escrow), "2.0.0");
+        // forge-lint: disable-next-line(unsafe-typecast)
+        core.registerModule(
+"ESCROW_ENGINE", address(escrow), "2.0.0");
         vm.stopPrank();
     }
 
@@ -31,17 +33,17 @@ contract AttackWave2_PrivilegeEscalationTest is Test {
 
     function test_Attack_DirectEscrowReleaseBypass() public {
         uint256 escrowId = 1;
-        
+
         // The attacker tries to call releaseEscrow directly on the EscrowEngine
         // bypassing the Core Router's security layer.
         vm.startPrank(attacker);
-        
+
         // If this succeeds, the Escrow Engine is naked to the internet.
-        // It MUST REVERT because only the Core Router (or authorized accounts) 
+        // It MUST REVERT because only the Core Router (or authorized accounts)
         // should be allowed to interact with raw escrow states.
-        vm.expectRevert(); 
+        vm.expectRevert();
         escrow.releaseEscrow(escrowId);
-        
+
         vm.stopPrank();
     }
 
@@ -52,15 +54,17 @@ contract AttackWave2_PrivilegeEscalationTest is Test {
     function test_Attack_CoreRouterModuleHijack() public {
         // Attacker deploys a malicious fake Escrow Engine
         address maliciousEscrow = address(0xDEADBEEF);
-        
+
         vm.startPrank(attacker);
 
         // Attacker attempts to overwrite the real ESCROW_ENGINE registry
         // with their malicious contract to intercept all protocol funds.
         // This MUST revert with a permissions error.
         vm.expectRevert();
-        core.registerModule(bytes32("ESCROW_ENGINE"), maliciousEscrow, "3.0.0");
-        
+        // forge-lint: disable-next-line(unsafe-typecast)
+        core.registerModule(
+"ESCROW_ENGINE", maliciousEscrow, "3.0.0");
+
         vm.stopPrank();
     }
 }

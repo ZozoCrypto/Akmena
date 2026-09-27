@@ -83,6 +83,7 @@ contract ERC1271ExecutionAuthorizationTest is Test {
             agent: address(smartAgent),
             target: address(target),
             selector: ERC1271Target.ping.selector,
+            asset: address(0),
             calldataHash: keccak256(payload),
             amount: AMOUNT,
             value: 0,

@@ -16,13 +16,16 @@ contract SettlementHandler is Test {
     uint256 public recordCount;
     uint256 public duplicateRecordAttempts;
     uint256 public duplicateRecordSuccesses;
+    uint256 public settlementDataIntegrityFailures;
 
     constructor(SettlementEngine _settlementEngine) {
         settlementEngine = _settlementEngine;
     }
 
     function recordSettlement(bytes32 settlementId, address payer, address payee, uint256 amount) external {
-        settlementId = settlementId == bytes32(0) ? keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao)) : settlementId;
+        settlementId = settlementId == bytes32(0)
+            ? keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao))
+            : settlementId;
         payer = payer == address(0) ? address(0x1) : payer;
         payee = payee == address(0) ? address(0x2) : payee;
         amount = bound(amount, 1, type(uint128).max);
@@ -36,6 +39,14 @@ contract SettlementHandler is Test {
                 settlementAmounts[settlementId] = amount;
                 settlementPayers[settlementId] = payer;
                 settlementPayees[settlementId] = payee;
+
+                try settlementEngine.getSettlement(settlementId) returns (LibStorage.SettlementData memory data) {
+                    if (data.amount != amount || data.payer != payer || data.payee != payee || data.timestamp == 0) {
+                        settlementDataIntegrityFailures++;
+                    }
+                } catch {
+                    settlementDataIntegrityFailures++;
+                }
             } else {
                 duplicateRecordSuccesses++;
             }

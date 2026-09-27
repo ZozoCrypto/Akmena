@@ -26,12 +26,23 @@ describe('Akmena ABI compatibility', () => {
         expect(inputTypes(EscrowEngineABI, 'createEscrow')).toContain(
             'address',
         );
-        expect(
-            EscrowEngineABI.filter(
-                (entry) =>
-                    entry.type === 'function' && entry.name === 'createEscrow',
-            ),
-        ).toHaveLength(2);
+        const createEscrowOverloads = EscrowEngineABI.filter(
+            (entry) =>
+                entry.type === 'function' && entry.name === 'createEscrow',
+        );
+
+        expect(createEscrowOverloads).toHaveLength(4);
+
+        const createEscrowInputTypes = createEscrowOverloads
+            .map((entry: any) => entry.inputs.map((input: any) => input.type))
+            .sort((a: string[], b: string[]) => a.join(',').localeCompare(b.join(',')));
+
+        expect(createEscrowInputTypes).toEqual([
+            ['address', 'address', 'address', 'uint256'],
+            ['address', 'address', 'address', 'uint256', 'bytes32'],
+            ['address', 'address', 'uint256'],
+            ['address', 'address', 'uint256', 'bytes32'],
+        ]);
 
         expect(inputTypes(EscrowEngineABI, 'releaseEscrow')).toEqual([
             'uint256',

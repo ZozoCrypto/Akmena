@@ -13,7 +13,7 @@ contract Attack_CoreAuthorityTest is Test {
     address internal admin = address(0xAD111);
     address internal attacker = address(0xBAD);
 
-    bytes32 constant ESCROW_KEY = bytes32("ESCROW_ENGINE");
+    bytes32 constant ESCROW_KEY = "ESCROW_ENGINE";
 
     function setUp() public {
         vm.startPrank(admin);
@@ -63,7 +63,7 @@ contract Attack_CoreAuthorityTest is Test {
     function test_Attack_ModuleAddressSpoofingViaStatePollution() public {
         // EXPLOIT ATTEMPT: Attacker attempts to register a slightly different bytes32 key
         // hoping downstream contracts use loose string matching or partial hashes.
-        bytes32 spoofedKey = bytes32("ESCROW_ENGINE_V2");
+        bytes32 spoofedKey = "ESCROW_ENGINE_V2";
         address spoofedEscrow = address(0x999);
 
         vm.prank(attacker);

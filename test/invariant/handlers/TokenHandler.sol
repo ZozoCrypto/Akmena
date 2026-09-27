@@ -18,7 +18,7 @@ contract TokenHandler is Test {
 
     function transfer(address recipient, uint256 amount) external {
         recipient = recipient == address(0) ? address(0x1) : recipient;
-        
+
         uint256 holderBalance = token.balanceOf(initialHolder);
         amount = bound(amount, 0, holderBalance);
 

@@ -1,0 +1,40 @@
+{
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "deployer": "0x2D4888499D765d387f9CbC48061b28CDe6bC2601",
+  "contracts": {
+    "AkmenaCore": {
+      "address": "0x0C4710331d6e234fE311C1c27252Ad63b7A6ac99",
+      "deploymentTx": "0x6ba21fddacd27683c014278fef6bcc043b7630663255ef323ff495bda76ef93e"
+    },
+    "EscrowEngine": {
+      "address": "0x18FdA79e236E303d6de1Bf94a12E5137d45E3D84",
+      "deploymentTx": "0x6ba21fddacd27683c014278fef6bcc043b7630663255ef323ff495bda76ef93e"
+    },
+    "AkmenaPolicyBoundary": {
+      "address": "0xdC3fC3e840b14Ce345638549D0d4617b75cD89b9",
+      "deploymentTx": "0x855be73f560953ac834c752d68f1b26ad5f19019e952f085f256e8cf64a93cb7"
+    },
+    "AkmenaExecutionAuthorization": {
+      "address": "0x12e1dC708c5A37ee4e45B550E9318966c3C5Eb34"
+    }
+  },
+  "configuration": {
+    "escrowModuleKey": "0x455343524f575f454e47494e4500000000000000000000000000000000000000",
+    "escrowModuleVersion": "2.1.0",
+    "eip712": {
+      "name": "AkmenaExecutionAuthorization",
+      "version": "1",
+      "chainId": 84532,
+      "verifyingContract": "0x12e1dC708c5A37ee4e45B550E9318966c3C5Eb34"
+    }
+  },
+  "deploymentBlock": 46106393,
+  "verification": {
+    "coreRuntimeBytes": 2861,
+    "escrowRuntimeBytes": 2478,
+    "policyRuntimeBytes": 4768,
+    "authorizationRuntimeBytes": 4358
+  },
+  "generatedAt": "2026-08-29T05:29:07.527239+00:00"
+}

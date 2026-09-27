@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {AKMAuthorization} from "./AKMAuthorization.sol";
 
 /// @title AKMPayments
 /// @notice ERC-3009 payment execution engine for AKM.
 abstract contract AKMPayments is AKMAuthorization {
+
     using ECDSA for bytes32;
 
     // =============================================================
@@ -50,6 +53,49 @@ abstract contract AKMPayments is AKMAuthorization {
         bytes32 digest = _authorizationDigest(structHash);
 
         _verifySigner(from, digest, v, r, s);
+
+        _useAuthorization(from, nonce);
+
+        _transferTokens(from, to, value);
+
+        emit AuthorizationTransfer(from, to, value, nonce);
+    }
+
+    // =============================================================
+    //        TRANSFER WITH AUTHORIZATION — BYTES SIGNATURE
+    // =============================================================
+
+    /// @notice Execute a signed transfer using either an EOA signature or ERC-1271.
+    /// @dev The authorization digest is identical to the legacy v/r/s path.
+    function transferWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        bytes calldata signature
+    ) public virtual {
+        _requireUnusedAuthorization(from, nonce);
+        _requireValidAuthorization(validAfter, validBefore);
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                TRANSFER_WITH_AUTHORIZATION_TYPEHASH,
+                from,
+                to,
+                value,
+                validAfter,
+                validBefore,
+                nonce
+            )
+        );
+
+        bytes32 digest = _authorizationDigest(structHash);
+
+        if (!SignatureChecker.isValidSignatureNow(from, digest, signature)) {
+            revert InvalidSignature();
+        }
 
         _useAuthorization(from, nonce);
 

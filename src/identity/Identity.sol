@@ -9,30 +9,16 @@ import "./IdentityBase.sol";
 contract Identity is IdentityBase {
     IdentityType private _type;
 
-    function initialize(
-        uint256 identityId_,
-        address owner_,
-        IdentityType identityType_,
-        string calldata metadataURI_
-    )
+    function initialize(uint256 identityId_, address owner_, IdentityType identityType_, string calldata metadataURI_)
         external
         initializer
     {
-        __IdentityBase_init(
-            identityId_,
-            owner_,
-            metadataURI_
-        );
+        __IdentityBase_init(identityId_, owner_, metadataURI_);
 
         _type = identityType_;
     }
 
-    function identityType()
-        external
-        view
-        override
-        returns (IdentityType)
-    {
+    function identityType() external view override returns (IdentityType) {
         return _type;
     }
 }

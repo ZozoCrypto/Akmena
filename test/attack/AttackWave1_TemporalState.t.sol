@@ -14,7 +14,7 @@ contract AttackWave1_TemporalStateTest is Test {
     }
 
     function test_Attack_AgreementDoubleExecutionExploit() public {
-        bytes32 agreementId = bytes32("AGREEMENT_DRAIN");
+        bytes32 agreementId = "AGREEMENT_DRAIN";
         bytes32 termsHash = keccak256("TERMS_V1");
         uint256 validUntil = block.timestamp + 1000;
 
@@ -25,7 +25,7 @@ contract AttackWave1_TemporalStateTest is Test {
         vm.prank(bob);
         agreementEngine.executeAgreement(agreementId);
 
-        // EXPLOIT ATTEMPT: Execute a second time. 
+        // EXPLOIT ATTEMPT: Execute a second time.
         // MUST revert now that we patched the zero-day!
         vm.expectRevert(bytes("AgreementAlreadyExecuted"));
         vm.prank(bob);

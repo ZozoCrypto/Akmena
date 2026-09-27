@@ -24,7 +24,7 @@ contract AttackWave2_PhantomEscrowTest is Test {
     // =========================================================================
 
     function test_Attack_PhantomFundingSpoof() public {
-        uint256 fakeAmount = 1_000_000 * 10**18; // 1 Million Tokens
+        uint256 fakeAmount = 1_000_000 * 10 ** 18; // 1 Million Tokens
 
         // Attacker has exactly 0 actual tokens in their wallet
         assertEq(address(attacker).balance, 0);
@@ -39,15 +39,11 @@ contract AttackWave2_PhantomEscrowTest is Test {
         // EXPECTED: The escrow MUST reject phantom funding.
         vm.expectRevert();
 
-        escrow.createEscrow(
-            attacker,
-            aiAgent,
-            fakeAmount
-        );
+        escrow.createEscrow(attacker, aiAgent, fakeAmount);
 
         // No escrow record can be created without actual AKM custody.
         assertEq(token.balanceOf(address(escrow)), 0);
-        
+
         vm.stopPrank();
     }
 }

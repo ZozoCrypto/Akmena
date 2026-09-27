@@ -19,8 +19,8 @@ contract Integration_PrivateWorkflowTest is Test {
         privacy = new PrivacyEngine();
         stealthRegistry = new StealthAddressRegistry();
 
-        core.registerModule(bytes32("PRIVACY_ENGINE"), address(privacy), "1.0.0");
-        core.registerModule(bytes32("STEALTH_REGISTRY"), address(stealthRegistry), "1.0.0");
+        core.registerModule("PRIVACY_ENGINE", address(privacy), "1.0.0");
+        core.registerModule("STEALTH_REGISTRY", address(stealthRegistry), "1.0.0");
     }
 
     function test_AgentPrivateSettlementFlow() public {
@@ -28,15 +28,8 @@ contract Integration_PrivateWorkflowTest is Test {
         bytes32 secret = keccak256("agent-secret-key");
         bytes32 nullifierHash = keccak256("workflow-task-001");
         uint256 paymentAmount = 5 ether;
-        
-        bytes32 commitment = keccak256(
-            abi.encodePacked(
-                nullifierHash,
-                secret,
-                paymentAmount,
-                stealthRecipient
-            )
-        );
+
+        bytes32 commitment = keccak256(abi.encodePacked(nullifierHash, secret, paymentAmount, stealthRecipient));
 
         // Step 2: Buyer Agent locks funds into the Privacy Pool
         vm.deal(buyerAgent, 10 ether);
@@ -54,7 +47,7 @@ contract Integration_PrivateWorkflowTest is Test {
         assertEq(stealthRecipient.balance, paymentAmount, "Stealth recipient did not receive funds");
         assertFalse(privacy.commitments(commitment), "Commitment was not erased (Risk of double-spend!)");
         assertTrue(privacy.nullifierHashes(nullifierHash), "Nullifier not marked spent");
-        
+
         console.log("Private Workflow successfully completed. Recipient balance:", stealthRecipient.balance);
     }
 }

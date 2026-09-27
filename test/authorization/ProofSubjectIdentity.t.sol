@@ -19,15 +19,7 @@ contract ProofSubjectIdentityTest is Test {
         bytes32 secret = keccak256("secret");
         uint256 amount = 1 ether;
 
-        bytes32 commitment =
-            keccak256(
-                abi.encodePacked(
-                    nullifierHash,
-                    secret,
-                    amount,
-                    recipient
-                )
-            );
+        bytes32 commitment = keccak256(abi.encodePacked(nullifierHash, secret, amount, recipient));
 
         vm.deal(agent, amount);
 
@@ -35,21 +27,13 @@ contract ProofSubjectIdentityTest is Test {
         privacy.depositPrivateEscrow{value: amount}(commitment);
 
         vm.prank(agent);
-        privacy.executePrivateSettlement(
-            nullifierHash,
-            secret,
-            amount,
-            recipient
-        );
+        privacy.executePrivateSettlement(nullifierHash, secret, amount, recipient);
 
         // This test intentionally documents the CURRENT semantic model.
         //
         // The privacy receipt is keyed to the recipient, not the caller.
         // We will use this invariant when deciding whether the proof
         // subject should remain recipient-scoped or become event-scoped.
-        assertEq(
-            recipient.balance,
-            amount
-        );
+        assertEq(recipient.balance, amount);
     }
 }

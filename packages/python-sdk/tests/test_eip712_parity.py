@@ -12,19 +12,19 @@ PRIVATE_KEY = bytes.fromhex(
 EXPECTED_AGENT = "0x8fd379246834eac74B8419FfdA202CF8051F7A03"
 
 EXPECTED_TYPE_HASH = (
-    "0xfbad3ac99ebab7a8672aada196f2f59ef0336807b51f80bc0e51757f78002dc8"
+    "0x434d4081110346a715fea42f2b6438b5774f9115417f52d641645515b2e02dbc"
 )
 
 EXPECTED_STRUCT_HASH = (
-    "0xa35d5febe281213931da8445fdf244eb4d0179d09ab9546edacaadf6311c5073"
+    "0x73ec1716f6ed03db3c27f1cfe7cbba6da82257cf14dc14703773e03f1e3e39a0"
 )
 
 EXPECTED_DOMAIN_SEPARATOR = (
-    "0xf828ca88e91d20e6cb37d22028694cfc043fb0f7241fe62bd2a35d5b323b2ec5"
+    "0xe72b17187748ed28d0af4802bef0e21f624f3ea9ba325851c9e2e4e0147e732e"
 )
 
 EXPECTED_DIGEST = (
-    "0x916c995c78b3db158e91c2a13f51441b3a97cf3178631af32e951be498159cc8"
+    "0xf5eb29d98d44669c00d34e952736e76a27654923a7f3ea4a56d5c484329d053a"
 )
 
 
@@ -55,7 +55,10 @@ def build_vector():
         text="PRODUCTION_PROOF"
     )
 
+    asset = to_checksum_address("0x0000000000000000000000000000000000000000")
     amount = 10**18
+
+
     value = 0
     proof_id = 0
     nonce = 12345
@@ -69,7 +72,8 @@ def build_vector():
         "address target,"
         "bytes4 selector,"
         "bytes32 calldataHash,"
-        "uint256 amount,"
+        "address asset,"
+"uint256 amount,"
         "uint256 value,"
         "bytes32 proofModuleKey,"
         "uint256 proofId,"
@@ -90,6 +94,7 @@ def build_vector():
                 "address",
                 "bytes4",
                 "bytes32",
+            "address",
                 "uint256",
                 "uint256",
                 "bytes32",
@@ -105,6 +110,7 @@ def build_vector():
                 target,
                 selector,
                 calldata_hash,
+                    asset,
                 amount,
                 value,
                 proof_module_key,
@@ -118,7 +124,7 @@ def build_vector():
 
     domain = {
         "name": "AkmenaExecutionAuthorization",
-        "version": "1",
+        "version": "2",
         "chainId": 31337,
         "verifyingContract": to_checksum_address(
             "0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f"
@@ -132,6 +138,7 @@ def build_vector():
             {"name": "target", "type": "address"},
             {"name": "selector", "type": "bytes4"},
             {"name": "calldataHash", "type": "bytes32"},
+            {"name": "asset", "type": "address"},
             {"name": "amount", "type": "uint256"},
             {"name": "value", "type": "uint256"},
             {"name": "proofModuleKey", "type": "bytes32"},
@@ -148,6 +155,7 @@ def build_vector():
         "target": target,
         "selector": selector,
         "calldataHash": calldata_hash,
+        "asset": asset,
         "amount": amount,
         "value": value,
         "proofModuleKey": proof_module_key,

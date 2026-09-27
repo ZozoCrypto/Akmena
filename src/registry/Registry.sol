@@ -7,6 +7,15 @@ import {IIdentity} from "../identity/IIdentity.sol";
 /// @title Registry
 /// @notice Canonical registry implementation for Akmena identities.
 contract Registry is IRegistry {
+    error UnauthorizedFactory();
+    error InvalidIdentityId();
+
+    // The deployer is allowed to perform the one-time bootstrap binding.
+    address public immutable factoryBinder;
+
+    // Becomes permanently fixed after bindIdentityFactory().
+    address public identityFactory;
+
     // ---------------------------------------------------------------------
     // State Variables
     // ---------------------------------------------------------------------
@@ -17,14 +26,34 @@ contract Registry is IRegistry {
     mapping(uint256 => address) private _identitiesById;
     mapping(address => uint256) private _idsByIdentity;
 
+    constructor() {
+        factoryBinder = msg.sender;
+    }
+
+    // ---------------------------------------------------------------------
+    // Factory Binding
+    // ---------------------------------------------------------------------
+
+    function bindIdentityFactory(address factory) external override {
+        if (msg.sender != factoryBinder) revert UnauthorizedBinder();
+        if (identityFactory != address(0)) revert FactoryAlreadyBound();
+        if (factory == address(0) || factory.code.length == 0) {
+            revert InvalidFactory();
+        }
+
+        identityFactory = factory;
+    }
+
     // ---------------------------------------------------------------------
     // Identity Allocation
     // ---------------------------------------------------------------------
 
     /// @inheritdoc IRegistry
     function allocateIdentityId() external override returns (uint256) {
-        // NOTE: In production, this should be restricted to ONLY the IdentityFactory
-        // via an access control modifier.
+        if (identityFactory == address(0) || msg.sender != identityFactory) {
+            revert UnauthorizedFactory();
+        }
+
         uint256 allocatedId = _currentIdentityId;
         _currentIdentityId++;
         return allocatedId;
@@ -41,13 +70,21 @@ contract Registry is IRegistry {
 
     /// @inheritdoc IRegistry
     function registerIdentity(address identity) external override {
+        if (identityFactory == address(0) || msg.sender != identityFactory) {
+            revert UnauthorizedFactory();
+        }
+        if (identity == address(0) || identity.code.length == 0) {
+            revert InvalidIdentity();
+        }
+
         if (_idsByIdentity[identity] != 0) {
             revert IdentityAlreadyRegistered();
         }
 
-        // Fetch the ID directly from the deployed Identity contract
         uint256 id = IIdentity(identity).identityId();
-        
+
+        if (id == 0) revert InvalidIdentityId();
+
         if (_identitiesById[id] != address(0)) {
             revert IdentityAlreadyRegistered();
         }
@@ -56,20 +93,6 @@ contract Registry is IRegistry {
         _idsByIdentity[identity] = id;
 
         emit IdentityRegistered(id, identity, IIdentity(identity).identityType());
-    }
-
-    /// @inheritdoc IRegistry
-    function removeIdentity(uint256 id) external override {
-        address identity = _identitiesById[id];
-        if (identity == address(0)) {
-            revert IdentityNotFound();
-        }
-
-        // Wipe from both mappings
-        delete _identitiesById[id];
-        delete _idsByIdentity[identity];
-
-        emit IdentityRemoved(id, identity);
     }
 
     // ---------------------------------------------------------------------

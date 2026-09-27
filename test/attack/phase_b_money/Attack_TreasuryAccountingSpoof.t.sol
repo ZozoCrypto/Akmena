@@ -15,23 +15,16 @@ contract Attack_TreasuryAccountingSpoofTest is Test {
     address internal attacker = address(0xBEEF);
     address internal recipient = address(0xCAFE);
 
-    uint256 internal constant INITIAL =
-        1_000_000 ether;
+    uint256 internal constant INITIAL = 1_000_000 ether;
 
     function setUp() public {
         token = new AkmenaToken(attacker);
 
-        treasury = new TreasuryEngine(
-            address(token),
-            owner
-        );
+        treasury = new TreasuryEngine(address(token), owner);
     }
 
-    function test_Attack_CannotFabricateTreasuryBalance()
-        public
-    {
-        uint256 before =
-            token.balanceOf(address(treasury));
+    function test_Attack_CannotFabricateTreasuryBalance() public {
+        uint256 before = token.balanceOf(address(treasury));
 
         vm.prank(attacker);
 
@@ -39,80 +32,47 @@ contract Attack_TreasuryAccountingSpoofTest is Test {
 
         treasury.fundTreasury(1_000_000 ether);
 
-        assertEq(
-            token.balanceOf(address(treasury)),
-            before
-        );
+        assertEq(token.balanceOf(address(treasury)), before);
     }
 
-    function test_Attack_NonOwnerCannotDisburse()
-        public
-    {
+    function test_Attack_NonOwnerCannotDisburse() public {
         uint256 amount = 1_000 ether;
 
         vm.prank(attacker);
-        token.approve(
-            address(treasury),
-            amount
-        );
+        token.approve(address(treasury), amount);
 
         vm.prank(attacker);
         treasury.fundTreasury(amount);
 
-        uint256 attackerBefore =
-            token.balanceOf(attacker);
+        uint256 attackerBefore = token.balanceOf(attacker);
 
         vm.prank(attacker);
-        vm.expectRevert(
-            ITreasuryEngine.Unauthorized.selector
-        );
+        vm.expectRevert(ITreasuryEngine.Unauthorized.selector);
 
-        treasury.disburseFunds(
-            recipient,
-            amount
-        );
+        treasury.disburseFunds(recipient, amount);
 
-        assertEq(
-            token.balanceOf(attacker),
-            attackerBefore
-        );
+        assertEq(token.balanceOf(attacker), attackerBefore);
     }
 
-    function test_OwnerDisbursementMovesRealAKM()
-        public
-    {
+    function test_OwnerDisbursementMovesRealAKM() public {
         uint256 amount = 5_000 ether;
 
         vm.prank(attacker);
-        token.approve(
-            address(treasury),
-            amount
-        );
+        token.approve(address(treasury), amount);
 
         vm.prank(attacker);
         treasury.fundTreasury(amount);
 
-        uint256 recipientBefore =
-            token.balanceOf(recipient);
+        uint256 recipientBefore = token.balanceOf(recipient);
 
-        uint256 treasuryBefore =
-            token.balanceOf(address(treasury));
+        uint256 treasuryBefore = token.balanceOf(address(treasury));
 
         vm.prank(owner);
 
-        treasury.disburseFunds(
-            recipient,
-            amount
-        );
+        treasury.disburseFunds(recipient, amount);
 
-        assertEq(
-            token.balanceOf(recipient),
-            recipientBefore + amount
-        );
+        assertEq(token.balanceOf(recipient), recipientBefore + amount);
 
-        assertEq(
-            token.balanceOf(address(treasury)),
-            treasuryBefore - amount
-        );
+        assertEq(token.balanceOf(address(treasury)), treasuryBefore - amount);
     }
 }

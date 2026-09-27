@@ -13,11 +13,7 @@ contract CoreRouterHandler {
         core = _core;
     }
 
-    function registerModule(
-        bytes32 key,
-        address module,
-        string calldata version
-    ) public {
+    function registerModule(bytes32 key, address module, string calldata version) public {
         if (module == address(0)) return;
 
         try core.registerModule(key, module, version) {
@@ -28,17 +24,12 @@ contract CoreRouterHandler {
         } catch {}
     }
 
-    function toggleModule(
-        bytes32 key,
-        bool enabled
-    ) public {
-        try core.setModuleStatus(key, enabled) {
-        } catch {}
+    function toggleModule(bytes32 key, bool enabled) public {
+        try core.setModuleStatus(key, enabled) {} catch {}
     }
 
     function pause(bool state) public {
-        try core.setPaused(state) {
-        } catch {}
+        try core.setPaused(state) {} catch {}
     }
 
     function registeredKeysLength() external view returns (uint256) {

@@ -25,23 +25,19 @@ contract AkmenaChaosTest is Test {
 
         agentRegistry.register(agentId, metadata);
         AgentRegistry.Agent memory agent = agentRegistry.getAgent(agentId);
-        
+
         assertEq(agent.owner, address(this));
         assertEq(agent.metadataURI, metadata);
     }
 
-    function _createFundedEscrow(
-        address buyer,
-        address seller,
-        uint256 amount
-    ) internal returns (uint256 escrowId) {
+    function _createFundedEscrow(address buyer, address seller, uint256 amount) internal returns (uint256 escrowId) {
         vm.assume(buyer != address(0));
         vm.assume(seller != address(0));
         vm.assume(amount > 0);
 
         // Fund the real buyer because EscrowEngine now requires
         // msg.sender == buyer and pulls AKM from the buyer.
-        token.transfer(buyer, amount);
+        require(token.transfer(buyer, amount));
 
         vm.prank(buyer);
         token.approve(address(escrowEngine), amount);
@@ -50,11 +46,7 @@ contract AkmenaChaosTest is Test {
         escrowId = escrowEngine.createEscrow(buyer, seller, amount);
     }
 
-    function testFuzz_CannotDoubleRelease(
-        address buyer,
-        address seller,
-        uint256 amount
-    ) public {
+    function testFuzz_CannotDoubleRelease(address buyer, address seller, uint256 amount) public {
         amount = bound(amount, 1, 1000 ether);
 
         uint256 escrowId = _createFundedEscrow(buyer, seller, amount);
@@ -67,12 +59,9 @@ contract AkmenaChaosTest is Test {
         escrowEngine.releaseEscrow(escrowId);
     }
 
-    function testFuzz_CannotRefundUnlessSeller(
-        address buyer,
-        address seller,
-        uint256 amount,
-        address unauthorized
-    ) public {
+    function testFuzz_CannotRefundUnlessSeller(address buyer, address seller, uint256 amount, address unauthorized)
+        public
+    {
         amount = bound(amount, 1, 1000 ether);
 
         vm.assume(unauthorized != address(0));
@@ -85,12 +74,9 @@ contract AkmenaChaosTest is Test {
         escrowEngine.refundEscrow(escrowId);
     }
 
-    function testFuzz_CannotReleaseUnlessBuyer(
-        address buyer,
-        address seller,
-        uint256 amount,
-        address unauthorized
-    ) public {
+    function testFuzz_CannotReleaseUnlessBuyer(address buyer, address seller, uint256 amount, address unauthorized)
+        public
+    {
         amount = bound(amount, 1, 1000 ether);
 
         vm.assume(unauthorized != address(0));

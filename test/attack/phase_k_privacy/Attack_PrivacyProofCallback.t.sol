@@ -17,10 +17,7 @@ contract PrivacyProofCallbackObserver {
         privacy = _privacy;
     }
 
-    function configure(
-        uint256 proofId,
-        uint256 amount
-    ) external {
+    function configure(uint256 proofId, uint256 amount) external {
         observedProofId = proofId;
         observedAmount = amount;
     }
@@ -28,11 +25,7 @@ contract PrivacyProofCallbackObserver {
     receive() external payable {
         callbackExecuted = true;
 
-        observedValid = privacy.verifyTransientProof(
-            observedProofId,
-            address(this),
-            observedAmount
-        );
+        observedValid = privacy.verifyTransientProof(observedProofId, address(this), address(0), observedAmount);
     }
 }
 
@@ -47,96 +40,46 @@ contract Attack_PrivacyProofCallbackTest is Test {
         observer = new PrivacyProofCallbackObserver(privacy);
     }
 
-    function _commitment(
-        bytes32 nullifierHash,
-        bytes32 secret,
-        uint256 amount,
-        address recipient
-    ) internal pure returns (bytes32) {
-        return keccak256(
-            abi.encodePacked(
-                nullifierHash,
-                secret,
-                amount,
-                recipient
-            )
-        );
+    function _commitment(bytes32 nullifierHash, bytes32 secret, uint256 amount, address recipient)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(nullifierHash, secret, amount, recipient));
     }
 
-    function test_RecipientCallbackCannotObservePrivacyProof()
-        public
-    {
-        bytes32 nullifierHash =
-            keccak256("callback-nullifier");
+    function test_RecipientCallbackCannotObservePrivacyProof() public {
+        bytes32 nullifierHash = keccak256("callback-nullifier");
 
-        bytes32 secret =
-            keccak256("callback-secret");
+        bytes32 secret = keccak256("callback-secret");
 
-        uint256 amount =
-            5 ether;
+        uint256 amount = 5 ether;
 
-        bytes32 commitment =
-            _commitment(
-                nullifierHash,
-                secret,
-                amount,
-                address(observer)
-            );
+        bytes32 commitment = _commitment(nullifierHash, secret, amount, address(observer));
 
-        observer.configure(
-            uint256(nullifierHash),
-            amount
-        );
+        observer.configure(uint256(nullifierHash), amount);
 
         vm.deal(depositor, amount);
 
         vm.prank(depositor);
-        privacy.depositPrivateEscrow{value: amount}(
-            commitment
-        );
+        privacy.depositPrivateEscrow{value: amount}(commitment);
 
-        uint256 observerBefore =
-            address(observer).balance;
+        uint256 observerBefore = address(observer).balance;
 
-        privacy.executePrivateSettlement(
-            nullifierHash,
-            secret,
-            amount,
-            payable(address(observer))
-        );
+        privacy.executePrivateSettlement(nullifierHash, secret, amount, payable(address(observer)));
 
-        assertTrue(
-            observer.callbackExecuted(),
-            "Recipient callback did not execute"
-        );
+        assertTrue(observer.callbackExecuted(), "Recipient callback did not execute");
 
-        assertFalse(
-            observer.observedValid(),
-            "CRITICAL: recipient observed privacy proof during callback"
-        );
+        assertFalse(observer.observedValid(), "CRITICAL: recipient observed privacy proof during callback");
 
-        assertEq(
-            address(observer).balance,
-            observerBefore + amount,
-            "Recipient did not receive settlement"
-        );
+        assertEq(address(observer).balance, observerBefore + amount, "Recipient did not receive settlement");
+
+        assertTrue(privacy.nullifierHashes(nullifierHash), "Nullifier was not consumed");
+
+        assertFalse(privacy.commitments(commitment), "Commitment was not consumed");
 
         assertTrue(
-            privacy.nullifierHashes(nullifierHash),
-            "Nullifier was not consumed"
-        );
-
-        assertFalse(
-            privacy.commitments(commitment),
-            "Commitment was not consumed"
-        );
-
-        assertTrue(
-            privacy.verifyTransientProof(
-                uint256(nullifierHash),
-                address(observer),
-                amount
-            ),
+            privacy.verifyTransientProof(uint256(nullifierHash), address(observer), address(0), amount),
             "Proof was not published after successful settlement"
         );
     }

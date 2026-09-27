@@ -16,33 +16,17 @@ contract Attack_TreasurySupplySpoofTest is Test {
     function setUp() public {
         token = new AkmenaToken(holder);
 
-        treasury = new TreasuryEngine(
-            address(token),
-            owner
-        );
+        treasury = new TreasuryEngine(address(token), owner);
     }
 
-    function test_TreasuryReportsTokenSupply()
-        public
-        view
-    {
-        (uint256 total,) =
-            treasury.getTreasuryState();
+    function test_TreasuryReportsTokenSupply() public view {
+        (uint256 total,) = treasury.getTreasuryState();
 
-        assertEq(
-            total,
-            token.totalSupply()
-        );
+        assertEq(total, token.totalSupply());
     }
 
-    function test_TreasuryHasNoIndependentSupplyState()
-        public
-        view
-    {
+    function test_TreasuryHasNoIndependentSupplyState() public view {
         // Supply is owned by the monetary layer.
-        assertEq(
-            treasury.token(),
-            address(token)
-        );
+        assertEq(treasury.token(), address(token));
     }
 }

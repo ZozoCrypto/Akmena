@@ -5,11 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {AkmenaToken} from "../../src/token/core/AkmenaToken.sol";
 
 contract AkmenaTokenOwnershipTest is Test {
-    uint256 internal constant MAX_SUPPLY =
-        1_000_000_000 ether;
+    uint256 internal constant MAX_SUPPLY = 1_000_000_000 ether;
 
-    address internal constant INITIAL_HOLDER =
-        address(0x1000);
+    address internal constant INITIAL_HOLDER = address(0x1000);
 
     AkmenaToken internal token;
 
@@ -18,15 +16,9 @@ contract AkmenaTokenOwnershipTest is Test {
     }
 
     function test_InitialHolderReceivesEntireInitialSupply() public view {
-        assertEq(
-            token.totalSupply(),
-            MAX_SUPPLY
-        );
+        assertEq(token.totalSupply(), MAX_SUPPLY);
 
-        assertEq(
-            token.balanceOf(INITIAL_HOLDER),
-            MAX_SUPPLY
-        );
+        assertEq(token.balanceOf(INITIAL_HOLDER), MAX_SUPPLY);
     }
 
     function test_InitialHolderCanTransferOwnership() public {
@@ -35,23 +27,12 @@ contract AkmenaTokenOwnershipTest is Test {
 
         vm.prank(INITIAL_HOLDER);
 
-        assertTrue(
-            token.transfer(recipient, amount)
-        );
+        assertTrue(token.transfer(recipient, amount));
 
-        assertEq(
-            token.balanceOf(INITIAL_HOLDER),
-            MAX_SUPPLY - amount
-        );
+        assertEq(token.balanceOf(INITIAL_HOLDER), MAX_SUPPLY - amount);
 
-        assertEq(
-            token.balanceOf(recipient),
-            amount
-        );
+        assertEq(token.balanceOf(recipient), amount);
 
-        assertEq(
-            token.totalSupply(),
-            MAX_SUPPLY
-        );
+        assertEq(token.totalSupply(), MAX_SUPPLY);
     }
 }

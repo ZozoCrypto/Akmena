@@ -9,6 +9,7 @@ export declare class EscrowModule {
     constructor(client: AkmenaClient);
     private requireAccount;
     create(buyer: `0x${string}`, seller: `0x${string}`, amount: bigint, referenceId?: `0x${string}`): Promise<EscrowTransactionResult>;
+    createWithAsset(asset: `0x${string}`, buyer: `0x${string}`, seller: `0x${string}`, amount: bigint, referenceId?: `0x${string}`): Promise<EscrowTransactionResult>;
     release(escrowId: bigint): Promise<EscrowTransactionResult>;
     refund(escrowId: bigint): Promise<EscrowTransactionResult>;
     get(escrowId: bigint): Promise<{

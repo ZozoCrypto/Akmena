@@ -12,10 +12,7 @@ contract DelegationEIP712DomainTest is Test {
         delegation = new DelegationEngine();
     }
 
-    function test_EIP712DomainIsCanonical()
-        public
-        view
-    {
+    function test_EIP712DomainIsCanonical() public view {
         (
             bytes1 fields,
             string memory name,
@@ -28,12 +25,9 @@ contract DelegationEIP712DomainTest is Test {
 
         assertEq(fields, bytes1(0x0f));
         assertEq(name, "AkmenaDelegationEngine");
-        assertEq(version, "1");
+        assertEq(version, "2");
         assertEq(chainId, block.chainid);
-        assertEq(
-            verifyingContract,
-            address(delegation)
-        );
+        assertEq(verifyingContract, address(delegation));
         assertEq(salt, bytes32(0));
         assertEq(extensions.length, 0);
     }

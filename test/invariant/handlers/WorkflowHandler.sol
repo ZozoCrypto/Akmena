@@ -6,7 +6,10 @@ import {WorkflowEngine} from "../../../src/orchestration/WorkflowEngine.sol";
 
 contract WorkflowHandler is Test {
     WorkflowEngine public immutable engine;
-    
+
+    uint256 public immutable identityId;
+    address public immutable identityOwner;
+
     bytes32[] public workflowIds;
     mapping(bytes32 => address) public workflowInitiator;
     mapping(bytes32 => bool) public isAdvanced;
@@ -16,42 +19,88 @@ contract WorkflowHandler is Test {
     uint256 public unauthorizedAdvanceAttempts;
     uint256 public unauthorizedAdvanceSuccesses;
 
-    constructor(WorkflowEngine _engine) {
+    constructor(WorkflowEngine _engine, uint256 _identityId, address _identityOwner) {
         engine = _engine;
+        identityId = _identityId;
+        identityOwner = _identityOwner;
     }
 
-    function initializeWorkflow(address initiator, bytes32 agentId, bytes32 agreementId, bytes32 escrowId) external {
+    function initializeWorkflow(address initiator, uint256 requestedIdentityId, bytes32 agreementId, bytes32 escrowId)
+        external
+    {
         initiator = _nonZero(initiator);
-        agentId = agentId == bytes32(0) ? keccak256("default.agent") : agentId;
-        agreementId = agreementId == bytes32(0) ? keccak256("default.agreement") : agreementId;
-        escrowId = escrowId == bytes32(0) ? keccak256("default.escrow") : escrowId;
+
+        if (agreementId == bytes32(0)) {
+            agreementId = keccak256("default.agreement");
+        }
+
+        if (escrowId == bytes32(0)) {
+            escrowId = keccak256("default.escrow");
+        }
+
+        // Fuzz the identity argument, but keep the canonical valid identity
+        // available as a deterministic success path.
+        uint256 id = requestedIdentityId;
 
         vm.prank(initiator);
-        try engine.initializeWorkflow(agentId, agreementId, escrowId) returns (bytes32 id) {
-            if (id != bytes32(0) && workflowInitiator[id] == address(0)) {
-                workflowIds.push(id);
-                workflowInitiator[id] = initiator;
+
+        try engine.initializeWorkflow(id, agreementId, escrowId) returns (bytes32 workflowId) {
+            if (workflowId != bytes32(0) && workflowInitiator[workflowId] == address(0)) {
+                workflowIds.push(workflowId);
+                workflowInitiator[workflowId] = initiator;
                 initializeCount++;
             }
         } catch {}
     }
 
-    function advanceWorkflow(address caller, uint256 index, bytes calldata settlementData, bytes calldata memoryData, bytes calldata reputationData) external {
-        if (workflowIds.length == 0) return;
-        bytes32 id = workflowIds[index % workflowIds.length];
-        address trueInitiator = workflowInitiator[id];
+    function initializeValidWorkflow(bytes32 agreementId, bytes32 escrowId) external {
+        if (agreementId == bytes32(0)) {
+            agreementId = keccak256("default.agreement");
+        }
+
+        if (escrowId == bytes32(0)) {
+            escrowId = keccak256("default.escrow");
+        }
+
+        vm.prank(identityOwner);
+
+        try engine.initializeWorkflow(identityId, agreementId, escrowId) returns (bytes32 workflowId) {
+            if (workflowId != bytes32(0) && workflowInitiator[workflowId] == address(0)) {
+                workflowIds.push(workflowId);
+                workflowInitiator[workflowId] = identityOwner;
+                initializeCount++;
+            }
+        } catch {}
+    }
+
+    function advanceWorkflow(
+        address caller,
+        uint256 index,
+        bytes calldata settlementData,
+        bytes calldata memoryData,
+        bytes calldata reputationData
+    ) external {
+        if (workflowIds.length == 0) {
+            return;
+        }
+
+        bytes32 workflowId = workflowIds[index % workflowIds.length];
 
         caller = _nonZero(caller);
 
         vm.prank(caller);
-        try engine.advanceToCompletion(id, settlementData, memoryData, reputationData) {
+
+        try engine.advanceToCompletion(workflowId, settlementData, memoryData, reputationData) {
             advanceCount++;
-            isAdvanced[id] = true;
-            if (caller != trueInitiator) {
+            isAdvanced[workflowId] = true;
+
+            // Under the new model, a caller may legitimately be different
+            // from the original initiator if authorized for the Identity.
+            if (caller != identityOwner) {
                 unauthorizedAdvanceSuccesses++;
             }
         } catch {
-            if (caller != trueInitiator) {
+            if (caller != identityOwner) {
                 unauthorizedAdvanceAttempts++;
             }
         }

@@ -19,10 +19,7 @@ contract EconomicTruthInvariantTest is Test {
     function setUp() public {
         token = new AkmenaToken(attacker);
 
-        treasury = new TreasuryEngine(
-            address(token),
-            attacker
-        );
+        treasury = new TreasuryEngine(address(token), attacker);
 
         settlement = new SettlementEngine();
         payments = new PaymentsEngine();
@@ -32,21 +29,14 @@ contract EconomicTruthInvariantTest is Test {
         uint256 beforeBalance = address(treasury).balance;
 
         vm.prank(attacker);
-        token.approve(
-            address(treasury),
-            100 ether
-        );
+        token.approve(address(treasury), 100 ether);
 
         vm.prank(attacker);
         treasury.fundTreasury(100 ether);
 
         uint256 afterBalance = address(treasury).balance;
 
-        assertEq(
-            beforeBalance,
-            afterBalance,
-            "Current TreasuryEngine unexpectedly moved native value"
-        );
+        assertEq(beforeBalance, afterBalance, "Current TreasuryEngine unexpectedly moved native value");
     }
 
     function test_SettlementRecordDoesNotMoveNativeValue() public {
@@ -54,12 +44,7 @@ contract EconomicTruthInvariantTest is Test {
         uint256 payeeBefore = attacker.balance;
 
         vm.prank(attacker);
-        settlement.recordSettlement(
-            keccak256("truth-test"),
-            victim,
-            attacker,
-            1 ether
-        );
+        settlement.recordSettlement(keccak256("truth-test"), victim, attacker, 1 ether);
 
         assertEq(victim.balance, payerBefore);
         assertEq(attacker.balance, payeeBefore);
@@ -69,16 +54,8 @@ contract EconomicTruthInvariantTest is Test {
         uint256 before = attacker.balance;
 
         vm.prank(attacker);
-        payments.executePayment(
-            victim,
-            attacker,
-            1 ether
-        );
+        payments.executePayment(victim, attacker, 1 ether);
 
-        assertEq(
-            attacker.balance,
-            before,
-            "PaymentsEngine currently does not move native value"
-        );
+        assertEq(attacker.balance, before, "PaymentsEngine currently does not move native value");
     }
 }

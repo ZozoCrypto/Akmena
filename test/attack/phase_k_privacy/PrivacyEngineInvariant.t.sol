@@ -15,7 +15,7 @@ contract PrivacyHandler is Test {
     function deposit(uint256 amount, uint256 seed) public {
         amount = bound(amount, 1, 100 ether);
         bytes32 commitment = keccak256(abi.encodePacked("commitment", seed));
-        
+
         if (privacy.commitments(commitment)) return;
 
         vm.deal(address(this), amount);

@@ -31,8 +31,8 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 contract AkmenaExecutionAuthorization is EIP712 {
     bytes32 public constant EXECUTION_INTENT_TYPEHASH = keccak256(
         "ExecutionIntent(" "address operator," "address agent," "address target," "bytes4 selector,"
-        "bytes32 calldataHash," "uint256 amount," "uint256 value," "bytes32 proofModuleKey," "uint256 proofId,"
-        "uint256 nonce," "uint256 validAfter," "uint256 deadline" ")"
+        "bytes32 calldataHash," "address asset," "uint256 amount," "uint256 value," "bytes32 proofModuleKey,"
+        "uint256 proofId," "uint256 nonce," "uint256 validAfter," "uint256 deadline" ")"
     );
 
     struct ExecutionIntent {
@@ -41,6 +41,7 @@ contract AkmenaExecutionAuthorization is EIP712 {
         address target;
         bytes4 selector;
         bytes32 calldataHash;
+        address asset;
         uint256 amount;
         uint256 value;
         bytes32 proofModuleKey;
@@ -61,7 +62,8 @@ contract AkmenaExecutionAuthorization is EIP712 {
     error InvalidSelector();
     error InvalidCalldataHash();
 
-    constructor() EIP712("AkmenaExecutionAuthorization", "1") {}
+    // V2 invalidates V1 signatures because the signed intent schema changed.
+    constructor() EIP712("AkmenaExecutionAuthorization", "2") {}
 
     /**
      * @notice Return the EIP-712 digest for an execution intent.
@@ -75,6 +77,7 @@ contract AkmenaExecutionAuthorization is EIP712 {
                 intent.target,
                 intent.selector,
                 intent.calldataHash,
+                intent.asset,
                 intent.amount,
                 intent.value,
                 intent.proofModuleKey,
@@ -109,10 +112,14 @@ contract AkmenaExecutionAuthorization is EIP712 {
             revert InvalidTarget();
         }
 
+        // Intentional timestamp boundary: signed execution has an explicit validity window.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp < intent.validAfter) {
             revert AuthorizationNotYetValid();
         }
 
+        // Intentional timestamp boundary: signed execution has an explicit expiry.
+        // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > intent.deadline) {
             revert AuthorizationExpired();
         }

@@ -10,17 +10,13 @@ contract SettlementEngine is ISettlementEngine {
         if (amount == 0) revert InvalidAmount();
 
         LibStorage.SettlementStorage storage ds = LibStorage.settlement();
-        
+
         if (ds.records[settlementId].timestamp != 0) {
             revert SettlementAlreadyExists();
         }
 
-        ds.records[settlementId] = LibStorage.SettlementData({
-            payer: payer,
-            payee: payee,
-            amount: amount,
-            timestamp: block.timestamp
-        });
+        ds.records[settlementId] =
+            LibStorage.SettlementData({payer: payer, payee: payee, amount: amount, timestamp: block.timestamp});
 
         emit SettlementRecorded(settlementId, payer, payee, amount);
     }

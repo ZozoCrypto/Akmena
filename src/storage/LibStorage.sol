@@ -4,36 +4,162 @@ pragma solidity ^0.8.28;
 import "./StorageNamespaces.sol";
 
 library LibStorage {
-    struct IdentityStorage { uint256 nextIdentityId; mapping(uint256 => address) identityAddress; mapping(address => uint256) addressToIdentityId; }
-    struct RegistryStorage { mapping(bytes32 => address) modules; mapping(bytes32 => bool) enabled; mapping(bytes32 => string) version; }
-    struct AuthorizationStorage { mapping(address => mapping(bytes32 => bool)) capabilities; mapping(address => mapping(address => bool)) delegates; mapping(address => bool) verified; mapping(address => mapping(address => mapping(bytes32 => bool))) attestations; }
-    struct TreasuryStorage { uint256 totalSupply; uint256 circulatingSupply; uint256 treasuryBalance; }
-    struct EscrowData { address buyer; address seller; uint256 amount; address asset; uint8 status; }
-    struct EscrowStorage { uint256 nextEscrowId; mapping(uint256 => EscrowData) escrows; }
-    struct SettlementData { address payer; address payee; uint256 amount; uint256 timestamp; }
-    struct SettlementStorage { mapping(bytes32 => SettlementData) records; }
-    struct PaymentsStorage { uint256 totalProcessedVolume; mapping(address => uint256) spentNonces; }
-    struct TaskData { address creator; address assignee; uint256 reward; uint8 status; }
-    struct MarketplaceStorage { uint256 nextTaskId; mapping(uint256 => TaskData) tasks; }
-    struct ReputationStorage { mapping(address => uint256) score; }
-    struct MemoryStorage { mapping(bytes32 => bytes32) root; }
+    struct IdentityStorage {
+        uint256 nextIdentityId;
+        mapping(uint256 => address) identityAddress;
+        mapping(address => uint256) addressToIdentityId;
+    }
 
-    struct DiscoveryData { bytes32 category; string metadataURI; bool isActive; }
-    struct DiscoveryStorage { mapping(address => DiscoveryData) agentProfiles; }
+    struct RegistryStorage {
+        mapping(bytes32 => address) modules;
+        mapping(bytes32 => bool) enabled;
+        mapping(bytes32 => string) version;
+    }
 
-    struct AgreementData { address partyA; address partyB; bytes32 termsHash; uint256 validUntil; bool isExecuted; }
-    struct AgreementStorage { mapping(bytes32 => AgreementData) agreements; }
+    struct AuthorizationStorage {
+        mapping(address => mapping(bytes32 => bool)) capabilities;
+        mapping(address => mapping(address => bool)) delegates;
+        mapping(address => mapping(address => mapping(bytes32 => uint256))) delegationExpiries;
+        mapping(address => bool) verified;
+        mapping(address => mapping(address => mapping(bytes32 => bool))) attestations;
+    }
 
-    function identity() internal pure returns (IdentityStorage storage ds) { bytes32 slot = StorageNamespaces.IDENTITY; assembly { ds.slot := slot } }
-    function registry() internal pure returns (RegistryStorage storage ds) { bytes32 slot = StorageNamespaces.REGISTRY; assembly { ds.slot := slot } }
-    function authorization() internal pure returns (AuthorizationStorage storage ds) { bytes32 slot = StorageNamespaces.AUTHORIZATION; assembly { ds.slot := slot } }
-    function treasury() internal pure returns (TreasuryStorage storage ds) { bytes32 slot = StorageNamespaces.TREASURY; assembly { ds.slot := slot } }
-    function escrow() internal pure returns (EscrowStorage storage ds) { bytes32 slot = StorageNamespaces.ESCROW; assembly { ds.slot := slot } }
-    function settlement() internal pure returns (SettlementStorage storage ds) { bytes32 slot = StorageNamespaces.SETTLEMENT; assembly { ds.slot := slot } }
-    function payments() internal pure returns (PaymentsStorage storage ds) { bytes32 slot = StorageNamespaces.PAYMENTS; assembly { ds.slot := slot } }
-    function marketplace() internal pure returns (MarketplaceStorage storage ds) { bytes32 slot = StorageNamespaces.MARKETPLACE; assembly { ds.slot := slot } }
-    function reputation() internal pure returns (ReputationStorage storage ds) { bytes32 slot = StorageNamespaces.REPUTATION; assembly { ds.slot := slot } }
-    function memoryStorage() internal pure returns (MemoryStorage storage ds) { bytes32 slot = StorageNamespaces.MEMORY; assembly { ds.slot := slot } }
-    function discovery() internal pure returns (DiscoveryStorage storage ds) { bytes32 slot = StorageNamespaces.DISCOVERY; assembly { ds.slot := slot } }
-    function agreement() internal pure returns (AgreementStorage storage ds) { bytes32 slot = StorageNamespaces.AGREEMENT; assembly { ds.slot := slot } }
+    struct TreasuryStorage {
+        uint256 totalSupply;
+        uint256 circulatingSupply;
+        uint256 treasuryBalance;
+    }
+
+    struct EscrowData {
+        address buyer;
+        address seller;
+        uint256 amount;
+        address asset;
+        uint8 status;
+        bytes32 referenceId;
+    }
+
+    struct EscrowStorage {
+        uint256 nextEscrowId;
+        mapping(uint256 => EscrowData) escrows;
+        mapping(bytes32 => uint256) referenceToEscrowId;
+    }
+
+    struct SettlementData {
+        address payer;
+        address payee;
+        uint256 amount;
+        uint256 timestamp;
+    }
+
+    struct SettlementStorage {
+        mapping(bytes32 => SettlementData) records;
+    }
+
+    struct PaymentsStorage {
+        uint256 totalProcessedVolume;
+        mapping(address => uint256) spentNonces;
+    }
+
+    struct TaskData {
+        address creator;
+        address assignee;
+        uint256 reward;
+        uint8 status;
+    }
+
+    struct MarketplaceStorage {
+        uint256 nextTaskId;
+        mapping(uint256 => TaskData) tasks;
+    }
+
+    struct ReputationStorage {
+        mapping(address => uint256) score;
+    }
+
+    struct MemoryStorage {
+        mapping(bytes32 => bytes32) root;
+    }
+
+    struct DiscoveryData {
+        bytes32 category;
+        string metadataURI;
+        bool isActive;
+    }
+
+    struct DiscoveryStorage {
+        mapping(address => DiscoveryData) agentProfiles;
+    }
+
+    struct AgreementData {
+        address partyA;
+        address partyB;
+        bytes32 termsHash;
+        uint256 validUntil;
+        bool isExecuted;
+    }
+
+    struct AgreementStorage {
+        mapping(bytes32 => AgreementData) agreements;
+    }
+
+    function identity() internal pure returns (IdentityStorage storage ds) {
+        bytes32 slot = StorageNamespaces.IDENTITY;
+        assembly { ds.slot := slot }
+    }
+
+    function registry() internal pure returns (RegistryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.REGISTRY;
+        assembly { ds.slot := slot }
+    }
+
+    function authorization() internal pure returns (AuthorizationStorage storage ds) {
+        bytes32 slot = StorageNamespaces.AUTHORIZATION;
+        assembly { ds.slot := slot }
+    }
+
+    function treasury() internal pure returns (TreasuryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.TREASURY;
+        assembly { ds.slot := slot }
+    }
+
+    function escrow() internal pure returns (EscrowStorage storage ds) {
+        bytes32 slot = StorageNamespaces.ESCROW;
+        assembly { ds.slot := slot }
+    }
+
+    function settlement() internal pure returns (SettlementStorage storage ds) {
+        bytes32 slot = StorageNamespaces.SETTLEMENT;
+        assembly { ds.slot := slot }
+    }
+
+    function payments() internal pure returns (PaymentsStorage storage ds) {
+        bytes32 slot = StorageNamespaces.PAYMENTS;
+        assembly { ds.slot := slot }
+    }
+
+    function marketplace() internal pure returns (MarketplaceStorage storage ds) {
+        bytes32 slot = StorageNamespaces.MARKETPLACE;
+        assembly { ds.slot := slot }
+    }
+
+    function reputation() internal pure returns (ReputationStorage storage ds) {
+        bytes32 slot = StorageNamespaces.REPUTATION;
+        assembly { ds.slot := slot }
+    }
+
+    function memoryStorage() internal pure returns (MemoryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.MEMORY;
+        assembly { ds.slot := slot }
+    }
+
+    function discovery() internal pure returns (DiscoveryStorage storage ds) {
+        bytes32 slot = StorageNamespaces.DISCOVERY;
+        assembly { ds.slot := slot }
+    }
+
+    function agreement() internal pure returns (AgreementStorage storage ds) {
+        bytes32 slot = StorageNamespaces.AGREEMENT;
+        assembly { ds.slot := slot }
+    }
 }

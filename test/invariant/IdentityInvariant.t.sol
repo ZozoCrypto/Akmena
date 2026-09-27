@@ -5,24 +5,19 @@ import "forge-std/Test.sol";
 import "forge-std/StdInvariant.sol";
 
 import "../../src/identity/Identity.sol";
+import "../../src/identity/IIdentity.sol";
 import "./handlers/IdentityHandler.sol";
 
 contract IdentityInvariant is StdInvariant, Test {
-
     Identity identity;
     IdentityHandler handler;
 
     address constant OWNER = address(0xBEEF);
 
     function setUp() public {
-
         identity = new Identity();
 
-        identity.initialize(
-            1,
-            OWNER,
-            "ipfs://genesis"
-        );
+        identity.initialize(1, OWNER, IIdentity.IdentityType.Human, "ipfs://genesis");
 
         handler = new IdentityHandler(identity);
 

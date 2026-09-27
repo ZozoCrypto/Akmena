@@ -12,16 +12,18 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
     using SafeERC20 for IERC20;
 
     // EIP-1153 Transient Reentrancy Lock Slot
-    bytes32 private constant REENTRANCY_LOCK_SLOT =
-        keccak256("akmena.reentrancy.escrow");
+    bytes32 private constant REENTRANCY_LOCK_SLOT = keccak256("akmena.reentrancy.escrow");
 
-    // Canonical AKM custody asset for this implementation.
+    // Default/canonical AKM asset retained for backward-compatible entrypoints.
     IERC20 public immutable asset;
 
     uint256 private _nextEscrowId = 1;
 
-    // Actual amount of AKM currently locked across active escrows.
+    // Backward-compatible accounting for the default AKM asset.
     uint256 public totalLocked;
+
+    // Exact active custody liability for every escrowed ERC20 asset.
+    mapping(address => uint256) public totalLockedByAsset;
 
     modifier nonReentrant() {
         bytes32 slot = REENTRANCY_LOCK_SLOT;
@@ -50,71 +52,107 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
         asset = IERC20(asset_);
     }
 
-    /// @notice Create and fund an escrow with real AKM custody.
+    /// @notice Create and fund an escrow using the default AKM asset.
     /// @dev The buyer must approve this contract for `amount`.
-    function createEscrow(
-        address buyer,
-        address seller,
-        uint256 amount
-    ) external nonReentrant returns (uint256) {
+    function createEscrow(address buyer, address seller, uint256 amount) external nonReentrant returns (uint256) {
+        return _createEscrow(buyer, seller, address(asset), amount, bytes32(0));
+    }
+
+    /// @notice Create and fund an escrow using the default AKM asset and reference.
+    function createEscrow(address buyer, address seller, uint256 amount, bytes32 referenceId)
+        external
+        nonReentrant
+        returns (uint256)
+    {
+        return _createEscrow(buyer, seller, address(asset), amount, referenceId);
+    }
+
+    /// @notice Create and fund an escrow for an explicit ERC20 asset.
+    /// @dev The buyer must approve this contract for `amount`.
+    function createEscrow(address buyer, address seller, address asset_, uint256 amount)
+        external
+        nonReentrant
+        returns (uint256)
+    {
+        return _createEscrow(buyer, seller, asset_, amount, bytes32(0));
+    }
+
+    /// @notice Create and fund an escrow for an explicit ERC20 asset and reference.
+    function createEscrow(address buyer, address seller, address asset_, uint256 amount, bytes32 referenceId)
+        external
+        nonReentrant
+        returns (uint256)
+    {
+        return _createEscrow(buyer, seller, asset_, amount, referenceId);
+    }
+
+    function _createEscrow(address buyer, address seller, address asset_, uint256 amount, bytes32 referenceId)
+        internal
+        returns (uint256)
+    {
         if (buyer == address(0) || seller == address(0)) {
             revert InvalidAddress();
+        }
+
+        if (asset_ == address(0) || asset_.code.length == 0) {
+            revert InvalidAsset();
         }
 
         if (amount == 0) {
             revert InvalidAmount();
         }
 
-        // Escrow creation must be authorized by the asset owner.
-        // ERC-20 allowance authorizes this contract as spender; it does
-        // not authorize arbitrary callers to choose escrow parameters.
         if (msg.sender != buyer) {
             revert UnauthorizedAccess();
         }
 
-        /*
-         * The escrow cannot become ACTIVE until actual AKM has moved
-         * into escrow custody.
-         *
-         * Using transferFrom(buyer, escrow, amount) preserves support
-         * for delegated creation where the buyer has explicitly granted
-         * allowance to the escrow contract.
-         */
-        asset.safeTransferFrom(
-            buyer,
-            address(this),
-            amount
-        );
+        LibStorage.EscrowStorage storage escrowStorage = LibStorage.escrow();
+
+        if (referenceId != bytes32(0) && escrowStorage.referenceToEscrowId[referenceId] != 0) {
+            revert EscrowReferenceAlreadyUsed();
+        }
+
+        IERC20 escrowAsset = IERC20(asset_);
+
+        uint256 balanceBefore = escrowAsset.balanceOf(address(this));
+        escrowAsset.safeTransferFrom(buyer, address(this), amount);
+        uint256 balanceAfter = escrowAsset.balanceOf(address(this));
+
+        if (balanceAfter < balanceBefore || balanceAfter - balanceBefore != amount) {
+            revert EscrowFundingMismatch();
+        }
 
         uint256 escrowId = _nextEscrowId++;
 
-        LibStorage.EscrowData storage data =
-            LibStorage.escrow().escrows[escrowId];
+        LibStorage.EscrowData storage data = escrowStorage.escrows[escrowId];
 
         data.buyer = buyer;
         data.seller = seller;
         data.amount = amount;
-        data.asset = address(asset);
-        data.status = 1; // Funded / Active
+        data.asset = asset_;
+        data.status = 1;
+        data.referenceId = referenceId;
 
-        totalLocked += amount;
+        if (referenceId != bytes32(0)) {
+            escrowStorage.referenceToEscrowId[referenceId] = escrowId;
+        }
 
-        emit EscrowCreated(
-            escrowId,
-            buyer,
-            seller,
-            amount
-        );
+        totalLockedByAsset[asset_] += amount;
+
+        // Preserve legacy totalLocked() semantics for the default AKM asset.
+        if (asset_ == address(asset)) {
+            totalLocked += amount;
+        }
+
+        emit EscrowCreated(escrowId, buyer, seller, amount);
+        emit EscrowCreatedWithAsset(escrowId, buyer, seller, asset_, amount);
 
         return escrowId;
     }
 
     /// @notice Release escrowed AKM to the seller.
-    function releaseEscrow(
-        uint256 escrowId
-    ) external nonReentrant {
-        LibStorage.EscrowData storage data =
-            LibStorage.escrow().escrows[escrowId];
+    function releaseEscrow(uint256 escrowId) external nonReentrant {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[escrowId];
 
         if (data.buyer == address(0)) {
             revert EscrowNotFound();
@@ -129,29 +167,28 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
         }
 
         uint256 amount = data.amount;
+        IERC20 escrowAsset = IERC20(data.asset);
 
-        if (asset.balanceOf(address(this)) < amount) {
+        if (escrowAsset.balanceOf(address(this)) < amount) {
             revert InsufficientEscrowBalance();
         }
 
         // Effects first; a failed token transfer reverts the entire tx.
         data.status = 2; // Released
-        totalLocked -= amount;
+        totalLockedByAsset[data.asset] -= amount;
 
-        asset.safeTransfer(
-            data.seller,
-            amount
-        );
+        if (data.asset == address(asset)) {
+            totalLocked -= amount;
+        }
+
+        escrowAsset.safeTransfer(data.seller, amount);
 
         emit EscrowReleased(escrowId);
     }
 
     /// @notice Refund escrowed AKM to the original buyer.
-    function refundEscrow(
-        uint256 escrowId
-    ) external nonReentrant {
-        LibStorage.EscrowData storage data =
-            LibStorage.escrow().escrows[escrowId];
+    function refundEscrow(uint256 escrowId) external nonReentrant {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[escrowId];
 
         if (data.buyer == address(0)) {
             revert EscrowNotFound();
@@ -166,28 +203,27 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
         }
 
         uint256 amount = data.amount;
+        IERC20 escrowAsset = IERC20(data.asset);
 
-        if (asset.balanceOf(address(this)) < amount) {
+        if (escrowAsset.balanceOf(address(this)) < amount) {
             revert InsufficientEscrowBalance();
         }
 
         // Effects first; a failed token transfer reverts the entire tx.
         data.status = 3; // Refunded
-        totalLocked -= amount;
+        totalLockedByAsset[data.asset] -= amount;
 
-        asset.safeTransfer(
-            data.buyer,
-            amount
-        );
+        if (data.asset == address(asset)) {
+            totalLocked -= amount;
+        }
+
+        escrowAsset.safeTransfer(data.buyer, amount);
 
         emit EscrowRefunded(escrowId);
     }
 
-    function getEscrow(
-        uint256 escrowId
-    ) external view returns (LibStorage.EscrowData memory) {
-        LibStorage.EscrowData storage data =
-            LibStorage.escrow().escrows[escrowId];
+    function getEscrow(uint256 escrowId) external view returns (LibStorage.EscrowData memory) {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[escrowId];
 
         if (data.buyer == address(0)) {
             revert EscrowNotFound();
@@ -197,13 +233,12 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
     }
 
     /// @notice Escrow proof is valid only while the exact funded escrow remains active.
-    function verifyTransientProof(
-        uint256 proofId,
-        address operator,
-        uint256 amount
-    ) external view returns (bool) {
-        LibStorage.EscrowData storage data =
-            LibStorage.escrow().escrows[proofId];
+    function verifyTransientProof(uint256 proofId, address operator, address asset_, uint256 amount)
+        external
+        view
+        returns (bool)
+    {
+        LibStorage.EscrowData storage data = LibStorage.escrow().escrows[proofId];
 
         if (data.status != 1) {
             return false;
@@ -217,7 +252,7 @@ contract EscrowEngine is IEscrowEngine, ITransientProofVerifier {
             return false;
         }
 
-        if (data.asset != address(asset)) {
+        if (data.asset != asset_) {
             return false;
         }
 

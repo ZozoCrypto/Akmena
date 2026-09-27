@@ -25,7 +25,7 @@ contract PaymentsEngineTest is Test {
     function test_MultiplePaymentsIncreaseVolume() public {
         engine.executePayment(alice, bob, 100);
         engine.executePayment(bob, alice, 250);
-        
+
         assertEq(engine.getTotalVolume(), 350);
     }
 

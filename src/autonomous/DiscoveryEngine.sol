@@ -9,11 +9,8 @@ contract DiscoveryEngine is IDiscoveryEngine {
         if (category == bytes32(0)) revert EmptyCategory();
 
         LibStorage.DiscoveryStorage storage ds = LibStorage.discovery();
-        ds.agentProfiles[msg.sender] = LibStorage.DiscoveryData({
-            category: category,
-            metadataURI: metadataURI,
-            isActive: true
-        });
+        ds.agentProfiles[msg.sender] =
+            LibStorage.DiscoveryData({category: category, metadataURI: metadataURI, isActive: true});
 
         emit AgentRegistered(msg.sender, category, metadataURI);
     }
@@ -21,7 +18,7 @@ contract DiscoveryEngine is IDiscoveryEngine {
     function updateStatus(bool isActive) external override {
         LibStorage.DiscoveryStorage storage ds = LibStorage.discovery();
         ds.agentProfiles[msg.sender].isActive = isActive;
-        
+
         emit AgentStatusUpdated(msg.sender, isActive);
     }
 

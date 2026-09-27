@@ -8,7 +8,7 @@ import {ProtocolAction, ActionType, ProposalState, IVotes} from "../../src/gover
 
 contract MockToken is IVotes {
     mapping(address => uint256) public votes;
-    uint256 public totalTokens = 100_000_000 * 10**18;
+    uint256 public totalTokens = 100_000_000 * 10 ** 18;
 
     function setVotes(address account, uint256 amount) external {
         votes[account] = amount;
@@ -52,15 +52,14 @@ contract GovernanceIntegrationTest is Test {
         governor.setTimelock(address(timelock));
 
         // Fund proposer & voter
-        token.setVotes(proposer, 2_000_000 * 10**18); // > 1M threshold
-        token.setVotes(voter1, 5_000_000 * 10**18);   // > 4% quorum
+        token.setVotes(proposer, 2_000_000 * 10 ** 18); // > 1M threshold
+        token.setVotes(voter1, 5_000_000 * 10 ** 18); // > 4% quorum
     }
 
     function test_FullProposalLifecycle() public {
         ProtocolAction[] memory actions = new ProtocolAction[](1);
         actions[0] = ProtocolAction({
-            actionType: ActionType.REGISTER_MODULE,
-            payload: abi.encode(address(0x99), keccak256("test.module"))
+            actionType: ActionType.REGISTER_MODULE, payload: abi.encode(address(0x99), keccak256("test.module"))
         });
 
         vm.prank(proposer);
@@ -68,7 +67,7 @@ contract GovernanceIntegrationTest is Test {
 
         // Move to Active state
         vm.roll(block.number + 2);
-        assertEq(uint(governor.state(propId)), uint(ProposalState.Active));
+        assertEq(uint256(governor.state(propId)), uint256(ProposalState.Active));
 
         // Vote YES
         vm.prank(voter1);
@@ -76,11 +75,11 @@ contract GovernanceIntegrationTest is Test {
 
         // Advance blocks past voting period
         vm.roll(block.number + 50401);
-        assertEq(uint(governor.state(propId)), uint(ProposalState.Succeeded));
+        assertEq(uint256(governor.state(propId)), uint256(ProposalState.Succeeded));
 
         // Queue
         governor.queue(propId);
-        assertEq(uint(governor.state(propId)), uint(ProposalState.Queued));
+        assertEq(uint256(governor.state(propId)), uint256(ProposalState.Queued));
 
         // Fast forward through 3-day timelock
         vm.warp(block.timestamp + 3 days + 1);
@@ -90,7 +89,7 @@ contract GovernanceIntegrationTest is Test {
         emit MockAkmenaCore.ActionExecuted(actions[0].actionType, actions[0].payload);
         timelock.execute(propId, actions, ADR_HASH);
 
-        assertEq(uint(governor.state(propId)), uint(ProposalState.Executed));
+        assertEq(uint256(governor.state(propId)), uint256(ProposalState.Executed));
     }
 
     function test_GuardianCanVetoQueuedProposal() public {
@@ -110,6 +109,6 @@ contract GovernanceIntegrationTest is Test {
         vm.prank(guardian);
         timelock.cancel(propId);
 
-        assertEq(uint(governor.state(propId)), uint(ProposalState.Canceled));
+        assertEq(uint256(governor.state(propId)), uint256(ProposalState.Canceled));
     }
 }

@@ -10,10 +10,10 @@ library LibWorkflowStorage {
     struct WorkflowRecord {
         bytes32 workflowId;
         address initiator;
-        bytes32 agentIdentityId;
+        uint256 identityId;
         bytes32 agreementId;
         bytes32 escrowId;
-        WorkflowStep currentStep; // Strict state machine tracking
+        WorkflowStep currentStep;
     }
 
     struct WorkflowStorage {
@@ -22,6 +22,7 @@ library LibWorkflowStorage {
 
     function workflowStorage() internal pure returns (WorkflowStorage storage ws) {
         bytes32 position = WORKFLOW_STORAGE_POSITION;
+
         assembly {
             ws.slot := position
         }

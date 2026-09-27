@@ -213,7 +213,32 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 7. SETTLEMENT BEFORE VALUE MOVEMENT
+    // 7. WRONG ESCROW DURING FINALIZATION
+    // =========================================================
+
+    function test_FinalizeWrongEscrowRejected() public {
+        bytes32 commitmentId = _createCommitment();
+
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(buyer, seller, AMOUNT, commitmentId);
+
+        vm.prank(buyer);
+        economic.attachEscrow(commitmentId, escrowId);
+
+        uint256 wrongEscrowId = escrowId + 1;
+
+        vm.expectRevert(IEconomicCommitmentEngine.EscrowCommitmentMismatch.selector);
+
+        economic.finalizeSettlement(wrongEscrowId, commitmentId);
+
+        IEconomicCommitmentEngine.EconomicCommitment memory state = economic.getCommitment(commitmentId);
+
+        assertEq(state.escrowId, escrowId);
+        assertEq(uint8(state.status), uint8(IEconomicCommitmentEngine.CommitmentStatus.EscrowAttached));
+    }
+
+    // =========================================================
+    // 8. SETTLEMENT BEFORE VALUE MOVEMENT
     // =========================================================
 
     function test_SettlementBeforeReleaseRejected() public {
@@ -235,7 +260,7 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 8. RELEASED BEFORE ATTACH
+    // 9. RELEASED BEFORE ATTACH
     // =========================================================
 
     function test_ReleasedBeforeAttachRejected() public {
@@ -253,7 +278,7 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 9. REFUNDED BEFORE ATTACH
+    // 10. REFUNDED BEFORE ATTACH
     // =========================================================
 
     function test_RefundedBeforeAttachRejected() public {
@@ -271,7 +296,7 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 10. FABRICATED COMMITMENT
+    // 11. FABRICATED COMMITMENT
     // =========================================================
 
     function test_FabricatedSettlementRejected() public {
@@ -283,7 +308,7 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 11. DUPLICATE ESCROW REFERENCE
+    // 12. DUPLICATE ESCROW REFERENCE
     // =========================================================
 
     function test_DuplicateEscrowReferenceRejected() public {
@@ -298,7 +323,7 @@ contract EconomicCommitmentEngineTest is Test {
     }
 
     // =========================================================
-    // 13. UNEXECUTED AGREEMENT CANNOT CREATE COMMITMENT
+    // 14. UNEXECUTED AGREEMENT CANNOT CREATE COMMITMENT
     // =========================================================
 
     function test_UnexecutedAgreementRejected() public {

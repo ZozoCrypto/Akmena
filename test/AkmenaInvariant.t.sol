@@ -20,10 +20,7 @@ contract EscrowHandler is Test {
 
     address public immutable buyer;
 
-    constructor(
-        EscrowEngine _escrow,
-        AkmenaToken _token
-    ) {
+    constructor(EscrowEngine _escrow, AkmenaToken _token) {
         escrow = _escrow;
         token = _token;
         buyer = address(this);
@@ -37,11 +34,7 @@ contract EscrowHandler is Test {
         return activeEscrows.length;
     }
 
-    function createEscrow(
-        address,
-        address seller,
-        uint256 amount
-    ) public {
+    function createEscrow(address, address seller, uint256 amount) public {
         amount = bound(amount, 1, 100_000 ether);
 
         // Prevent collisions with zero-address validation while retaining
@@ -57,11 +50,7 @@ contract EscrowHandler is Test {
             return;
         }
 
-        uint256 id = escrow.createEscrow(
-            buyer,
-            seller,
-            amount
-        );
+        uint256 id = escrow.createEscrow(buyer, seller, amount);
 
         expectedActiveVolume += amount;
         isActive[id] = true;
@@ -124,17 +113,11 @@ contract AkmenaStatefulInvariantTest is Test {
 
         escrow = new EscrowEngine(address(token));
 
-        handler = new EscrowHandler(
-            escrow,
-            token
-        );
+        handler = new EscrowHandler(escrow, token);
 
         // Fund the handler with real AKM so invariant calls can actually
         // create funded escrows rather than silently reverting.
-        token.transfer(
-            address(handler),
-            HANDLER_FUNDING
-        );
+        require(token.transfer(address(handler), HANDLER_FUNDING));
 
         targetContract(address(handler));
     }
@@ -143,55 +126,29 @@ contract AkmenaStatefulInvariantTest is Test {
         assertTrue(true);
     }
 
-    function invariant_ActiveVolumeMatchesState()
-        public
-        view
-    {
+    function invariant_ActiveVolumeMatchesState() public view {
         uint256 actualVolume = 0;
 
-        for (
-            uint256 i = 0;
-            i < handler.activeEscrowsLength();
-            ++i
-        ) {
+        for (uint256 i = 0; i < handler.activeEscrowsLength(); ++i) {
             uint256 id = handler.activeEscrows(i);
 
-            LibStorage.EscrowData memory data =
-                escrow.getEscrow(id);
+            LibStorage.EscrowData memory data = escrow.getEscrow(id);
 
             if (handler.isActive(id)) {
-                assertEq(
-                    data.status,
-                    1,
-                    "Active handler escrow is not ACTIVE"
-                );
+                assertEq(data.status, 1, "Active handler escrow is not ACTIVE");
 
                 actualVolume += data.amount;
             } else {
-                assertTrue(
-                    data.status == 2 ||
-                    data.status == 3,
-                    "Inactive escrow is not terminal"
-                );
+                assertTrue(data.status == 2 || data.status == 3, "Inactive escrow is not terminal");
             }
         }
 
-        assertEq(
-            actualVolume,
-            handler.expectedActiveVolume(),
-            "Ghost active volume diverged from escrow state"
-        );
+        assertEq(actualVolume, handler.expectedActiveVolume(), "Ghost active volume diverged from escrow state");
 
-        assertEq(
-            escrow.totalLocked(),
-            actualVolume,
-            "Escrow totalLocked diverged from active escrow volume"
-        );
+        assertEq(escrow.totalLocked(), actualVolume, "Escrow totalLocked diverged from active escrow volume");
 
         assertGe(
-            token.balanceOf(address(escrow)),
-            escrow.totalLocked(),
-            "Escrow custody does not back locked liability"
+            token.balanceOf(address(escrow)), escrow.totalLocked(), "Escrow custody does not back locked liability"
         );
     }
 }

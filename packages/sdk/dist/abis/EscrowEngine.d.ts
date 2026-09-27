@@ -28,6 +28,32 @@ export declare const EscrowEngineABI: readonly [{
         readonly type: "address";
         readonly internalType: "address";
     }, {
+        readonly name: "asset_";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "amount";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
+    }];
+    readonly outputs: readonly [{
+        readonly name: "";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
+    }];
+    readonly stateMutability: "nonpayable";
+}, {
+    readonly type: "function";
+    readonly name: "createEscrow";
+    readonly inputs: readonly [{
+        readonly name: "buyer";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "seller";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
         readonly name: "amount";
         readonly type: "uint256";
         readonly internalType: "uint256";
@@ -57,6 +83,36 @@ export declare const EscrowEngineABI: readonly [{
         readonly name: "amount";
         readonly type: "uint256";
         readonly internalType: "uint256";
+    }];
+    readonly outputs: readonly [{
+        readonly name: "";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
+    }];
+    readonly stateMutability: "nonpayable";
+}, {
+    readonly type: "function";
+    readonly name: "createEscrow";
+    readonly inputs: readonly [{
+        readonly name: "buyer";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "seller";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "asset_";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "amount";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
+    }, {
+        readonly name: "referenceId";
+        readonly type: "bytes32";
+        readonly internalType: "bytes32";
     }];
     readonly outputs: readonly [{
         readonly name: "";
@@ -135,6 +191,20 @@ export declare const EscrowEngineABI: readonly [{
     readonly stateMutability: "view";
 }, {
     readonly type: "function";
+    readonly name: "totalLockedByAsset";
+    readonly inputs: readonly [{
+        readonly name: "";
+        readonly type: "address";
+        readonly internalType: "address";
+    }];
+    readonly outputs: readonly [{
+        readonly name: "";
+        readonly type: "uint256";
+        readonly internalType: "uint256";
+    }];
+    readonly stateMutability: "view";
+}, {
+    readonly type: "function";
     readonly name: "verifyTransientProof";
     readonly inputs: readonly [{
         readonly name: "proofId";
@@ -142,6 +212,10 @@ export declare const EscrowEngineABI: readonly [{
         readonly internalType: "uint256";
     }, {
         readonly name: "operator";
+        readonly type: "address";
+        readonly internalType: "address";
+    }, {
+        readonly name: "asset_";
         readonly type: "address";
         readonly internalType: "address";
     }, {
@@ -182,6 +256,36 @@ export declare const EscrowEngineABI: readonly [{
     readonly anonymous: false;
 }, {
     readonly type: "event";
+    readonly name: "EscrowCreatedWithAsset";
+    readonly inputs: readonly [{
+        readonly name: "escrowId";
+        readonly type: "uint256";
+        readonly indexed: true;
+        readonly internalType: "uint256";
+    }, {
+        readonly name: "buyer";
+        readonly type: "address";
+        readonly indexed: true;
+        readonly internalType: "address";
+    }, {
+        readonly name: "seller";
+        readonly type: "address";
+        readonly indexed: true;
+        readonly internalType: "address";
+    }, {
+        readonly name: "asset";
+        readonly type: "address";
+        readonly indexed: false;
+        readonly internalType: "address";
+    }, {
+        readonly name: "amount";
+        readonly type: "uint256";
+        readonly indexed: false;
+        readonly internalType: "uint256";
+    }];
+    readonly anonymous: false;
+}, {
+    readonly type: "event";
     readonly name: "EscrowRefunded";
     readonly inputs: readonly [{
         readonly name: "escrowId";
@@ -200,6 +304,10 @@ export declare const EscrowEngineABI: readonly [{
         readonly internalType: "uint256";
     }];
     readonly anonymous: false;
+}, {
+    readonly type: "error";
+    readonly name: "EscrowFundingMismatch";
+    readonly inputs: readonly [];
 }, {
     readonly type: "error";
     readonly name: "EscrowNotActive";
@@ -223,6 +331,10 @@ export declare const EscrowEngineABI: readonly [{
 }, {
     readonly type: "error";
     readonly name: "InvalidAmount";
+    readonly inputs: readonly [];
+}, {
+    readonly type: "error";
+    readonly name: "InvalidAsset";
     readonly inputs: readonly [];
 }, {
     readonly type: "error";

@@ -21,7 +21,9 @@ contract GovernanceHandler is Test {
     }
 
     function createProposal(bytes32 proposalId, string memory description) external {
-        proposalId = proposalId == bytes32(0) ? keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao)) : proposalId;
+        proposalId = proposalId == bytes32(0)
+            ? keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao))
+            : proposalId;
         bytes memory descBytes = bytes(description);
         if (descBytes.length == 0) {
             description = "Default proposal description";

@@ -8,7 +8,6 @@ import {AkmenaCore} from "../../src/core/AkmenaCore.sol";
 import {CoreRouterHandler} from "./handlers/CoreRouterHandler.sol";
 
 contract CoreRouterInvariant is StdInvariant, Test {
-
     AkmenaCore internal core;
     CoreRouterHandler internal handler;
 
@@ -33,7 +32,7 @@ contract CoreRouterInvariant is StdInvariant, Test {
         uint256 length = handler.registeredKeysLength();
         for (uint256 i = 0; i < length; ++i) {
             bytes32 k = handler.registeredKeys(i);
-            (address moduleAddress, bool isEnabled, string memory version) = core.getModule(k);
+            (address moduleAddress, bool isEnabled, ) = core.getModule(k);
 
             if (isEnabled) {
                 assertTrue(moduleAddress != address(0));

@@ -10,7 +10,7 @@ contract PaymentsEngine is IPaymentsEngine {
         if (amount == 0) revert InvalidAmount();
 
         LibStorage.PaymentsStorage storage ds = LibStorage.payments();
-        
+
         // M2M State Update for volume tracking (decoupled from standard logic to protect privacy)
         ds.totalProcessedVolume += amount;
 
