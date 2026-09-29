@@ -266,7 +266,14 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         } else {
             uint256 balanceAfter = IERC20(intent.asset).balanceOf(address(this));
 
-            uint256 spent = balanceBefore > balanceAfter ? balanceBefore - balanceAfter : 0;
+            // A net balance increase during the call (rebasing / reflection
+            // tokens, adapter-driven mints) must never be silently absorbed
+            // into a zero-spend reading: value left custody unrecorded.
+            if (balanceAfter > balanceBefore) {
+                revert EconomicBalanceIncrease();
+            }
+
+            uint256 spent = balanceBefore - balanceAfter;
 
             // Generic ERC20-context calls are allowed only when they do not
             // actually spend tokens from PolicyBoundary custody.
