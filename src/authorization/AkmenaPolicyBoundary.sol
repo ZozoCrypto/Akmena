@@ -95,7 +95,12 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             revert InvalidAsset();
         }
 
-        if (adapter == address(0) || adapter.code.length == 0) {
+        // A token must never be ENABLED as its own economic adapter: the adapter
+        // entrypoint would execute with the token's full ledger control,
+        // letting it offset outflows with mints that net-delta spending
+        // accounting cannot observe. Revocation (enabled == false) stays
+        // permitted so a previously granted self-adapter can always be removed.
+        if (adapter == address(0) || adapter.code.length == 0 || (enabled && adapter == asset_)) {
             revert InvalidAdapter();
         }
 
