@@ -33,6 +33,16 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     // Keyed by asset => adapter target.
     mapping(address => mapping(address => bool)) public economicAdapters;
 
+    /// @notice Standard-Debit token admission (spec §7.2).
+    /// @dev Separate from the adapter allowlist: this answers "does this
+    /// asset's transfer semantics make exact-amount settlement possible?"
+    /// (asset trust), not "is this contract's code trusted?" (code trust).
+    /// Default-deny: every asset starts unadmitted. Positive-amount ERC20
+    /// settlement requires explicit admission. INTERIM AUTHORITY: the
+    /// AkmenaCore deployer administers this list; moving it behind
+    /// timelocked multisig governance is a mainnet prerequisite (G-7).
+    mapping(address => bool) public isStandardDebit;
+
     error PolicyExceeded();
     error EscrowPrerequisiteFailed();
     error UnauthorizedAgent();
@@ -47,6 +57,10 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     error EconomicAdapterNotAllowed();
     error NativeValueMismatch();
     error InsufficientOperatorAllowance();
+    /// @notice Reverted when a positive-amount ERC20 intent names an asset
+    /// that has not been admitted to the Standard-Debit allowlist (§7.2).
+    /// Default-deny: only explicitly admitted tokens can settle value.
+    error StandardDebitNotAdmitted();
     // Legacy measurement-model errors: retained for ABI and test
     // compatibility. Model D settlement never produces them; removal is
     // scheduled alongside the obsolete attack-test updates (Phase 3).
@@ -60,6 +74,14 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     event ERC20Settled(
         address indexed operator, address indexed agent, address indexed asset, uint256 amount, address target
     );
+
+    /// @notice Emitted when the Standard-Debit token allowlist changes.
+    /// @dev The monitoring trigger for token-admission changes. Removal is
+    /// fail-closed and immediate: pending signed intents targeting the
+    /// removed token revert with StandardDebitNotAdmitted (nonce unconsumed).
+    /// Removal does NOT affect operator→boundary allowances on the token
+    /// contract — those remain the operator's to rotate.
+    event StandardDebitUpdated(address indexed asset, bool enabled);
 
     /// @notice Emitted when the economic-adapter allowlist changes.
     /// @dev The monitoring trigger for the allowance-rotation path: when an
@@ -161,6 +183,28 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         economicAdapters[asset_][adapter] = enabled;
 
         emit EconomicAdapterUpdated(asset_, adapter, enabled);
+    }
+
+    /// @notice Admit or remove a token from the Standard-Debit allowlist.
+    /// @dev Only the AkmenaCore deployer may change this allowlist (INTERIM —
+    /// G-7 moves adapter/token administration behind timelocked multisig).
+    /// Admission requires the off-chain evidence battery of spec §7.2
+    /// (exact transfer, amount-honest pull, exact allowance accounting,
+    /// revert-on-failure, no sender-side hooks); this function records the
+    /// decision, it does not verify token behavior. Removal is immediate and
+    /// fail-closed.
+    function setStandardDebit(address asset_, bool enabled) external {
+        if (msg.sender != core.deployer()) {
+            revert UnauthorizedAdapterAdmin();
+        }
+
+        if (asset_ == address(0) || asset_.code.length == 0) {
+            revert InvalidAsset();
+        }
+
+        isStandardDebit[asset_] = enabled;
+
+        emit StandardDebitUpdated(asset_, enabled);
     }
 
     function _policy(address operator, address agent, address asset_)
@@ -265,6 +309,15 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
                 revert NativeValueMismatch();
             }
 
+            // Standard-Debit admission (§7.2): positive-amount settlement
+            // requires the asset's transfer semantics to make exact-amount
+            // settlement possible. Default-deny — unadmitted tokens cannot
+            // move value through the boundary. Zero-amount intents are exempt
+            // (no funds move; token semantics are irrelevant).
+            if (intent.amount > 0 && !isStandardDebit[intent.asset]) {
+                revert StandardDebitNotAdmitted();
+            }
+
             // A direct call into the asset contract is itself an economic
             // operation and therefore requires an explicitly trusted adapter.
             if (intent.target == intent.asset && !isEconomicAdapter) {
@@ -321,7 +374,12 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         // measured native spending, so their declared amount remains the
         // policy-accounted amount.
         if (isNative && msg.value == 0) {
-            if (intent.amount > policy.dailyLimit - policy.totalSpentToday) {
+            // Saturating headroom (F-14): if the operator lowered dailyLimit
+            // below totalSpentToday, headroom is zero — clean PolicyExceeded,
+            // never Panic(0x11).
+            uint256 headroom =
+                policy.totalSpentToday >= policy.dailyLimit ? 0 : policy.dailyLimit - policy.totalSpentToday;
+            if (intent.amount > headroom) {
                 revert PolicyExceeded();
             }
         }
@@ -341,7 +399,10 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
             if (msg.value > 0) {
                 // Actual native spend is exactly the ETH forwarded by this call.
-                if (msg.value > policy.dailyLimit - policy.totalSpentToday) {
+                // Saturating headroom (F-14): clean PolicyExceeded, never panic.
+                uint256 headroom =
+                    policy.totalSpentToday >= policy.dailyLimit ? 0 : policy.dailyLimit - policy.totalSpentToday;
+                if (msg.value > headroom) {
                     revert PolicyExceeded();
                 }
 
