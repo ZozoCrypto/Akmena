@@ -33,6 +33,8 @@ contract AkmenaChaosTest is Test {
     function _createFundedEscrow(address buyer, address seller, uint256 amount) internal returns (uint256 escrowId) {
         vm.assume(buyer != address(0));
         vm.assume(seller != address(0));
+        vm.assume(buyer != address(escrowEngine));
+        vm.assume(seller != address(escrowEngine));
         vm.assume(amount > 0);
 
         // Fund the real buyer because EscrowEngine now requires
