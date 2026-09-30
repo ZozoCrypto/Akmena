@@ -5,20 +5,36 @@ import {Test} from "forge-std/Test.sol";
 import {LibTransientProof} from "../../src/libraries/LibTransientProof.sol";
 
 contract TransientProofDomainIsolationHarness {
-    function writeEscrow(uint256 id, address subject, uint256 amount) external {
+    /// @dev Write and read in the SAME frame (nested). Foundry's revm does not
+    /// persist EIP-1153 transient storage across sibling frames, but nested
+    /// frames work correctly. This tests the domain-separation property
+    /// without depending on the environmental limitation.
+    function writeAndReadEscrow(uint256 id, address subject, uint256 amount)
+        external
+        returns (bool written, bool leakedToPrivacy)
+    {
         LibTransientProof.setEscrowProof(id, subject, address(0), amount);
+        written = LibTransientProof.verifyEscrowProof(id, subject, address(0), amount);
+        leakedToPrivacy = LibTransientProof.verifyPrivacyProof(id, subject, address(0), amount);
     }
 
-    function writePrivacy(uint256 id, address subject, uint256 amount) external {
+    function writeAndReadPrivacy(uint256 id, address subject, uint256 amount)
+        external
+        returns (bool written, bool leakedToEscrow)
+    {
         LibTransientProof.setPrivacyProof(id, subject, address(0), amount);
+        written = LibTransientProof.verifyPrivacyProof(id, subject, address(0), amount);
+        leakedToEscrow = LibTransientProof.verifyEscrowProof(id, subject, address(0), amount);
     }
 
-    function readEscrow(uint256 id, address subject, uint256 amount) external view returns (bool) {
-        return LibTransientProof.verifyEscrowProof(id, subject, address(0), amount);
-    }
-
-    function readPrivacy(uint256 id, address subject, uint256 amount) external view returns (bool) {
-        return LibTransientProof.verifyPrivacyProof(id, subject, address(0), amount);
+    function writeBothAndRead(uint256 id, address subject, uint256 amount)
+        external
+        returns (bool escrowValid, bool privacyValid)
+    {
+        LibTransientProof.setEscrowProof(id, subject, address(0), amount);
+        LibTransientProof.setPrivacyProof(id, subject, address(0), amount);
+        escrowValid = LibTransientProof.verifyEscrowProof(id, subject, address(0), amount);
+        privacyValid = LibTransientProof.verifyPrivacyProof(id, subject, address(0), amount);
     }
 }
 
@@ -34,27 +50,24 @@ contract TransientProofDomainIsolationTest is Test {
     }
 
     function test_EscrowAndPrivacyDomainsAreIndependent() public {
-        harness.writeEscrow(ID, subject, AMOUNT);
+        (bool written, bool leaked) = harness.writeAndReadEscrow(ID, subject, AMOUNT);
 
-        assertTrue(harness.readEscrow(ID, subject, AMOUNT), "escrow proof was not written");
-
-        assertFalse(harness.readPrivacy(ID, subject, AMOUNT), "escrow proof leaked into privacy domain");
+        assertTrue(written, "escrow proof was not written");
+        assertFalse(leaked, "escrow proof leaked into privacy domain");
     }
 
     function test_PrivacyAndEscrowDomainsAreIndependent() public {
-        harness.writePrivacy(ID, subject, AMOUNT);
+        (bool written, bool leaked) = harness.writeAndReadPrivacy(ID, subject, AMOUNT);
 
-        assertTrue(harness.readPrivacy(ID, subject, AMOUNT), "privacy proof was not written");
-
-        assertFalse(harness.readEscrow(ID, subject, AMOUNT), "privacy proof leaked into escrow domain");
+        assertTrue(written, "privacy proof was not written");
+        assertFalse(leaked, "privacy proof leaked into escrow domain");
     }
 
     function test_SameIdDifferentDomainCannotCrossAuthenticate() public {
-        harness.writeEscrow(ID, subject, AMOUNT);
-        harness.writePrivacy(ID, subject, AMOUNT);
+        (bool escrowValid, bool privacyValid) = harness.writeBothAndRead(ID, subject, AMOUNT);
 
-        assertTrue(harness.readEscrow(ID, subject, AMOUNT));
-        assertTrue(harness.readPrivacy(ID, subject, AMOUNT));
+        assertTrue(escrowValid, "escrow proof invalid");
+        assertTrue(privacyValid, "privacy proof invalid");
 
         // Same numeric identifier, same subject, same amount.
         // Each proof must remain valid only in its own domain.
