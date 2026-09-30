@@ -43,6 +43,19 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     /// timelocked multisig governance is a mainnet prerequisite (G-7).
     mapping(address => bool) public isStandardDebit;
 
+    /// @notice Slow-path allowlist admin (spec §7.1).
+    /// @dev Holds the ADD power. In production this is the TimelockController:
+    /// adapter/token additions are delayed and cancellable. Initialized to
+    /// the core deployer; transferable via setAllowlistAdmin.
+    address public allowlistAdmin;
+
+    /// @notice Fast-path emergency admin (spec §7.1).
+    /// @dev Holds the REMOVE power only — can never add. In production this
+    /// is the multisig directly (no timelock delay): removal must be
+    /// executable within 1 hour of decision. Initialized to the core
+    /// deployer; transferable via setEmergencyAdmin.
+    address public emergencyAdmin;
+
     error PolicyExceeded();
     error EscrowPrerequisiteFailed();
     error UnauthorizedAgent();
@@ -53,6 +66,7 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     error LegacyExecutionDisabled();
     error InvalidAsset();
     error UnauthorizedAdapterAdmin();
+    error InvalidAdmin();
     error InvalidAdapter();
     error EconomicAdapterNotAllowed();
     error NativeValueMismatch();
@@ -110,6 +124,12 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         bool requireActiveEscrow
     );
 
+    /// @notice Emitted when the slow-path allowlist admin changes.
+    event AllowlistAdminUpdated(address indexed admin);
+
+    /// @notice Emitted when the fast-path emergency admin changes.
+    event EmergencyAdminUpdated(address indexed admin);
+
     constructor(address _core) {
         if (_core == address(0) || _core.code.length == 0) {
             revert InvalidCore();
@@ -117,6 +137,11 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
         core = AkmenaCore(_core);
         executionAuthorization = new AkmenaExecutionAuthorization();
+
+        // Interim: deployer holds both paths. G-7 migrates allowlistAdmin to
+        // the TimelockController and emergencyAdmin to the multisig.
+        allowlistAdmin = core.deployer();
+        emergencyAdmin = core.deployer();
     }
 
     /// @notice Configure the native-value policy (asset = address(0)).
@@ -161,9 +186,11 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     }
 
     /// @notice Allow or revoke a trusted economic adapter for one ERC20 asset.
-    /// @dev Only the AkmenaCore deployer may change this allowlist.
+    /// @dev Slow path (spec §7.1): only the allowlistAdmin (the timelock in
+    /// production) may call this. Additions are therefore delayed and
+    /// cancellable; use emergencyRemoveEconomicAdapter for immediate removal.
     function setEconomicAdapter(address asset_, address adapter, bool enabled) external {
-        if (msg.sender != core.deployer()) {
+        if (msg.sender != allowlistAdmin) {
             revert UnauthorizedAdapterAdmin();
         }
 
@@ -185,16 +212,29 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         emit EconomicAdapterUpdated(asset_, adapter, enabled);
     }
 
+    /// @notice Immediately remove an economic adapter (fast path, spec §7.1).
+    /// @dev Only the emergencyAdmin (the multisig directly, no timelock
+    /// delay) may call this. Can ONLY remove — there is no emergency add.
+    /// Fail-closed: pending signed intents targeting the removed adapter
+    /// revert with EconomicAdapterNotAllowed (nonce unconsumed).
+    function emergencyRemoveEconomicAdapter(address asset_, address adapter) external {
+        if (msg.sender != emergencyAdmin) {
+            revert UnauthorizedAdapterAdmin();
+        }
+
+        economicAdapters[asset_][adapter] = false;
+
+        emit EconomicAdapterUpdated(asset_, adapter, false);
+    }
+
     /// @notice Admit or remove a token from the Standard-Debit allowlist.
-    /// @dev Only the AkmenaCore deployer may change this allowlist (INTERIM —
-    /// G-7 moves adapter/token administration behind timelocked multisig).
-    /// Admission requires the off-chain evidence battery of spec §7.2
-    /// (exact transfer, amount-honest pull, exact allowance accounting,
-    /// revert-on-failure, no sender-side hooks); this function records the
-    /// decision, it does not verify token behavior. Removal is immediate and
-    /// fail-closed.
+    /// @dev Slow path (spec §7.1): only the allowlistAdmin (the timelock in
+    /// production) may call this. Admission requires the off-chain evidence
+    /// battery of spec §7.2; this function records the decision, it does not
+    /// verify token behavior. For immediate removal use
+    /// emergencyRemoveStandardDebit.
     function setStandardDebit(address asset_, bool enabled) external {
-        if (msg.sender != core.deployer()) {
+        if (msg.sender != allowlistAdmin) {
             revert UnauthorizedAdapterAdmin();
         }
 
@@ -205,6 +245,54 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         isStandardDebit[asset_] = enabled;
 
         emit StandardDebitUpdated(asset_, enabled);
+    }
+
+    /// @notice Immediately remove a token from the Standard-Debit allowlist
+    /// (fast path, spec §7.1).
+    /// @dev Only the emergencyAdmin may call this. Can ONLY remove — there
+    /// is no emergency admission. Fail-closed: pending signed intents
+    /// targeting the removed token revert with StandardDebitNotAdmitted
+    /// (nonce unconsumed).
+    function emergencyRemoveStandardDebit(address asset_) external {
+        if (msg.sender != emergencyAdmin) {
+            revert UnauthorizedAdapterAdmin();
+        }
+
+        isStandardDebit[asset_] = false;
+
+        emit StandardDebitUpdated(asset_, false);
+    }
+
+    /// @notice Transfer the slow-path allowlist admin (G-7 migration).
+    /// @dev Only the current allowlistAdmin may transfer. In production this
+    /// moves from the deployer to the TimelockController.
+    function setAllowlistAdmin(address newAdmin) external {
+        if (msg.sender != allowlistAdmin) {
+            revert UnauthorizedAdapterAdmin();
+        }
+        if (newAdmin == address(0)) {
+            revert InvalidAdmin();
+        }
+
+        allowlistAdmin = newAdmin;
+
+        emit AllowlistAdminUpdated(newAdmin);
+    }
+
+    /// @notice Transfer the fast-path emergency admin (G-7 migration).
+    /// @dev Only the current emergencyAdmin may transfer. In production this
+    /// moves from the deployer to the multisig.
+    function setEmergencyAdmin(address newAdmin) external {
+        if (msg.sender != emergencyAdmin) {
+            revert UnauthorizedAdapterAdmin();
+        }
+        if (newAdmin == address(0)) {
+            revert InvalidAdmin();
+        }
+
+        emergencyAdmin = newAdmin;
+
+        emit EmergencyAdminUpdated(newAdmin);
     }
 
     function _policy(address operator, address agent, address asset_)
