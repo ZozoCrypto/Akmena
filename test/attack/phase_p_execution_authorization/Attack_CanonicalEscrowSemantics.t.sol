@@ -71,6 +71,16 @@ contract AttackCanonicalEscrowSemanticsTest is Test {
         vm.prank(operator);
 
         boundary.setAgentAssetPolicy(agent, address(token), 10 ether, 100 ether, true);
+
+        // Model D: intents with amount > 0 must target an allowlisted adapter,
+        // and settlement pulls from the operator — fund and approve them.
+        boundary.setEconomicAdapter(address(token), address(targetA), true);
+        boundary.setEconomicAdapter(address(token), address(targetB), true);
+
+        token.transfer(operator, 100 ether);
+
+        vm.prank(operator);
+        token.approve(address(boundary), type(uint256).max);
     }
 
     function _payloadA() internal pure returns (bytes memory) {

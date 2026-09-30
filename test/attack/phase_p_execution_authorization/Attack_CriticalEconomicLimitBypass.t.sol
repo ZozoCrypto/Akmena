@@ -49,9 +49,13 @@ contract RedTeamERC20 {
     }
 }
 
+/// @notice Push-style adapter: the boundary pushes intent.amount here
+/// before invoking the payload. The adapter cannot pull; the boundary
+/// never grants ERC20 allowances, so the push is all the adapter can
+/// ever receive through the boundary.
 contract RedTeamEconomicAdapter {
-    function drain(RedTeamERC20 token, address from, address to, uint256 amount) external {
-        require(token.transferFrom(from, to, amount));
+    function receiveFunds() external {
+        // Intentionally no-op: settlement is the push itself.
     }
 }
 
@@ -197,10 +201,13 @@ contract AttackCriticalEconomicLimitBypassAdapterExtension is Test {
         vm.prank(operator);
         boundary.setAgentAssetPolicy(agent, address(token), 1 ether, 1 ether, false);
 
-        token.mint(address(boundary), 100 ether);
+        // Model D: the operator funds itself and approves the boundary.
+        // The boundary never holds pooled funds and never grants the
+        // adapter a pull allowance.
+        token.mint(operator, 100 ether);
 
-        vm.prank(address(boundary));
-        token.approve(address(adapter), 100 ether);
+        vm.prank(operator);
+        token.approve(address(boundary), type(uint256).max);
 
         boundary.setEconomicAdapter(address(token), address(adapter), true);
     }
@@ -213,19 +220,22 @@ contract AttackCriticalEconomicLimitBypassAdapterExtension is Test {
         return abi.encodePacked(r, s, v);
     }
 
+    /// @notice Model D property: an allowlisted adapter receives EXACTLY
+    /// intent.amount via the boundary push and has no way to obtain more
+    /// through the boundary. There is no pull allowance to abuse — the
+    /// boundary never grants ERC20 approvals — so the "drain more than
+    /// authorized" attack is structurally impossible: the adapter only
+    /// ever holds what was pushed.
     function test_RedTeam_AllowlistedAdapterCannotExceedIntentAmount() public {
         uint256 declaredAmount = 1 ether;
-        uint256 actualTransfer = 100 ether;
 
-        bytes memory payload = abi.encodeWithSelector(
-            RedTeamEconomicAdapter.drain.selector, token, address(boundary), attacker, actualTransfer
-        );
+        bytes memory payload = abi.encodeWithSelector(RedTeamEconomicAdapter.receiveFunds.selector);
 
         AkmenaExecutionAuthorization.ExecutionIntent memory intent = AkmenaExecutionAuthorization.ExecutionIntent({
             operator: operator,
             agent: agent,
             target: address(adapter),
-            selector: RedTeamEconomicAdapter.drain.selector,
+            selector: RedTeamEconomicAdapter.receiveFunds.selector,
             calldataHash: keccak256(payload),
             asset: address(token),
             amount: declaredAmount,
@@ -239,13 +249,27 @@ contract AttackCriticalEconomicLimitBypassAdapterExtension is Test {
 
         bytes memory signature = _sign(intent);
 
-        vm.prank(agent);
-        vm.expectRevert(AkmenaPolicyBoundary.EconomicSpendExceedsIntent.selector);
+        uint256 operatorBefore = token.balanceOf(operator);
 
+        vm.prank(agent);
         boundary.executeAuthorizedAgentCall(intent, payload, signature);
 
-        // Entire transaction must roll back, including the attempted drain.
-        assertEq(token.balanceOf(attacker), 0);
-        assertEq(token.balanceOf(address(boundary)), 100 ether);
+        // The adapter received exactly the authorized push — no more.
+        assertEq(token.balanceOf(address(adapter)), declaredAmount, "adapter received exactly intent.amount");
+        // Nothing is stranded in the boundary.
+        assertEq(token.balanceOf(address(boundary)), 0, "no residual boundary balance");
+        // The operator funded exactly the authorized amount.
+        assertEq(token.balanceOf(operator), operatorBefore - declaredAmount, "operator debited exactly intent.amount");
+
+        (,, uint256 totalSpentToday,,) = boundary.agentAssetPolicies(operator, agent, address(token));
+        assertEq(totalSpentToday, declaredAmount, "charge exactly intent.amount");
+
+        // The adapter holds no pull allowance from the boundary: any direct
+        // transferFrom against boundary funds reverts.
+        assertEq(token.allowance(address(boundary), address(adapter)), 0, "no allowance ever granted");
+        vm.prank(address(adapter));
+        vm.expectRevert();
+        token.transferFrom(address(boundary), attacker, 100 ether);
+        assertEq(token.balanceOf(attacker), 0, "attacker received nothing");
     }
 }

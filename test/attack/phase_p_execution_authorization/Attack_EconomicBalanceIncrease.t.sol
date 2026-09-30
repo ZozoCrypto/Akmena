@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 import {AkmenaCore} from "../../../src/core/AkmenaCore.sol";
 import {AkmenaPolicyBoundary} from "../../../src/authorization/AkmenaPolicyBoundary.sol";
 import {AkmenaExecutionAuthorization} from "../../../src/authorization/AkmenaExecutionAuthorization.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @notice Plain mock ERC20 with an open mint, used to simulate an
@@ -22,32 +21,40 @@ contract RebaseToken is ERC20 {
     }
 }
 
-/// @notice Adapter that pulls `amt` tokens from the caller (the
-/// PolicyBoundary) to `to`, then triggers a token-side balance increase
-/// for the boundary (simulates rebase/reflection crediting holders
-/// during the execution window).
-contract RebasePullAdapter {
-    function pullAndRebase(address token, address to, uint256 amt, uint256 rebaseAmt) external {
-        IERC20(token).transferFrom(msg.sender, to, amt);
+/// @notice Push-style adapter: the boundary pushes intent.amount here
+/// before invoking the payload. The adapter then triggers a token-side
+/// balance increase for the boundary mid-call (simulates rebase /
+/// reflection crediting holders during the execution window).
+/// The boundary grants no pull allowances, so the adapter cannot take
+/// anything beyond the push.
+contract RebasePushAdapter {
+    function receiveAndRebase(address token, uint256 rebaseAmt) external {
+        // The boundary already pushed intent.amount to this adapter before
+        // this call. Minting to the boundary simulates the rebase credit.
         RebaseToken(token).rebaseMint(msg.sender, rebaseAmt);
     }
 }
 
-/// @notice Regression tests for the EconomicBalanceIncrease guard:
-/// a net balance INCREASE during the ERC20 execution window must revert
-/// instead of being silently absorbed into a zero-spend reading.
+/// @notice Model D regression tests for the removed EconomicBalanceIncrease
+/// guard.
 ///
-/// Residual (tracked separately, NOT fixed): net-zero (pull X + mint X)
-/// and partial-credit (pull 100 + mint 30) flows are invisible to
-/// net-delta accounting.
+/// Under the old measurement model, a net balance INCREASE during the
+/// ERC20 execution window had to revert, because balance-delta accounting
+/// could otherwise be distorted (net-zero and partial-credit flows were
+/// invisible to it).
+///
+/// Under Model D there is no balance-delta measurement: settlement pulls
+/// exactly intent.amount from the operator, pushes exactly intent.amount
+/// to the allowlisted adapter, and the charge (totalSpentToday) is fixed
+/// BEFORE any fund movement. A mid-call mint therefore cannot distort
+/// the charge — it is stranded in the boundary by design (no sweep) and
+/// never reduces the recorded spend.
 contract Attack_EconomicBalanceIncrease is Test {
     AkmenaCore internal core;
     AkmenaPolicyBoundary internal boundary;
     AkmenaExecutionAuthorization internal auth;
     RebaseToken internal token;
-    RebasePullAdapter internal adapter;
-
-    address internal recipient = address(0xBEE);
+    RebasePushAdapter internal adapter;
 
     uint256 internal constant AGENT_KEY = 0xA11CE;
     address internal agent;
@@ -62,14 +69,16 @@ contract Attack_EconomicBalanceIncrease is Test {
         auth = boundary.executionAuthorization();
 
         token = new RebaseToken();
-        adapter = new RebasePullAdapter();
+        adapter = new RebasePushAdapter();
 
         boundary.setAgentAssetPolicy(agent, address(token), 1000 ether, 10000 ether, false);
         boundary.setEconomicAdapter(address(token), address(adapter), true);
-        vm.prank(address(boundary));
-        token.approve(address(adapter), type(uint256).max);
 
-        token.mint(address(boundary), 1000 ether);
+        // Model D: the operator (this test contract) funds itself and
+        // approves the boundary. The boundary never holds pooled funds and
+        // never grants pull allowances.
+        token.mint(address(this), 1000 ether);
+        token.approve(address(boundary), type(uint256).max);
     }
 
     function _intent(address target, bytes memory payload, address asset, uint256 amount)
@@ -109,42 +118,53 @@ contract Attack_EconomicBalanceIncrease is Test {
         return totalSpentToday;
     }
 
-    /// @notice The attack: adapter pulls 100 out while the token mints 200
-    /// back to the boundary mid-call (net: boundary 1000 -> 1100).
-    /// Must revert with EconomicBalanceIncrease(), atomically: balances
-    /// and daily spend unchanged.
-    function test_balanceIncreaseRevertsAtomically() public {
+    /// @notice Model D property: a token-side mint to the boundary mid-call
+    /// cannot distort the charge. The charge is fixed at intent.amount
+    /// before any fund movement; the rebase is stranded in the boundary
+    /// (no sweep by design) and never reduces recorded spend.
+    function test_rebaseMintCannotDistortCharge() public {
         bytes memory payload = abi.encodeWithSelector(
-            RebasePullAdapter.pullAndRebase.selector, address(token), recipient, 100 ether, 200 ether
-        );
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(address(adapter), payload, address(token), 100 ether);
-        bytes memory sig = _sign(intent); // sign BEFORE expectRevert: hashIntent is an external call
-
-        vm.expectRevert(AkmenaPolicyBoundary.EconomicBalanceIncrease.selector);
-        vm.prank(agent);
-        boundary.executeAuthorizedAgentCall(intent, payload, sig);
-
-        assertEq(token.balanceOf(address(boundary)), 1000 ether, "boundary balance unchanged");
-        assertEq(token.balanceOf(recipient), 0, "recipient received nothing");
-        assertEq(_totalSpent(address(token)), 0, "no spend recorded");
-    }
-
-    /// @notice Control: a plain pull with NO rebase still works and records
-    /// measured spend exactly (guard must not break the happy path).
-    function test_plainPullStillWorks() public {
-        bytes memory payload = abi.encodeWithSelector(
-            RebasePullAdapter.pullAndRebase.selector, address(token), recipient, 100 ether, 0
+            RebasePushAdapter.receiveAndRebase.selector, address(token), 200 ether
         );
         AkmenaExecutionAuthorization.ExecutionIntent memory intent =
             _intent(address(adapter), payload, address(token), 100 ether);
         bytes memory sig = _sign(intent);
 
+        uint256 operatorBefore = token.balanceOf(address(this));
+
         vm.prank(agent);
         boundary.executeAuthorizedAgentCall(intent, payload, sig);
 
-        assertEq(token.balanceOf(address(boundary)), 900 ether, "boundary -100");
-        assertEq(token.balanceOf(recipient), 100 ether, "recipient +100");
-        assertEq(_totalSpent(address(token)), 100 ether, "measured spend recorded");
+        // Charge is exactly the authorized amount, unaffected by the rebase.
+        assertEq(_totalSpent(address(token)), 100 ether, "charge fixed at intent.amount");
+        // Adapter received exactly the pushed amount — no more, no less.
+        assertEq(token.balanceOf(address(adapter)), 100 ether, "adapter received exactly 100");
+        // Operator funded exactly the authorized amount.
+        assertEq(token.balanceOf(address(this)), operatorBefore - 100 ether, "operator debited exactly 100");
+        // The mid-call rebase mint is stranded in the boundary; it does NOT
+        // reduce the recorded charge.
+        assertEq(token.balanceOf(address(boundary)), 200 ether, "rebase stranded, charge unaffected");
+    }
+
+    /// @notice Model D happy-path control: operator approves + funds, the
+    /// allowlisted adapter receives exactly the pushed amount, the charge
+    /// is exact, and the boundary ends with zero residual balance.
+    function test_modelDSettlementHappyPath() public {
+        bytes memory payload = abi.encodeWithSelector(
+            RebasePushAdapter.receiveAndRebase.selector, address(token), 0
+        );
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+            _intent(address(adapter), payload, address(token), 100 ether);
+        bytes memory sig = _sign(intent);
+
+        uint256 operatorBefore = token.balanceOf(address(this));
+
+        vm.prank(agent);
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+
+        assertEq(token.balanceOf(address(adapter)), 100 ether, "adapter received exactly 100");
+        assertEq(token.balanceOf(address(boundary)), 0, "no residual boundary balance");
+        assertEq(token.balanceOf(address(this)), operatorBefore - 100 ether, "operator debited exactly 100");
+        assertEq(_totalSpent(address(token)), 100 ether, "charge recorded exactly");
     }
 }

@@ -84,6 +84,10 @@ contract AttackAdapterAgentSourceBypassTest is Test {
     }
 
     function test_RedTeam_AdapterCanSpendAgentFundsWithoutBoundaryDelta() public {
+        // Model D regression: the old confused-deputy path is closed. The
+        // boundary pulls ONLY from intent.operator (0x1111), which never
+        // approved the boundary — the agent's direct approval of the adapter
+        // is a wallet-level grant the boundary cannot and does not use.
         uint256 declaredAmount = 1 ether;
         uint256 actualTransfer = 100 ether;
 
@@ -110,15 +114,15 @@ contract AttackAdapterAgentSourceBypassTest is Test {
         bytes memory signature = _sign(intent);
 
         vm.prank(agent);
-
+        vm.expectRevert(AkmenaPolicyBoundary.InsufficientOperatorAllowance.selector);
         boundary.executeAuthorizedAgentCall(intent, payload, signature);
 
-        assertEq(token.balanceOf(attacker), actualTransfer, "agent funds were not drained");
-
-        assertEq(token.balanceOf(agent), 0, "agent should have lost the transferred funds");
+        // Nothing moved through the boundary: the operator never approved it.
+        assertEq(token.balanceOf(attacker), 0, "no funds were drained");
+        assertEq(token.balanceOf(agent), 100 ether, "agent funds untouched");
 
         (,, uint256 totalSpentToday,,) = boundary.agentAssetPolicies(operator, agent, address(token));
 
-        assertEq(totalSpentToday, 0, "boundary incorrectly believes no economic spend occurred");
+        assertEq(totalSpentToday, 0, "nothing executed, nothing charged");
     }
 }

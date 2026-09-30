@@ -8,7 +8,6 @@ import {AkmenaExecutionAuthorization} from "../../../src/authorization/AkmenaExe
 import {EscrowEngine} from "../../../src/economics/EscrowEngine.sol";
 import {IEscrowEngine} from "../../../src/economics/IEscrowEngine.sol";
 import {LibStorage} from "../../../src/storage/LibStorage.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @notice Mock ERC20 with a 10% fee-on-transfer, taken from the transferred
@@ -52,19 +51,27 @@ contract PlainToken is ERC20 {
     }
 }
 
-/// @notice Benign economic adapter: pulls `amt` tokens from the caller
-/// (the PolicyBoundary) to `to`.
-contract PullAdapter {
-    function pull(address token, address to, uint256 amt) external {
-        IERC20(token).transferFrom(msg.sender, to, amt);
+/// @notice Minimal push-style adapter: the boundary pushes intent.amount
+/// here before invoking the payload. The adapter cannot pull; no pull
+/// allowance from the boundary exists.
+contract PushAdapter {
+    function receiveFunds() external {
+        // Intentionally no-op: settlement is the push itself.
     }
 }
 
-/// @notice Fee-on-transfer token vs balance-delta accounting.
-/// Covers (a) PolicyBoundary execution path: measured spend records the net
-/// outflow from boundary custody, never the declared amount;
-/// (b) EscrowEngine funding path: fee tokens are rejected, plain tokens fund cleanly;
-/// (c) fee-to-boundary and fee-to-third-party edges.
+/// @notice Fee-on-transfer token vs Model D exact-amount settlement.
+///
+/// Under Model D there is no balance-delta measurement to distort:
+/// settlement pulls exactly intent.amount from the operator and pushes
+/// exactly intent.amount to the allowlisted adapter. A fee-on-transfer
+/// token therefore FAILS CLOSED whenever the fee leaves the boundary
+/// underfunded for the push (the whole transaction — pull, push, charge,
+/// nonce — rolls back atomically). Fee tokens are excluded from
+/// Standard-Debit admission; these tests pin the raw contract behavior:
+/// (a) boundary execution fails closed; (b) escrow funding still rejects
+/// fee tokens while plain tokens fund cleanly; (c) fee-to-boundary and
+/// fee-to-third-party edges.
 contract Attack_FeeTokenEconomicAccounting is Test {
     AkmenaCore internal core;
     AkmenaPolicyBoundary internal boundary;
@@ -72,7 +79,7 @@ contract Attack_FeeTokenEconomicAccounting is Test {
     EscrowEngine internal escrowEngine;
     FeeToken internal feeToken;
     PlainToken internal plainToken;
-    PullAdapter internal adapter;
+    PushAdapter internal adapter;
 
     address internal feeCollector = address(0xFEE);
     address internal recipient = address(0xBEE);
@@ -91,7 +98,7 @@ contract Attack_FeeTokenEconomicAccounting is Test {
 
         feeToken = new FeeToken(feeCollector);
         plainToken = new PlainToken();
-        adapter = new PullAdapter();
+        adapter = new PushAdapter();
 
         escrowEngine = new EscrowEngine(address(plainToken));
 
@@ -99,12 +106,12 @@ contract Attack_FeeTokenEconomicAccounting is Test {
         boundary.setAgentAssetPolicy(agent, address(feeToken), 1000 ether, 10000 ether, false);
         // Allowlist the adapter for the fee token (test contract is deployer).
         boundary.setEconomicAdapter(address(feeToken), address(adapter), true);
-        // Boundary pre-approves the adapter.
-        vm.prank(address(boundary));
-        feeToken.approve(address(adapter), type(uint256).max);
 
-        // Fund the boundary with 1000 fee-tokens (mint = no fee).
-        feeToken.mint(address(boundary), 1000 ether);
+        // Model D: the operator (this test contract) funds itself and
+        // approves the boundary. The boundary never holds pooled funds and
+        // never grants the adapter a pull allowance.
+        feeToken.mint(address(this), 1000 ether);
+        feeToken.approve(address(boundary), type(uint256).max);
     }
 
     function _intent(address target, bytes memory payload, address asset, uint256 amount)
@@ -138,15 +145,6 @@ contract Attack_FeeTokenEconomicAccounting is Test {
         sig = abi.encodePacked(r, s, v);
     }
 
-    function _execute(AkmenaExecutionAuthorization.ExecutionIntent memory intent, bytes memory payload)
-        internal
-        returns (bytes memory)
-    {
-        bytes memory sig = _sign(intent);
-        vm.prank(agent);
-        return boundary.executeAuthorizedAgentCall(intent, payload, sig);
-    }
-
     function _totalSpent(address asset) internal view returns (uint256) {
         (,, uint256 totalSpentToday,,) =
             boundary.agentAssetPolicies(address(this), agent, asset);
@@ -157,100 +155,120 @@ contract Attack_FeeTokenEconomicAccounting is Test {
                               (a) BOUNDARY
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Baseline: intent amount=100, adapter pulls 100 fee-tokens.
-    /// Measured spend is the full 100 outflow even though the recipient
-    /// receives only 90 after the 10% fee.
-    function test_a_feeTokenMeasuredSpendExact() public {
-        bytes memory payload =
-            abi.encodeWithSelector(PullAdapter.pull.selector, address(feeToken), recipient, 100 ether);
+    /// @notice Model D: a fee-on-transfer token FAILS CLOSED. The pull
+    /// takes 100 from the operator but only 90 arrives at the boundary
+    /// (10% fee to the collector), so the exact-amount push of 100
+    /// reverts. The whole transaction — pull, push, charge, nonce —
+    /// rolls back atomically: nothing is spent, nothing is recorded.
+    function test_a_feeTokenFailsClosedAtomically() public {
+        bytes memory payload = abi.encodeWithSelector(PushAdapter.receiveFunds.selector);
         AkmenaExecutionAuthorization.ExecutionIntent memory intent =
             _intent(address(adapter), payload, address(feeToken), 100 ether);
-
-        uint256 bBefore = feeToken.balanceOf(address(boundary));
-        uint256 rBefore = feeToken.balanceOf(recipient);
-        uint256 cBefore = feeToken.balanceOf(feeCollector);
-
-        _execute(intent, payload);
-
-        uint256 spent = bBefore - feeToken.balanceOf(address(boundary));
-        uint256 rDelta = feeToken.balanceOf(recipient) - rBefore;
-        uint256 cDelta = feeToken.balanceOf(feeCollector) - cBefore;
-
-        assertEq(bBefore, 1000 ether, "boundary funded with 1000");
-        assertEq(spent, 100 ether, "measured spend = full 100 outflow");
-        assertEq(rDelta, 90 ether, "recipient receives 90 after 10% fee");
-        assertEq(cDelta, 10 ether, "collector receives the 10 fee");
-        assertEq(_totalSpent(address(feeToken)), 100 ether, "daily total records 100");
-    }
-
-    /// @notice Ceiling check: intent amount=90 but adapter pulls 100.
-    /// Measured outflow (100) exceeds the declared ceiling (90) -> must revert.
-    function test_a_measuredSpendExceedsIntentReverts() public {
-        bytes memory payload =
-            abi.encodeWithSelector(PullAdapter.pull.selector, address(feeToken), recipient, 100 ether);
-        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
-            _intent(address(adapter), payload, address(feeToken), 90 ether);
-
         bytes memory sig = _sign(intent); // sign BEFORE expectRevert: hashIntent is an external call
+
         vm.prank(agent);
-        vm.expectRevert(AkmenaPolicyBoundary.EconomicSpendExceedsIntent.selector);
+        vm.expectRevert(); // ERC20InsufficientBalance on the underfunded push
         boundary.executeAuthorizedAgentCall(intent, payload, sig);
 
-        assertEq(feeToken.balanceOf(address(boundary)), 1000 ether, "no state changed on revert");
-        assertEq(_totalSpent(address(feeToken)), 0, "no spend recorded on revert");
+        // Atomic rollback: the operator keeps everything, nobody received anything.
+        assertEq(feeToken.balanceOf(address(this)), 1000 ether, "operator balance unchanged");
+        assertEq(feeToken.balanceOf(address(boundary)), 0, "boundary received nothing");
+        assertEq(feeToken.balanceOf(address(adapter)), 0, "adapter received nothing");
+        assertEq(feeToken.balanceOf(feeCollector), 0, "collector received nothing");
+        assertEq(_totalSpent(address(feeToken)), 0, "no spend recorded");
+        assertFalse(auth.usedNonces(agent, intent.nonce), "nonce not consumed");
     }
 
-    /// @notice Distortion probe: two sequential 100-token executions.
-    /// Accounting stays exact: 200 of budget consumed, 180 delivered.
-    function test_a_repeatedSpendBudgetRatio() public {
+    /// @notice Model D: even a smaller intent cannot slip a fee token
+    /// through. Intent 90: the pull delivers 81 after the fee, the exact
+    /// push of 90 reverts, and everything rolls back atomically.
+    function test_a_smallerIntentStillFailsClosed() public {
+        bytes memory payload = abi.encodeWithSelector(PushAdapter.receiveFunds.selector);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+            _intent(address(adapter), payload, address(feeToken), 90 ether);
+        bytes memory sig = _sign(intent); // sign BEFORE expectRevert: hashIntent is an external call
+
+        vm.prank(agent);
+        vm.expectRevert();
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+
+        assertEq(feeToken.balanceOf(address(this)), 1000 ether, "operator balance unchanged");
+        assertEq(feeToken.balanceOf(address(boundary)), 0, "boundary received nothing");
+        assertEq(feeToken.balanceOf(address(adapter)), 0, "adapter received nothing");
+        assertEq(_totalSpent(address(feeToken)), 0, "no spend recorded");
+        assertFalse(auth.usedNonces(agent, intent.nonce), "nonce not consumed");
+    }
+
+    /// @notice Model D: repeated fee-token attempts consume no budget.
+    /// Both executions revert; the daily total stays zero and the
+    /// operator balance is untouched.
+    function test_a_repeatedFeeTokenAttemptsConsumeNoBudget() public {
         for (uint256 i = 0; i < 2; i++) {
-            bytes memory payload =
-                abi.encodeWithSelector(PullAdapter.pull.selector, address(feeToken), recipient, 100 ether);
-            _execute(_intent(address(adapter), payload, address(feeToken), 100 ether), payload);
+            bytes memory payload = abi.encodeWithSelector(PushAdapter.receiveFunds.selector);
+            AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+                _intent(address(adapter), payload, address(feeToken), 100 ether);
+            bytes memory sig = _sign(intent);
+
+            vm.prank(agent);
+            vm.expectRevert();
+            boundary.executeAuthorizedAgentCall(intent, payload, sig);
         }
 
-        uint256 spent = 1000 ether - feeToken.balanceOf(address(boundary));
-        uint256 received = feeToken.balanceOf(recipient);
-
-        assertEq(spent, 200 ether, "measured spend exactly 200");
-        assertEq(received, 180 ether, "recipient got 180 (90%)");
-        assertEq(_totalSpent(address(feeToken)), 200 ether, "daily budget consumed 200");
+        assertEq(feeToken.balanceOf(address(this)), 1000 ether, "operator balance unchanged");
+        assertEq(_totalSpent(address(feeToken)), 0, "no budget consumed");
     }
 
-    /// @notice Edge (c1): fee routed to the BOUNDARY itself.
-    /// Net outflow is 90; measured spend must be exactly 90, not 100.
-    function test_c_feeToBoundaryItself() public {
+    /// @notice Edge (c1): fee routed to the BOUNDARY itself. This is the
+    /// one fee-token edge that does NOT fail closed: the pull delivers
+    /// the full 100 to the boundary (90 + 10 fee-to-self), so the exact
+    /// push of 100 is funded and execution succeeds. The economics stay
+    /// exact — the operator authorized 100 and 100 left the operator, so
+    /// the charge is exactly 100 — but the push itself takes a 10% fee,
+    /// so the adapter nets 90 and the 10 fee is stranded in the boundary
+    /// (no sweep by design). It is never misaccounted: the stranded fee
+    /// cannot reduce the charge or be extracted without a signed intent.
+    /// Fee tokens remain excluded from Standard-Debit admission; this
+    /// pins the raw contract behavior for the edge.
+    function test_c_feeToBoundarySucceedsWithFeeStranded() public {
         feeToken.setFeeCollector(address(boundary));
 
-        bytes memory payload =
-            abi.encodeWithSelector(PullAdapter.pull.selector, address(feeToken), recipient, 100 ether);
+        bytes memory payload = abi.encodeWithSelector(PushAdapter.receiveFunds.selector);
         AkmenaExecutionAuthorization.ExecutionIntent memory intent =
             _intent(address(adapter), payload, address(feeToken), 100 ether);
+        bytes memory sig = _sign(intent);
 
-        uint256 bBefore = feeToken.balanceOf(address(boundary));
-        _execute(intent, payload);
-        uint256 spent = bBefore - feeToken.balanceOf(address(boundary));
+        vm.prank(agent);
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
 
-        assertEq(spent, 90 ether, "measured spend = net 90 outflow");
-        assertEq(feeToken.balanceOf(recipient), 90 ether, "recipient got 90");
-        assertEq(_totalSpent(address(feeToken)), 90 ether, "daily total records 90");
+        assertEq(feeToken.balanceOf(address(this)), 900 ether, "operator debited exactly 100");
+        assertEq(_totalSpent(address(feeToken)), 100 ether, "charge exactly 100");
+        assertEq(feeToken.balanceOf(address(adapter)), 90 ether, "adapter nets 90 after push fee");
+        assertEq(feeToken.balanceOf(address(boundary)), 10 ether, "fee stranded in boundary");
     }
 
-    /// @notice Edge (c2): fee routed to a third party.
-    /// Pins the third-party split: 100 of budget consumed, 90 delivered,
-    /// 10 to the third party.
-    function test_c_feeToThirdParty() public {
+    /// @notice Edge (c2): fee routed to a third party fails closed. The
+    /// pull delivers 90 to the boundary and 10 to the third party; the
+    /// exact push of 100 reverts and the whole transaction rolls back —
+    /// the third party keeps nothing.
+    function test_c_feeToThirdPartyFailsClosed() public {
         address thirdParty = address(0x7A7A);
         feeToken.setFeeCollector(thirdParty);
 
-        bytes memory payload =
-            abi.encodeWithSelector(PullAdapter.pull.selector, address(feeToken), recipient, 100 ether);
-        _execute(_intent(address(adapter), payload, address(feeToken), 100 ether), payload);
+        bytes memory payload = abi.encodeWithSelector(PushAdapter.receiveFunds.selector);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+            _intent(address(adapter), payload, address(feeToken), 100 ether);
+        bytes memory sig = _sign(intent);
 
-        assertEq(1000 ether - feeToken.balanceOf(address(boundary)), 100 ether);
-        assertEq(feeToken.balanceOf(thirdParty), 10 ether, "third party got the fee");
-        assertEq(feeToken.balanceOf(recipient), 90 ether);
-        assertEq(_totalSpent(address(feeToken)), 100 ether);
+        vm.prank(agent);
+        vm.expectRevert();
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+
+        assertEq(feeToken.balanceOf(address(this)), 1000 ether, "operator balance unchanged");
+        assertEq(feeToken.balanceOf(thirdParty), 0, "third party received nothing");
+        assertEq(feeToken.balanceOf(address(adapter)), 0, "adapter received nothing");
+        assertEq(feeToken.balanceOf(address(boundary)), 0, "boundary received nothing");
+        assertEq(_totalSpent(address(feeToken)), 0, "no spend recorded");
+        assertFalse(auth.usedNonces(agent, intent.nonce), "nonce not consumed");
     }
 
     /*//////////////////////////////////////////////////////////////
