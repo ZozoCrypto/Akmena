@@ -6,9 +6,12 @@ import {LibStorage} from "../storage/LibStorage.sol";
 import {AkmenaExecutionAuthorization} from "./AkmenaExecutionAuthorization.sol";
 import {ITransientProofVerifier} from "./ITransientProofVerifier.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
+    using SafeERC20 for IERC20;
+
     AkmenaCore public immutable core;
     AkmenaExecutionAuthorization public immutable executionAuthorization;
 
@@ -43,8 +46,47 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     error InvalidAdapter();
     error EconomicAdapterNotAllowed();
     error NativeValueMismatch();
+    error InsufficientOperatorAllowance();
+    // Legacy measurement-model errors: retained for ABI and test
+    // compatibility. Model D settlement never produces them; removal is
+    // scheduled alongside the obsolete attack-test updates (Phase 3).
     error EconomicSpendExceedsIntent();
     error EconomicBalanceIncrease();
+
+    /// @notice Emitted when an ERC20 intent settles under Model D custody.
+    /// @dev amount is always exactly the signed intent.amount: pull, push,
+    /// and call are one atomic unit. Monitored by operators to reconcile
+    /// allowance usage against policy charges.
+    event ERC20Settled(
+        address indexed operator, address indexed agent, address indexed asset, uint256 amount, address target
+    );
+
+    /// @notice Emitted when the economic-adapter allowlist changes.
+    /// @dev The monitoring trigger for the allowance-rotation path: when an
+    /// adapter is removed or disabled, operators must revoke any standing
+    /// ERC20 approvals they granted toward executions targeting it. Removal
+    /// from this allowlist does NOT revoke operator approvals — only the
+    /// operator's own wallet can do that.
+    event EconomicAdapterUpdated(address indexed asset, address indexed adapter, bool enabled);
+
+    /// @notice Emitted when a native-value spending policy is (re)configured.
+    event AgentPolicyConfigured(
+        address indexed operator,
+        address indexed agent,
+        uint256 maxSpendPerTransaction,
+        uint256 dailyLimit,
+        bool requireActiveEscrow
+    );
+
+    /// @notice Emitted when an ERC20 spending policy is (re)configured.
+    event AgentAssetPolicyConfigured(
+        address indexed operator,
+        address indexed agent,
+        address indexed asset,
+        uint256 maxSpendPerTransaction,
+        uint256 dailyLimit,
+        bool requireActiveEscrow
+    );
 
     constructor(address _core) {
         if (_core == address(0) || _core.code.length == 0) {
@@ -56,6 +98,10 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     }
 
     /// @notice Configure the native-value policy (asset = address(0)).
+    /// @dev The policy is namespaced under msg.sender as operator: only the
+    /// operator's own funds can ever be spent through it. Reconfiguring
+    /// resets the daily counters (totalSpentToday = 0, lastResetTimestamp =
+    /// now); previously recorded spend is discarded, not preserved.
     function setAgentPolicy(address agent, uint256 maxSpend, uint256 daily, bool requireEscrow) external {
         agentPolicies[msg.sender][agent] = SpendingPolicy({
             maxSpendPerTransaction: maxSpend,
@@ -64,10 +110,16 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             lastResetTimestamp: block.timestamp,
             requireActiveEscrow: requireEscrow
         });
+
+        emit AgentPolicyConfigured(msg.sender, agent, maxSpend, daily, requireEscrow);
     }
 
     /// @notice Configure an isolated policy for one ERC20 asset.
-    /// @dev Limits are denominated in that asset's smallest units.
+    /// @dev Limits are denominated in that asset's smallest units. The policy
+    /// is namespaced under msg.sender as operator, and every ERC20 execution
+    /// pulls funds from that same operator's wallet — never from pooled
+    /// boundary custody. Reconfiguring resets the daily counters
+    /// (totalSpentToday = 0, lastResetTimestamp = now).
     function setAgentAssetPolicy(address agent, address asset_, uint256 maxSpend, uint256 daily, bool requireEscrow)
         external
     {
@@ -82,6 +134,8 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             lastResetTimestamp: block.timestamp,
             requireActiveEscrow: requireEscrow
         });
+
+        emit AgentAssetPolicyConfigured(msg.sender, agent, asset_, maxSpend, daily, requireEscrow);
     }
 
     /// @notice Allow or revoke a trusted economic adapter for one ERC20 asset.
@@ -105,6 +159,8 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         }
 
         economicAdapters[asset_][adapter] = enabled;
+
+        emit EconomicAdapterUpdated(asset_, adapter, enabled);
     }
 
     function _policy(address operator, address agent, address asset_)
@@ -149,6 +205,14 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
      * operator, agent, target, selector, calldata,
      * amount, native value, proof context, nonce,
      * and validity window.
+     *
+     * Settlement model (Model D — operator-retained custody):
+     * - Native: msg.value semantics are exact and unchanged.
+     * - ERC20: the boundary holds no pooled tokens. Execution pulls exactly
+     *   intent.amount from intent.operator's wallet (which must have approved
+     *   the boundary), pushes it to the allowlisted adapter, then calls the
+     *   adapter — atomically. The policy charge equals the signed amount and
+     *   is recorded before any fund movement; it is never restored.
      *
      * The boundary retains policy accounting and proof
      * enforcement, while the authorization primitive
@@ -206,6 +270,27 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             if (intent.target == intent.asset && !isEconomicAdapter) {
                 revert EconomicAdapterNotAllowed();
             }
+
+            // Economic value movement is only permitted to allowlisted
+            // adapters: settlement pushes operator funds to the target
+            // before calling it, so the target must be explicitly trusted.
+            if (intent.amount > 0 && !isEconomicAdapter) {
+                revert EconomicAdapterNotAllowed();
+            }
+
+            // Defense in depth (V-9): a legacy self-adapter grant
+            // (economicAdapters[asset][asset], writable only before 00428402)
+            // must never be executable for value movement. Target == asset is
+            // incoherent in the push model — the push would fund the token
+            // contract while the call draws from the boundary's commingled
+            // balance — and enables costless griefing of stranded legacy
+            // pools (capital-recycled 1:1 destruction of pool funds into the
+            // token contract, no profit to the attacker). New grants are
+            // already rejected by setEconomicAdapter; this closes the
+            // execution path for legacy ones.
+            if (intent.amount > 0 && intent.target == intent.asset) {
+                revert InvalidAdapter();
+            }
         }
 
         SpendingPolicy storage policy = _policy(intent.operator, agent, intent.asset);
@@ -216,6 +301,8 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
         // Reset the rolling 24-hour spending window first.
         // Intentional timestamp boundary: spending policy resets on a rolling 24-hour window.
+        // The reset requires STRICTLY more than 1 day to have elapsed: at exactly
+        // lastResetTimestamp + 1 days the window has NOT reset; at +1 day + 1 second it has.
         // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp > policy.lastResetTimestamp + 1 days) {
             policy.totalSpentToday = 0;
@@ -243,21 +330,15 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
         executionAuthorization.verifyAndConsume(intent, payload, msg.value, signature);
 
-        uint256 balanceBefore;
-
-        if (!isNative) {
-            balanceBefore = IERC20(intent.asset).balanceOf(address(this));
-        }
-
-        (bool success, bytes memory returnData) = intent.target.call{value: msg.value}(payload);
-
-        if (!success) {
-            assembly {
-                revert(add(returnData, 32), mload(returnData))
-            }
-        }
-
         if (isNative) {
+            (bool success, bytes memory returnData) = intent.target.call{value: msg.value}(payload);
+
+            if (!success) {
+                assembly {
+                    revert(add(returnData, 32), mload(returnData))
+                }
+            }
+
             if (msg.value > 0) {
                 // Actual native spend is exactly the ETH forwarded by this call.
                 if (msg.value > policy.dailyLimit - policy.totalSpentToday) {
@@ -268,40 +349,90 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             } else {
                 policy.totalSpentToday += intent.amount;
             }
-        } else {
-            uint256 balanceAfter = IERC20(intent.asset).balanceOf(address(this));
 
-            // A net balance increase during the call (rebasing / reflection
-            // tokens, adapter-driven mints) must never be silently absorbed
-            // into a zero-spend reading: value left custody unrecorded.
-            if (balanceAfter > balanceBefore) {
-                revert EconomicBalanceIncrease();
-            }
-
-            uint256 spent = balanceBefore - balanceAfter;
-
-            // Generic ERC20-context calls are allowed only when they do not
-            // actually spend tokens from PolicyBoundary custody.
-            if (spent > 0 && !isEconomicAdapter) {
-                revert EconomicAdapterNotAllowed();
-            }
-
-            // Economic adapters must honor the signed economic ceiling.
-            if (spent > intent.amount) {
-                revert EconomicSpendExceedsIntent();
-            }
-
-            if (spent > policy.maxSpendPerTransaction) {
-                revert PolicyExceeded();
-            }
-
-            if (spent > policy.dailyLimit - policy.totalSpentToday) {
-                revert PolicyExceeded();
-            }
-
-            // Record the measured economic effect, never the declaration.
-            policy.totalSpentToday += spent;
+            return returnData;
         }
+
+        return _settleERC20(intent, payload, policy);
+    }
+
+    /**
+     * @notice Model D ERC20 settlement: pull → push → call, atomically.
+     * @dev The boundary holds no pooled ERC20. Each economic execution pulls
+     * exactly intent.amount from intent.operator, pushes it to the
+     * allowlisted adapter, then calls the adapter. The settled amount is
+     * exact by construction; nothing is measured.
+     *
+     * A positive amount implies the target passed the allowlist gate above.
+     * A zero amount is a generic call (authorization/proof-context
+     * operations): no funds move, nothing is charged.
+     */
+    function _settleERC20(
+        AkmenaExecutionAuthorization.ExecutionIntent calldata intent,
+        bytes calldata payload,
+        SpendingPolicy storage policy
+    ) internal returns (bytes memory) {
+        bool success;
+        bytes memory returnData;
+
+        if (intent.amount == 0) {
+            (success, returnData) = intent.target.call(payload);
+
+            if (!success) {
+                assembly {
+                    revert(add(returnData, 32), mload(returnData))
+                }
+            }
+
+            return returnData;
+        }
+
+        // Step 8 — operator allowance pre-check: fail closed with a clean
+        // error (the transferFrom below would revert anyway).
+        if (IERC20(intent.asset).allowance(intent.operator, address(this)) < intent.amount) {
+            revert InsufficientOperatorAllowance();
+        }
+
+        // Step 9 — daily-limit headroom, saturating. If the operator lowered
+        // dailyLimit below totalSpentToday mid-window, headroom is defined as
+        // zero: a clean PolicyExceeded, never Panic(0x11).
+        uint256 headroom =
+            policy.totalSpentToday >= policy.dailyLimit ? 0 : policy.dailyLimit - policy.totalSpentToday;
+
+        if (intent.amount > headroom) {
+            revert PolicyExceeded();
+        }
+
+        // Step 10 — charge-before-push: the full authorized amount is
+        // accounted before any fund movement. Never restored, including on
+        // adapter misbehavior.
+        policy.totalSpentToday += intent.amount;
+
+        // Step 11 — pull exactly intent.amount from the operator's wallet.
+        // `from` is intent.operator, bound by the EIP-712 signature and the
+        // operator-namespaced policy: only the operator's own funds can move.
+        // forge-lint: disable-next-line(arbitrary-send-erc20)
+        IERC20(intent.asset).safeTransferFrom(intent.operator, address(this), intent.amount);
+
+        // Step 12 — push exactly intent.amount to the adapter. Plain
+        // transfer: the boundary never grants pull allowances to anyone.
+        IERC20(intent.asset).safeTransfer(intent.target, intent.amount);
+
+        // Step 13 — execute the signed payload. The adapter already holds
+        // the pushed funds. Any revert rolls back pull, push, charge,
+        // and nonce consumption atomically.
+        (success, returnData) = intent.target.call(payload);
+
+        if (!success) {
+            assembly {
+                revert(add(returnData, 32), mload(returnData))
+            }
+        }
+
+        // Emitted after the external call deliberately: the event attests to
+        // completed settlement. Reentrancy is blocked by nonReentrant.
+        // forge-lint: disable-next-line(reentrancy-events)
+        emit ERC20Settled(intent.operator, intent.agent, intent.asset, intent.amount, intent.target);
 
         return returnData;
     }
