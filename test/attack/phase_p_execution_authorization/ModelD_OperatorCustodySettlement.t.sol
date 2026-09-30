@@ -94,6 +94,10 @@ contract ModelDOperatorCustodySettlementTest is Test {
         boundary.setEconomicAdapter(address(token), address(adapter), true);
         boundary.setEconomicAdapter(address(token), address(revertingAdapter), true);
 
+        // Deployer admits the token to the Standard-Debit allowlist (§7.2).
+        // Default-deny: without this, positive-amount settlement reverts.
+        boundary.setStandardDebit(address(token), true);
+
         token.mint(operator, 1_000_000 ether);
 
         // Operator funds the policy and approves the boundary.
@@ -527,5 +531,142 @@ contract ModelDOperatorCustodySettlementTest is Test {
         assertEq(_spentToday(), 0, "no spend recorded");
         assertFalse(authorization.usedNonces(agent, 0), "outer nonce not consumed");
         assertFalse(authorization.usedNonces(agent, 1), "inner nonce not consumed");
+    }
+
+    // ── Standard-Debit admission (§7.2) ──────────────────────────────
+
+    /// @notice Default-deny: a positive-amount intent naming a non-admitted
+    /// token reverts StandardDebitNotAdmitted — even when the adapter is
+    /// allowlisted and the operator has approved. Asset trust and code trust
+    /// are separate gates; both must pass.
+    function test_Admission_NonAdmittedTokenRevertsOnEconomicPath() public {
+        ModelDMockToken unadmitted = new ModelDMockToken();
+        unadmitted.mint(operator, 1_000 ether);
+        // Adapter allowlisted for the unadmitted token — code trust passes.
+        boundary.setEconomicAdapter(address(unadmitted), address(adapter), true);
+        // NOTE: no setStandardDebit — asset trust must fail.
+
+        vm.startPrank(operator);
+        boundary.setAgentAssetPolicy(agent, address(unadmitted), 100 ether, 1_000 ether, false);
+        unadmitted.approve(address(boundary), 500 ether);
+        vm.stopPrank();
+
+        bytes memory payload = abi.encodeWithSelector(ModelDMockAdapter.execute.selector, 60 ether);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = AkmenaExecutionAuthorization.ExecutionIntent({
+            operator: operator,
+            agent: agent,
+            target: address(adapter),
+            selector: ModelDMockAdapter.execute.selector,
+            asset: address(unadmitted),
+            calldataHash: keccak256(payload),
+            amount: 60 ether,
+            value: 0,
+            proofModuleKey: bytes32(0),
+            proofId: 0,
+            nonce: 0,
+            validAfter: block.timestamp,
+            deadline: block.timestamp + 1 hours
+        });
+        // Sign BEFORE expectRevert: argument evaluation order would otherwise
+        // consume the revert expectation on the hashIntent staticcall.
+        bytes memory signature = _sign(intent);
+
+        vm.prank(agent);
+        vm.expectRevert(AkmenaPolicyBoundary.StandardDebitNotAdmitted.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
+
+        // Nothing moved, nothing charged, nonce unconsumed.
+        assertEq(unadmitted.balanceOf(operator), 1_000 ether, "operator balance unchanged");
+        assertEq(_spentToday(), 0, "no spend recorded");
+    }
+
+    /// @notice Zero-amount intents are exempt from token admission (§7.2):
+    /// no funds move, so token semantics are irrelevant. The adapter gate
+    /// (step 4) still applies.
+    function test_Admission_ZeroAmountExemptFromAdmission() public {
+        ModelDMockToken unadmitted = new ModelDMockToken();
+        boundary.setEconomicAdapter(address(unadmitted), address(adapter), true);
+        // NOTE: no setStandardDebit — zero-amount must still succeed.
+
+        vm.prank(operator);
+        boundary.setAgentAssetPolicy(agent, address(unadmitted), 100 ether, 1_000 ether, false);
+
+        bytes memory payload = abi.encodeWithSelector(ModelDMockAdapter.execute.selector, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = AkmenaExecutionAuthorization.ExecutionIntent({
+            operator: operator,
+            agent: agent,
+            target: address(adapter),
+            selector: ModelDMockAdapter.execute.selector,
+            asset: address(unadmitted),
+            calldataHash: keccak256(payload),
+            amount: 0,
+            value: 0,
+            proofModuleKey: bytes32(0),
+            proofId: 0,
+            nonce: 0,
+            validAfter: block.timestamp,
+            deadline: block.timestamp + 1 hours
+        });
+        // Sign BEFORE expectRevert: argument evaluation order would otherwise
+        // consume the revert expectation on the hashIntent staticcall.
+        bytes memory signature = _sign(intent);
+
+        vm.prank(agent);
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
+
+        assertEq(_spentToday(), 0, "zero-amount records no spend");
+        assertTrue(authorization.usedNonces(agent, 0), "nonce consumed");
+    }
+
+    /// @notice Only the deployer can admit or remove tokens (interim
+    /// authority; G-7 moves this behind timelocked multisig).
+    function test_Admission_NonDeployerCannotAdmit() public {
+        address attacker = vm.addr(0xBEEF);
+        vm.prank(attacker);
+        vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedAdapterAdmin.selector);
+        boundary.setStandardDebit(address(token), true);
+
+        vm.prank(attacker);
+        vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedAdapterAdmin.selector);
+        boundary.setStandardDebit(address(token), false);
+
+        assertTrue(boundary.isStandardDebit(address(token)), "admission unchanged");
+    }
+
+    /// @notice Removal is immediate and fail-closed: a signed-but-unexecuted
+    /// intent targeting the removed token reverts with the nonce unconsumed.
+    /// Removal does NOT revoke operator→boundary allowances on the token.
+    function test_Admission_RemovalIsFailClosed() public {
+        bytes memory payload = abi.encodeWithSelector(ModelDMockAdapter.execute.selector, 60 ether);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(address(adapter), payload, 60 ether, 0);
+        bytes memory signature = _sign(intent);
+
+        // Deployer removes the token after signing but before execution.
+        boundary.setStandardDebit(address(token), false);
+        assertFalse(boundary.isStandardDebit(address(token)), "token removed");
+
+        vm.prank(agent);
+        vm.expectRevert(AkmenaPolicyBoundary.StandardDebitNotAdmitted.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
+
+        assertEq(token.balanceOf(operator), 1_000_000 ether, "operator balance unchanged");
+        assertEq(_spentToday(), 0, "no spend recorded");
+        assertFalse(authorization.usedNonces(agent, 0), "nonce unconsumed - retryable after re-admission");
+        // Allowance survives removal: it lives on the token, not the boundary.
+        assertEq(token.allowance(operator, address(boundary)), 500 ether, "allowance not revoked by removal");
+    }
+
+    /// @notice StandardDebitUpdated is emitted on admit and remove (F-10
+    /// monitoring trigger for the token-admission path).
+    function test_Admission_StandardDebitUpdatedEmitted() public {
+        ModelDMockToken fresh = new ModelDMockToken();
+
+        vm.expectEmit(true, false, false, true);
+        emit AkmenaPolicyBoundary.StandardDebitUpdated(address(fresh), true);
+        boundary.setStandardDebit(address(fresh), true);
+
+        vm.expectEmit(true, false, false, true);
+        emit AkmenaPolicyBoundary.StandardDebitUpdated(address(fresh), false);
+        boundary.setStandardDebit(address(fresh), false);
     }
 }

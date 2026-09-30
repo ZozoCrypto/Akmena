@@ -73,6 +73,7 @@ contract AttackAdapterAgentSourceBypassTest is Test {
 
         // Core deployer authorizes the adapter as an economic path.
         boundary.setEconomicAdapter(address(token), address(adapter), true);
+        boundary.setStandardDebit(address(token), true);
     }
 
     function _sign(AkmenaExecutionAuthorization.ExecutionIntent memory intent) internal view returns (bytes memory) {

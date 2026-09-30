@@ -76,6 +76,7 @@ contract AttackCanonicalEscrowSemanticsTest is Test {
         // and settlement pulls from the operator — fund and approve them.
         boundary.setEconomicAdapter(address(token), address(targetA), true);
         boundary.setEconomicAdapter(address(token), address(targetB), true);
+        boundary.setStandardDebit(address(token), true);
 
         token.transfer(operator, 100 ether);
 

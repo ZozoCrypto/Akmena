@@ -73,6 +73,7 @@ contract Attack_EconomicBalanceIncrease is Test {
 
         boundary.setAgentAssetPolicy(agent, address(token), 1000 ether, 10000 ether, false);
         boundary.setEconomicAdapter(address(token), address(adapter), true);
+        boundary.setStandardDebit(address(token), true);
 
         // Model D: the operator (this test contract) funds itself and
         // approves the boundary. The boundary never holds pooled funds and

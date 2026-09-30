@@ -106,6 +106,7 @@ contract Attack_FeeTokenEconomicAccounting is Test {
         boundary.setAgentAssetPolicy(agent, address(feeToken), 1000 ether, 10000 ether, false);
         // Allowlist the adapter for the fee token (test contract is deployer).
         boundary.setEconomicAdapter(address(feeToken), address(adapter), true);
+        boundary.setStandardDebit(address(feeToken), true);
 
         // Model D: the operator (this test contract) funds itself and
         // approves the boundary. The boundary never holds pooled funds and
