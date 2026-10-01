@@ -29,6 +29,22 @@
 
 **Mutation Score:** 13 KILLED + 1 EQUIVALENT = 14/20 (70%) effective; 6 SURVIVED (30%)
 
+## Update 2026-10-01: All Survived Mutants Killed
+
+Five new tests in `test/unit/R10_MutantGapTests.t.sol` (commit `df849888`) close all 6 gaps.
+Each test was empirically verified to FAIL when its corresponding mutant is applied:
+
+| Mutant | Test | Kill Evidence |
+|--------|------|---------------|
+| #17 (High) | `test_NativeSettlementHeadroomCalculation` | `panic: division by zero (0x12)` on mutant |
+| #13 (High) | `test_RequireActiveEscrowEnforced` | Execution succeeds (should revert) on mutant |
+| #10 (Med) | `test_ZeroValueNativeRespectsDailyLimit` | Does not revert (should) on mutant |
+| #11 (Med) | `test_ZeroValueNativeHeadroomCalculation` | Wrong `PolicyExceeded` on mutant |
+| #12 (Med) | `test_ZeroValueNativeRespectsDailyLimit` | Does not revert (should) on mutant |
+| #8 (Low) | `test_ZeroAmountSelfAdapterReverts` | Does not revert (should) on mutant |
+
+**Final mutation score:** 19 KILLED + 1 EQUIVALENT = 20/20 (100%) effective.
+
 ## Detailed Analysis
 
 ### KILLED Mutants (13)
