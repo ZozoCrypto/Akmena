@@ -10,8 +10,8 @@
 **RUNTIME-PROVEN — 2026-09-30:**
 
 - Non-invariant tests at HEAD (`2be7ef0e`): **819 passed, 0 failed, 0 skipped** across 159 suites (`forge test --no-match-path "test/invariant/*"`, exit 0, ~25 min).
-- Invariant suites (`test/invariant/*`, incl. R9 V3 campaigns): running separately — result pending.
-- Combined total will be recorded here when the invariant run lands.
+- Invariant suites at HEAD (`f4f48769`): **24 passed, 0 failed, 0 skipped** across 15 suites (`forge test --match-path "test/invariant/*"`, exit 0, ~55 min; incl. R9 V3 campaigns).
+- **Combined R14 total: 843 passed, 0 failed, 0 skipped.**
 
 - Recorded 2026-09-30: **820/820** (`d328ab16` era, after transient-proof rewrites).
 - Alignment synthesis notes a later run showed **792/794** with 2 escrow failures — **now explained and resolved** (see §2).
@@ -123,11 +123,14 @@
 
 ---
 
-## 8. R14 — Regression: INCOMPLETE
+## 8. R14 — Regression: COMPLETE at `f4f48769`
 
-- The 800/800 (now 820/820) counts were aggregates, not one unrestricted current-HEAD run.
-- The full-suite run in progress (§1) is the corrective evidence.
-- **After it lands:** record exact command, seed, commit hash, and count. If green, R14 closes for this HEAD.
+- Non-invariant: **819 passed, 0 failed, 0 skipped** across 159 suites
+  (`forge test --no-match-path "test/invariant/*"`, exit 0, ~25 min).
+- Invariant: **24 passed, 0 failed, 0 skipped** across 15 suites
+  (`forge test --match-path "test/invariant/*"`, exit 0, ~55 min).
+  Includes R9 V3 honest + malicious campaigns and EscrowInvariant (500k calls each).
+- **Combined: 843 passed, 0 failed, 0 skipped.** R14 closes for this HEAD.
 
 ---
 
