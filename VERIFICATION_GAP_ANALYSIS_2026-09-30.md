@@ -132,6 +132,20 @@
   Includes R9 V3 honest + malicious campaigns and EscrowInvariant (500k calls each).
 - **Combined: 843 passed, 0 failed, 0 skipped.** R14 closes for this HEAD.
 
+## 8b. R14 — Re-run: COMPLETE at `27167778` (2026-10-01)
+
+Post-change regression covering everything landed since `f4f48769`:
+R10 gap-fill tests (5), R11 nonce rewrite + expansion (13 symbolic),
+R12 expanded fork tests (6), disabled-test restorations (13).
+
+- Non-invariant: **843 passed, 0 failed, 0 skipped** across 163 suites
+  (`forge test --no-match-path "test/invariant/*"`, exit 0, ~29 min).
+- Invariant: **25 passed, 0 failed, 0 skipped** across 16 suites
+  (`forge test --match-path "test/invariant/*"`, exit 0, ~66 min).
+  The 16th suite is `ModelDBoundaryHandlerMedusa` (added post-baseline in `57c863b8`).
+- **Combined: 868 passed, 0 failed, 0 skipped.** R14 closes for this HEAD.
+- No production contract changes during the run; `git status --short src/` clean.
+
 ---
 
 ## 9. R15 — Independent review: NOT STARTED
