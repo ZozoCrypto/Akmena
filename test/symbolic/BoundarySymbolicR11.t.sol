@@ -74,16 +74,62 @@ contract BoundarySymbolicR11 is Test {
         assertTrue(!success);
     }
 
-    /// @notice SYMBOLIC: Nonce 0 is valid, but reuse must be prevented.
-    /// @dev This tests the nonce tracking mechanism directly.
-    function check_NonceTracking(uint256 nonce) public {
-        // The boundary tracks used nonces per operator
-        // After a successful settlement, the nonce must be marked used
-        // A second attempt with the same nonce must revert
-        
-        // This is a structural test - verifies the mapping exists and is used
-        // Full flow test requires valid signatures which Halmos can't forge
-        assertTrue(nonce == nonce); // placeholder - real test needs signature setup
+    /// @notice SYMBOLIC: A used (agent, nonce) pair MUST always revert (replay protection).
+    /// @dev Marks usedNonces[agent][nonce]=true via vm.store, then proves that
+    ///      ANY intent with that (agent, nonce) reverts, regardless of signature
+    ///      validity or other parameters. This verifies the NonceAlreadyUsed
+    ///      check is effective and fail-closed.
+    ///      usedNonces is mapping(address => mapping(uint256 => bool)) at slot 2.
+    function check_NonceReplayReverts(
+        address agent,
+        uint256 nonce,
+        address operator,
+        address asset,
+        address target,
+        uint256 amount,
+        bytes memory payload,
+        bytes memory signature
+    ) public {
+        // Setup: mark usedNonces[agent][nonce] = true via vm.store
+        // Slot derivation: keccak256(nonce . keccak256(agent . 2))
+        bytes32 innerSlot = keccak256(abi.encode(agent, uint256(2)));
+        bytes32 nonceSlot = keccak256(abi.encode(nonce, innerSlot));
+        vm.store(address(auth), nonceSlot, bytes32(uint256(1)));
+
+        // Verify the nonce is marked used
+        assertTrue(auth.usedNonces(agent, nonce));
+
+        // Construct intent with the REPLAYED (agent, nonce)
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = AkmenaExecutionAuthorization.ExecutionIntent({
+            operator: operator,
+            agent: agent,
+            target: target,
+            selector: bytes4(0),
+            calldataHash: keccak256(payload),
+            asset: asset,
+            amount: amount,
+            value: 0,
+            proofModuleKey: bytes32(0),
+            proofId: 0,
+            nonce: nonce,
+            validAfter: 0,
+            deadline: block.timestamp + 1 hours
+        });
+
+        // Attempt execution with replayed nonce via low-level call
+        // Halmos doesn't support expectRevert, so we check success==false
+        (bool success, ) = address(boundary).call(
+            abi.encodeWithSelector(
+                boundary.executeAuthorizedAgentCall.selector,
+                intent,
+                payload,
+                signature
+            )
+        );
+
+        // Property: MUST revert (replay protection enforced)
+        // Halmos proves this by showing no counterexample exists where success==true
+        assertTrue(!success);
     }
 
     /// @notice SYMBOLIC: Zero-address operator must always revert
