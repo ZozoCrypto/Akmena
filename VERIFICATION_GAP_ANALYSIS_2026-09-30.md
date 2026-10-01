@@ -7,7 +7,11 @@
 
 ## 1. Current suite ground truth
 
-**RUNTIME-PROVEN (pending):** Full `forge test` at HEAD is running (started 18:51 MDT). Result to be filled in below.
+**RUNTIME-PROVEN — 2026-09-30:**
+
+- Non-invariant tests at HEAD (`2be7ef0e`): **819 passed, 0 failed, 0 skipped** across 159 suites (`forge test --no-match-path "test/invariant/*"`, exit 0, ~25 min).
+- Invariant suites (`test/invariant/*`, incl. R9 V3 campaigns): running separately — result pending.
+- Combined total will be recorded here when the invariant run lands.
 
 - Recorded 2026-09-30: **820/820** (`d328ab16` era, after transient-proof rewrites).
 - Alignment synthesis notes a later run showed **792/794** with 2 escrow failures — **now explained and resolved** (see §2).
