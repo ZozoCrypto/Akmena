@@ -127,3 +127,107 @@ commitment = Poseidon(nullifier,   proof = Groth16{
 5. Wrong denomination deposit reverts.
 6. Fee > denomination reverts.
 7. On-chain tree root matches circuit-computed root (Poseidon consistency).
+
+## Compliance reality (2026-09-30, source-verified)
+
+A Tornado-style single-anonymity-set pool with no exclusion mechanism is
+the design OFAC sanctioned in 2022. Both live EVM privacy systems ship an
+explicit compliance story; a plain fixed-denomination pool does not have one.
+
+- **Railgun (RAIL20)**: shielded UTXO notes, Groth16, relayer ("Broadcaster")
+  network. Compliance = **Private Proofs of Innocence (PPOI)**: every shield
+  undergoes algorithmic screening against list-provider data (hacks, exploits,
+  sanctioned addresses); flagged deposits enter an "Unshield-Only Standby
+  Period" and can only return to the deposit address. Users carry a ZK proof
+  their funds are not in the flagged set. Publicly praised by Vitalik; live
+  on Ethereum/Arbitrum/BNB/Polygon with significant TVL.
+- **Privacy Pools (0xbow)**: Groth16 fixed-denomination pools (ETH, wBTC,
+  USDC, USDT, DAI), live on Ethereum mainnet since March 2025. Compliance =
+  **Association Set Providers (ASPs)**: deposits are vetted into an
+  association set; withdrawal proves membership in BOTH the deposit tree and
+  the chosen association set ("my funds come from this vetted subset").
+  Ragequit: if your deposit leaves the set, you can withdraw to the original
+  deposit address. Dynamic sets: illicit deposits removable without
+  disturbing others.
+
+Consequence for Akmena: if privacy stays in the protocol, the minimum extra
+circuit signal is an association-set root (include known-good or exclude
+known-bad deposits) plus a public ragequit path. Without it, the pool is a
+compliance reject for any Base-ecosystem integration, grant, or facilitator
+screening -- not a differentiator. The alternative is to integrate an
+existing rail (RAIL20) rather than maintain a second anonymity set Akmena
+cannot fill (see below).
+
+## Anonymity-set honesty
+
+Fixed denominations only help once the set is large. A depth-20 tree with a
+handful of deposits is a handful of people; timing analysis narrows it
+further (published anonymity-loss research on live shielded pools confirms
+this is not theoretical). Akmena will not have Tornado-scale liquidity on
+day one. A private pool Akmena owns is mostly theater until other agents
+actually deposit the same denomination. Do not claim privacy the set cannot
+deliver; report `anonymitySetSize()` honestly and treat small sets as
+low-privacy.
+
+## Relayer visibility
+
+On-chain unlinkability is not off-chain unlinkability. Whoever submits the
+`withdraw` transaction learns `(recipient, fee)` in the clear. A single
+self-run relayer is a log. Mitigations: independent relayer market (none
+exists for this pool), or self-relay (supported: `relayer = address(0)`,
+`fee = 0`) -- which links the withdrawal to the submitter's address instead.
+There is no configuration where nobody learns the recipient; the question is
+only who.
+
+## Policy-boundary integration invariants (REQUIRED before wiring)
+
+A withdraw to an arbitrary recipient is a policy bypass unless the boundary
+owns both edges. Hazard (demonstrated in
+`test/privacy/PolicyBypassHazard.t.sol`): an agent under a daily limit
+deposits into the pool, then withdraws to a fresh address; neither edge
+consults the limit. The pool is intentionally permissionless -- that is what
+grows the anonymity set -- so enforcement must live in the integration
+adapter, never in the pool.
+
+Status of the five required invariants against the current prototype:
+
+1. Deposit `source` is the agent/smart account, never the boundary, and the
+   amount is reserved against the daily limit BEFORE the external call.
+   -> FUTURE WIRING. The pool cannot do this; the adapter must.
+2. Withdraw recipient is constrained (same agent, bound escrow `payTo`, or
+   a stealth address committed at deposit) -- enforced by the boundary as
+   the withdraw gatekeeper, NOT by binding the recipient at deposit time
+   (which would fix the recipient on-chain at deposit and destroy the
+   fresh-address property unlinkability requires). The coherent architecture
+   is: withdrawals go through `PolicyBoundary`, which checks the recipient
+   against policy, then calls `pool.withdraw`. The proof still hides WHICH
+   deposit is spent; the boundary -- the agent's own policy enforcer --
+   sees recipient and amount. Privacy holds against third parties, not
+   against your own enforcer.
+3. Failed withdraw does not burn the nullifier. -> HOLDS. Proof is verified
+   BEFORE the nullifier is marked spent (`test_FailedProofDoesNotBurnNullifier`).
+   A reverted payment likewise rolls back the marking (whole-tx revert).
+4. Pool admin cannot swap the verifier without a timelock. -> MOOT BY
+   CONSTRUCTION, stronger than required: the verifier is `immutable`, no
+   admin role exists, the ABI is deposit/withdraw/views only
+   (`test_VerifierImmutableNoAdmin`).
+5. Association-set / exclusion proof + ragequit for the compliance story
+   (see above). -> NOT IMPLEMENTED. This is the missing circuit signal.
+
+## Integration decision
+
+Do NOT wire `AkmenaPrivatePool` into Core as a live module until:
+(a) the execution-layer rewrite lands (typed payment, no `call{value}`,
+reserve-before-call, ERC-1271) -- that is the money bug and it comes first;
+(b) the policy-bound adapter is designed with invariants 1-2 as acceptance
+tests (the hazard test inverts: over-limit deposit and unapproved recipient
+MUST revert at the adapter);
+(c) a decision is made between adding the association-set circuit signal vs
+integrating RAIL20 as an external rail.
+
+Until then: v2 stays unwired, the Groth16 ceremony stays test-only (a local
+setup can be forged by whoever ran it -- never Sepolia-as-production or
+mainnet), and the honest line is: v2 fixes unlinkability INSIDE the pool.
+It does not fix policy, it does not fix a small anonymity set, and it is not
+the differentiator versus RAIL20 until deposits and withdrawals are
+policy-bound.
