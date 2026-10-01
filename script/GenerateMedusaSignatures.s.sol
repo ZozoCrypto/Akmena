@@ -6,9 +6,14 @@ import {ModelDBoundaryHandlerMedusa, MedusaFuzzAdapter} from "../test/invariant/
 import {AkmenaExecutionAuthorization} from "../src/authorization/AkmenaExecutionAuthorization.sol";
 
 /// @notice Generates pre-signed intents for the Medusa handler.
-/// @dev Run: forge script script/GenerateMedusaSignatures.s.sol -vvv
-///      This deploys the handler, generates signatures for the deployed auth,
-///      registers them, and prints the handler address for medusa.json.
+/// @dev Workflow:
+///      1. Start Anvil: `anvil`
+///      2. Run: `forge script script/GenerateMedusaSignatures.s.sol --rpc-url http://localhost:8545 --broadcast --private-key <KEY>`
+///      3. Dump state: `cast rpc anvil_dumpState --rpc-url http://localhost:8545 > medusa_genesis.json`
+///      4. Configure medusa.json with genesisStateFile and genesisContractMappings
+///      5. Run: `medusa fuzz`
+///      Medusa loads the genesis state containing the deployed handler with
+///      pre-signed intents already registered.
 contract GenerateMedusaSignatures is Script {
     uint256 internal constant AGENT1_KEY = 0xA6E171;
     uint256 internal constant AGENT2_KEY = 0xA6E172;
@@ -17,6 +22,9 @@ contract GenerateMedusaSignatures is Script {
     AkmenaExecutionAuthorization internal auth;
 
     function run() external {
+        vm.startBroadcast();
+
+        // Deploy the handler (deploys full stack in constructor).
         handler = new ModelDBoundaryHandlerMedusa();
         auth = handler.auth();
 
