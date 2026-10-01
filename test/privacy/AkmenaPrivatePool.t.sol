@@ -51,6 +51,13 @@ contract AkmenaPrivatePoolTest is Test {
         return bytes32(PoseidonT3.hash([a, b]));
     }
 
+    // NOTE (2026-09-30): The real circuit uses Poseidon(1) for nullifierHash
+    // (single input). These mock-verifier tests use poseidon2(nullifier, 0)
+    // which is a DIFFERENT hash. This is safe here because MockVerifier does
+    // not check the proof against the circuit — it just passes through.
+    // The JS e2e (test/e2e.js) uses the correct single-input Poseidon(1).
+    // Do NOT copy the poseidon2(nullifier, 0) pattern into real-proof code.
+
     // --- Tests ---
 
     function test_DepositEmitsAndIncrementsLeaf() public {
