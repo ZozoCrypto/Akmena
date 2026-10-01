@@ -110,7 +110,18 @@ contract MedusaReentrantAdapter {
 ///      The pre-signed intents cover a fixed set of (operator, agent, amount,
 ///      nonce) combinations. Medusa fuzzes token modes, governance actions,
 ///      and which pre-signed intent to execute.
+///
+///      AGENT DESIGN (ERC-1271): The boundary requires msg.sender ==
+///      intent.agent. Since the handler is the caller, the handler itself is
+///      the intent agent: intents carry intent.agent == address(this), and the
+///      handler implements ERC-1271 isValidSignature, authorizing a digest iff
+///      it was registered via registerPresigned. Spending policies are
+///      therefore namespaced (operator, handler, token) and must be set by
+///      the operators in the genesis setup phase (see MEDUSA_RUNBOOK.md).
+///      Operator ERC20 approvals to the boundary are likewise genesis state.
 contract ModelDBoundaryHandlerMedusa {
+    /// @dev ERC-1271 magic value: isValidSignature must return this.
+    bytes4 internal constant ERC1271_MAGIC = 0x1626ba7e;
     // Hardcoded addresses (computed via vm.addr in Foundry, then frozen).
     // OPERATOR1_KEY = 0x0E7A71, OPERATOR2_KEY = 0x0E7A72
     // AGENT1_KEY = 0xA6E171, AGENT2_KEY = 0xA6E172
@@ -140,6 +151,13 @@ contract ModelDBoundaryHandlerMedusa {
     uint256 public totalPulledFromOperator;
     uint256 public totalPushedToAdapter;
     uint256 public revertCount;
+    uint256 internal _lastAdapterReceived;
+    /// @dev Set once the token ever leaves honest mode: malicious modes can
+    /// legitimately change supply (rebase/mint/burn), so the supply half of
+    /// conservation is only checked on purely-honest runs.
+    bool public everNonHonestMode;
+    /// @dev Digests authorized via ERC-1271. Set at registration time.
+    mapping(bytes32 => bool) public authorizedDigest;
 
     constructor() {
 
@@ -151,35 +169,116 @@ contract ModelDBoundaryHandlerMedusa {
         adapter = new MedusaFuzzAdapter();
         reentrantAdapter = new MedusaReentrantAdapter(address(boundary));
 
-        // Fund operators, approve boundary, set policies.
-        token.mint(OPERATOR1, 1_000_000 ether);
-        token.mint(OPERATOR2, 1_000_000 ether);
+        // The handler is its own operator for self-contained fuzzing:
+        // it mints to itself, approves the boundary, and sets its own
+        // (handler, handler, token) spending policy. No external genesis
+        // setup needed — every deployment is immediately fuzzable.
+        token.mint(address(this), 2_000_000 ether);
+        token.approve(address(boundary), type(uint256).max);
+        boundary.setAgentAssetPolicy(
+            address(this), address(token), 10_000 ether, 1_000_000 ether, false
+        );
 
-        // Note: approvals must be done by the operators. In Medusa, we use
-        // a helper that the operators call via senderAddresses. For now,
-        // the handler does it via prank simulation — Medusa will call
-        // approveAsOperator.
+        // Admission + allowlist: the handler is the interim allowlistAdmin
+        // (core.deployer() == address(this)), so it configures these directly.
+        boundary.setStandardDebit(address(token), true);
+        boundary.setEconomicAdapter(address(token), address(adapter), true);
+        boundary.setEconomicAdapter(address(token), address(reentrantAdapter), true);
+
+        // Self-register pre-signed intents: the handler is its own agent
+        // (ERC-1271), so intents can be created in the constructor with
+        // agent == address(this). This makes every deployment (Medusa, forge,
+        // cast) immediately fuzzable without a separate registration step.
+        _registerBuiltinIntents();
     }
 
-    /// @notice Called by OPERATOR1/OPERATOR2 (via Medusa senderAddresses) to approve.
-    function approveAsOperator(uint256 amount) external {
-        require(msg.sender == OPERATOR1 || msg.sender == OPERATOR2, "not operator");
-        token.approve(address(boundary), amount);
+    /// @dev Registers 8 intents (4 amounts × 2 nonce sets) with the handler as
+    /// both operator and agent. Called from the constructor; the one-shot guard
+    /// is bypassed here because registration happens atomically at deployment.
+    function _registerBuiltinIntents() internal {
+        uint256[4] memory amounts = [uint256(1 ether), uint256(10 ether), uint256(100 ether), uint256(1000 ether)];
+        uint256 nonce = 0;
+        for (uint256 a = 0; a < 4; a++) {
+            bytes memory payload =
+                abi.encodeWithSelector(MedusaFuzzAdapter.execute.selector, amounts[a]);
+            AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+                AkmenaExecutionAuthorization.ExecutionIntent({
+                    operator: address(this),
+                    agent: address(this),
+                    target: address(adapter),
+                    selector: MedusaFuzzAdapter.execute.selector,
+                    calldataHash: keccak256(payload),
+                    asset: address(token),
+                    amount: amounts[a],
+                    value: 0,
+                    proofModuleKey: bytes32(0),
+                    proofId: 0,
+                    nonce: nonce,
+                    validAfter: 0,
+                    deadline: block.timestamp + 30 days
+                });
+            bytes32 digest = auth.hashIntent(intent);
+            authorizedDigest[digest] = true;
+            presignedIntents.push(
+                PresignedIntent({intent: intent, payload: payload, sig: new bytes(65)})
+            );
+            nonce++;
+        }
+        // Second set with different nonces (4 more, total 8).
+        for (uint256 a = 0; a < 4; a++) {
+            bytes memory payload =
+                abi.encodeWithSelector(MedusaFuzzAdapter.execute.selector, amounts[a]);
+            AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+                AkmenaExecutionAuthorization.ExecutionIntent({
+                    operator: address(this),
+                    agent: address(this),
+                    target: address(adapter),
+                    selector: MedusaFuzzAdapter.execute.selector,
+                    calldataHash: keccak256(payload),
+                    asset: address(token),
+                    amount: amounts[a],
+                    value: 0,
+                    proofModuleKey: bytes32(0),
+                    proofId: 0,
+                    nonce: nonce,
+                    validAfter: 0,
+                    deadline: block.timestamp + 30 days
+                });
+            bytes32 digest = auth.hashIntent(intent);
+            authorizedDigest[digest] = true;
+            presignedIntents.push(
+                PresignedIntent({intent: intent, payload: payload, sig: new bytes(65)})
+            );
+            nonce++;
+        }
+    }
+
+    /// @notice ERC-1271: the handler is the intent agent. A digest is valid
+    /// iff it was registered via registerPresigned.
+    /// @dev Test-harness simplification: authorization is by digest registry,
+    ///      not by ECDSA recovery. Production agents remain EOAs.
+    function isValidSignature(bytes32 hash, bytes calldata) external view returns (bytes4) {
+        if (authorizedDigest[hash]) return ERC1271_MAGIC;
+        return 0xffffffff;
     }
 
     /// @notice Set token malicious mode (0-7).
     function setTokenMode(uint8 m) external {
         token.setMode(m);
+        if (m != 0) everNonHonestMode = true;
     }
 
     /// @notice Execute a pre-signed intent by index.
     /// @dev Medusa fuzzes `index` to choose which intent to execute.
+    ///      The handler is the caller AND the intent agent (ERC-1271), so the
+    ///      boundary's msg.sender == intent.agent gate passes.
     function executePresigned(uint256 index) external {
         require(presignedIntents.length > 0, "no presigned intents");
         uint256 i = index % presignedIntents.length;
         PresignedIntent storage pi = presignedIntents[i];
 
         uint256 balBefore = token.balanceOf(pi.intent.operator);
+        uint256 adapterBefore = adapter.totalDeclaredReceived();
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = address(boundary).call(
@@ -193,13 +292,12 @@ contract ModelDBoundaryHandlerMedusa {
 
         if (success) {
             successfulSettlements++;
-            // Track conservation in honest mode only.
+            // Track conservation in honest mode only (delta-based: the
+            // adapter's total is cumulative, so record the per-call delta).
             if (token.mode() == 0) {
                 uint256 balAfter = token.balanceOf(pi.intent.operator);
-                // In honest mode, operator balance should decrease by exactly amount.
-                // (Ghost tracking; invariant checks this.)
                 totalPulledFromOperator += (balBefore - balAfter);
-                totalPushedToAdapter += adapter.totalDeclaredReceived();
+                totalPushedToAdapter += (adapter.totalDeclaredReceived() - adapterBefore);
             }
         } else {
             revertCount++;
@@ -239,36 +337,50 @@ contract ModelDBoundaryHandlerMedusa {
     }
 
     /// @notice Register pre-signed intents (called by generator script).
-    /// @dev Allows multiple calls to support incremental registration.
+    /// @dev One-shot: after genesis setup the fixed-intent model must not be
+    ///      distortable by the fuzzer. Later calls revert harmlessly.
+    ///      Intents MUST carry intent.agent == address(this); the digest is
+    ///      authorized for ERC-1271 at registration time.
     function registerPresigned(
         AkmenaExecutionAuthorization.ExecutionIntent[] calldata intents,
         bytes[] calldata payloads,
         bytes[] calldata sigs
     ) external {
+        require(presignedIntents.length == 0, "already registered");
         require(intents.length == payloads.length && intents.length == sigs.length, "length mismatch");
         for (uint256 i = 0; i < intents.length; i++) {
+            require(intents[i].agent == address(this), "agent must be handler");
             presignedIntents.push(PresignedIntent({
                 intent: intents[i],
                 payload: payloads[i],
                 sig: sigs[i]
             }));
+            authorizedDigest[auth.hashIntent(intents[i])] = true;
         }
     }
 
     // Invariants (Medusa calls these as properties).
     // Note: Medusa uses `invariant_` prefix or assertion testing.
 
-    /// @notice In honest mode, total pulled from operators equals total pushed to adapters.
+    /// @notice In honest mode, operator funds pulled equal adapter funds pushed.
+    /// On purely-honest runs (token never left mode 0), no tokens may be
+    /// created or destroyed: operator balances + adapter balances == minted.
+    /// @dev Non-vacuous: ghost counters are delta-tracked per settlement.
     function invariant_conservation() public view returns (bool) {
         if (token.mode() != 0) return true; // only check honest mode
-        // This is a simplified check; full conservation needs per-settlement tracking.
-        return true;
+        if (totalPulledFromOperator != totalPushedToAdapter) return false;
+        if (everNonHonestMode) return true; // supply may have moved legitimately
+        uint256 supply = token.balanceOf(address(this))
+            + token.balanceOf(address(adapter))
+            + token.balanceOf(address(reentrantAdapter))
+            + token.balanceOf(address(boundary));
+        return supply == 2_000_000 ether;
     }
 
-    /// @notice Boundary should never hold tokens in honest mode after settlement.
+    /// @notice The boundary must never retain ERC20 after settlement, in any
+    /// token mode: Model D pulls from the operator and pushes to the adapter
+    /// atomically; a non-zero boundary balance means funds got stuck.
     function invariant_boundaryClean() public view returns (bool) {
-        if (token.mode() != 0) return true;
-        // Allow dust from setup; check no large stranded balance.
-        return token.balanceOf(address(boundary)) < 1 ether;
+        return token.balanceOf(address(boundary)) == 0;
     }
 }
