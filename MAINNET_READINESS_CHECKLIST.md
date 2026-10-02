@@ -15,7 +15,7 @@
 
 | # | Item | Evidence | Exact Revision | Status | Approver |
 |---|------|----------|----------------|--------|----------|
-| T-1 | Unit test suite passes | G-2: 843 unit tests across 163 suites, 0 failures. 27 min. Log: `/tmp/g2_unit.log`. | `3c6b95f6` | COMPLETE | MUSE |
+| T-1 | Unit test suite passes | Post-GAP-1 patch: 852 unit tests across 166 suites, 0 failures. (+9: 4 gap + 2 native + 3 EIP712). | `968cc8fb` | COMPLETE | MUSE |
 | T-2 | Invariant test suite passes | G-2: 30 invariant tests across 17 suites, 0 failures. 51 min. Log: `/tmp/g2_invariant.log`. | `3c6b95f6` | COMPLETE | MUSE |
 | T-3 | G-2 full-suite baseline at current HEAD | 873/873 (843+30). Vs 868/868 baseline: +5 = MedusaSettlementProofTest (new in 4498937a). Zero failures. ~78 min total. | `3c6b95f6` | COMPLETE | MUSE |
 | T-4 | Seed sensitivity documented | R14 report notes 868/868 supersedes seed-sensitive 820/820 claim. Exact commands recorded. | `be75aa6e` | COMPLETE | MUSE |
