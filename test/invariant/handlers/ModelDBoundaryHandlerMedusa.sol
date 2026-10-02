@@ -187,8 +187,9 @@ contract ModelDBoundaryHandlerMedusa {
         // settlement fuzzing. The agent supplies msg.value from its own balance.
         // Note: In production, the agent is an EOA funding itself. Here the
         // handler is both operator and agent (ERC-1271), so it funds itself.
-        boundary.setAgentAssetPolicy(
-            address(this), address(0), 1_000 ether, 100_000 ether, false
+        // setAgentPolicy (not setAgentAssetPolicy) is the native policy entrypoint.
+        boundary.setAgentPolicy(
+            address(this), 1_000 ether, 100_000 ether, false
         );
 
         // Admission + allowlist: the handler is the interim allowlistAdmin
