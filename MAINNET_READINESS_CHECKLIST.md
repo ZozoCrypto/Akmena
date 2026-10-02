@@ -41,7 +41,7 @@
 | S-4 | Mutation testing (R10) | 20 mutants, 19 killed + 1 equivalent = 100% effective. 5 gap-fill tests added. | `85a08429`, `df849888` | COMPLETE | MUSE |
 | S-5 | Fuzzing — Foundry invariants | 25/25 pass (R14). | `27167778` | COMPLETE | MUSE |
 | S-6 | Fuzzing — Medusa (R9) | 11,114 calls, 0 failures, both security invariants pass. Harness repaired (`4498937a`). | `4498937a` | COMPLETE | MUSE |
-| S-7 | R9 coverage gaps assessed | Estimate complete: `R9_100K_ESTIMATE.md`. 100k campaign = 3-5 min, 8 workers. Recommended. Awaiting Elijah approval. Current 11k campaign: 0 failures, no demonstrated gaps. | 2026-10-01 | COMPLETE | MUSE |
+| S-7 | R9 coverage gaps assessed | **100k campaign COMPLETE:** 100,022 calls, 1,056 branches, 62 corpus, 0 failures. Both invariants pass. 26/26 tests. 4m28s. Revision `5aa7f9f3`, config `medusa_100k.json` (8 workers, seqLen 200). Log: `/tmp/medusa_100k.log`. | `5aa7f9f3` | COMPLETE | MUSE |
 | S-8 | Independent review (R15) | Package prepared (`R15_REVIEW_PACKAGE.md`). Reviewer NOT commissioned. | `3c6b95f6` | BLOCKED | ELIJAH |
 | S-9 | Known findings triaged | V-0 closed by construction. N-7 resolved (Model D pull leg). A-8 F-7/F-8 documented with mitigations. **AR-13 disposition (Elijah 2026-10-01): CONFIRMED as real risk — deployer-compromise blast radius moves from boundary pool to operator allowances. Mitigation = G-7 timelocked/multisig adapter governance (pending execution). Not safe-by-design, not a false positive.** | Various | COMPLETE | MUSE |
 

@@ -1,0 +1,75 @@
+{
+  "_comment": "R9 100k campaign. Approved 2026-10-01. Revision: 5aa7f9f3",
+  "compilation": {
+    "compileTargets": [],
+    "contractSelection": [
+      "ModelDBoundaryHandlerMedusa"
+    ],
+    "cryticArgs": [
+      "--compile-force-framework",
+      "foundry",
+      "--foundry-compile-all"
+    ],
+    "excludeTargets": [],
+    "platform": "crytic-compile",
+    "solcVersion": "",
+    "testDirectory": "test/invariant",
+    "vyperVersion": ""
+  },
+  "fuzzing": {
+    "agentAddresses": [],
+    "callSequenceLength": 200,
+    "chainConfig": {
+      "cheatCodeContracts": [],
+      "genesisStateFile": "medusa_genesis.json"
+    },
+    "corpusDirectory": "fuzz-corpus",
+    "coverageGuided": true,
+    "deployerAddress": "0x30000",
+    "excludeSenders": [],
+    "mutationFuzzer": {
+      "dictionaryWeight": 80
+    },
+    "senderAddresses": [
+      "0x8872ee96A7a73c98B0909D827C391A4d21dFcf01",
+      "0xcD8410Cd2D27B6fd23369e38C4c732544D0D0f82",
+      "0xdCfC9F66072Ba917Ac73236880bC5B5E180a24ED",
+      "0x0000000000000000000000000000000000000001",
+      "0x0000000000000000000000000000000000000002",
+      "0x0000000000000000000000000000000000000003"
+    ],
+    "targetContracts": [
+      "ModelDBoundaryHandlerMedusa"
+    ],
+    "testLimit": 100000,
+    "testing": {
+      "assertionTesting": {
+        "enabled": true,
+        "maxTests": 100,
+        "testViewMethods": false
+      },
+      "optimizationTesting": {
+        "enabled": false
+      },
+      "propertyTesting": {
+        "enabled": true,
+        "testPrefixes": [
+          "invariant_"
+        ]
+      },
+      "stopOnFailedContractMatching": false,
+      "stopOnFailedTest": true,
+      "stopOnNoTests": true,
+      "testAllContracts": false,
+      "traceAll": false
+    },
+    "timeout": 3600,
+    "workerResetLimit": 50,
+    "workers": 8
+  },
+  "logging": {
+    "level": "info",
+    "logDirectory": "logs",
+    "testLogDirectory": "logs/tests"
+  }
+}
