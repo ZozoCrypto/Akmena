@@ -123,11 +123,13 @@ contract R10MutantGapTests is Test {
     /// @dev Mutant 10 deletes the headroom check; mutant 12 deletes the enforcement.
     ///      Without these, zero-value native calls could exceed daily limits.
     function test_ZeroValueNativeRespectsDailyLimit() public {
-        // Daily limit 5 ether for zero-value native "spending" (intent.amount accounting).
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit. This test verifies the new behavior:
+        // multiple zero-value intents do NOT fill the limit.
         vm.prank(operator);
         boundary.setAgentPolicy(agent, 10 ether, 5 ether, false);
 
-        // First: 3 ether declared. headroom=5. Should succeed.
+        // First: 3 ether declared, zero value. Should succeed and NOT consume limit.
         bytes memory payload1 = abi.encodeWithSelector(R10NativeAdapter.noop.selector);
         (AkmenaExecutionAuthorization.ExecutionIntent memory intent1, bytes memory sig1) =
             _signNative(address(nativeAdapter), R10NativeAdapter.noop.selector, payload1, 3 ether, 0, 0);
@@ -135,49 +137,45 @@ contract R10MutantGapTests is Test {
         vm.prank(agent);
         boundary.executeAuthorizedAgentCall(intent1, payload1, sig1);
 
-        // Second: 3 ether declared. totalSpentToday=3, headroom=2. Should revert.
+        // Second: 3 ether declared, zero value. Should ALSO succeed (limit not consumed).
         bytes memory payload2 = abi.encodeWithSelector(R10NativeAdapter.noop.selector);
         (AkmenaExecutionAuthorization.ExecutionIntent memory intent2, bytes memory sig2) =
             _signNative(address(nativeAdapter), R10NativeAdapter.noop.selector, payload2, 3 ether, 0, 1);
 
         vm.prank(agent);
-        vm.expectRevert(AkmenaPolicyBoundary.PolicyExceeded.selector);
         boundary.executeAuthorizedAgentCall(intent2, payload2, sig2);
+
+        // Verify the daily limit was NOT consumed.
+        (,, uint256 spentToday,,) = boundary.agentPolicies(operator, agent);
+        assertEq(spentToday, 0, "GAP-1: zero-value native must not charge daily limit");
     }
 
     /// @notice Mutant 11: zero-value native headroom `-` → `*`.
-    /// @dev The mutant computes headroom as dailyLimit * totalSpentToday.
-    ///      With totalSpentToday=0, headroom=0 (false reverts).
-    ///      This test verifies correct subtraction-based headroom.
+    /// @dev GAP-1 hardening 2026-10-01: zero-value native intents no longer
+    ///      consume the daily limit, so headroom calculation is skipped.
+    ///      This test verifies the new behavior: no headroom check for zero-value.
     function test_ZeroValueNativeHeadroomCalculation() public {
         vm.prank(operator);
         boundary.setAgentPolicy(agent, 10 ether, 10 ether, false);
 
-        // With totalSpentToday=0, headroom should be 10 ether (not 0 as mutant computes).
-        // A 5 ether zero-value call should succeed.
+        // Zero-value calls should succeed regardless of "headroom" since
+        // they don't consume the limit. Even with a tiny daily limit,
+        // zero-value intents pass through.
+        vm.prank(operator);
+        boundary.setAgentPolicy(agent, 10 ether, 1 wei, false);
+
         bytes memory payload1 = abi.encodeWithSelector(R10NativeAdapter.noop.selector);
         (AkmenaExecutionAuthorization.ExecutionIntent memory intent1, bytes memory sig1) =
             _signNative(address(nativeAdapter), R10NativeAdapter.noop.selector, payload1, 5 ether, 0, 0);
 
         vm.prank(agent);
+        // Should succeed even though 5 ether > 1 wei daily limit,
+        // because zero-value native doesn't consume the limit.
         boundary.executeAuthorizedAgentCall(intent1, payload1, sig1);
 
-        // Now totalSpentToday=5. Headroom=5. A 5 ether call should succeed (boundary inclusive).
-        bytes memory payload2 = abi.encodeWithSelector(R10NativeAdapter.noop.selector);
-        (AkmenaExecutionAuthorization.ExecutionIntent memory intent2, bytes memory sig2) =
-            _signNative(address(nativeAdapter), R10NativeAdapter.noop.selector, payload2, 5 ether, 0, 1);
-
-        vm.prank(agent);
-        boundary.executeAuthorizedAgentCall(intent2, payload2, sig2);
-
-        // Now totalSpentToday=10. Headroom=0. Any positive amount should revert.
-        bytes memory payload3 = abi.encodeWithSelector(R10NativeAdapter.noop.selector);
-        (AkmenaExecutionAuthorization.ExecutionIntent memory intent3, bytes memory sig3) =
-            _signNative(address(nativeAdapter), R10NativeAdapter.noop.selector, payload3, 1 wei, 0, 2);
-
-        vm.prank(agent);
-        vm.expectRevert(AkmenaPolicyBoundary.PolicyExceeded.selector);
-        boundary.executeAuthorizedAgentCall(intent3, payload3, sig3);
+        // Verify nothing was charged.
+        (,, uint256 spentToday,,) = boundary.agentPolicies(operator, agent);
+        assertEq(spentToday, 0, "GAP-1: zero-value native must not charge daily limit");
     }
 
     /// @notice Mutant 13: deleting _verifyActiveEscrow must break escrow-enforced policies.

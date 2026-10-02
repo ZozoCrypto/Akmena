@@ -145,7 +145,10 @@ contract AttackSmartAgentReentrancyTest is Test {
 
         (,, uint256 spentToday,,) = boundary.agentPolicies(operator, address(agent));
 
-        // The nested execution is blocked, so only the outer 12 ETH execution is counted.
-        assertEq(spentToday, 12 ether, "nested reentry must not increase daily spending");
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit. The nested execution is blocked
+        // by the reentrancy guard (not by the daily limit), so spentToday
+        // remains 0.
+        assertEq(spentToday, 0, "zero-value native should not charge policy");
     }
 }

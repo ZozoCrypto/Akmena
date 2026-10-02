@@ -13,7 +13,7 @@ contract DailyResetTarget {
     uint256 public calls;
     uint256 public lastAmount;
 
-    function execute(uint256 amount) external returns (bool) {
+    function execute(uint256 amount) external payable returns (bool) {
         calls += 1;
         lastAmount = amount;
         return true;
@@ -52,6 +52,14 @@ contract AttackPolicyDailyResetTest is Test {
         view
         returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
     {
+        return _intentWithValue(amount, 0, nonce);
+    }
+
+    function _intentWithValue(uint256 amount, uint256 value, uint256 nonce)
+        internal
+        view
+        returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
+    {
         bytes memory payload = abi.encodeWithSelector(DailyResetTarget.execute.selector, amount);
 
         return AkmenaExecutionAuthorization.ExecutionIntent({
@@ -62,7 +70,7 @@ contract AttackPolicyDailyResetTest is Test {
             asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
-            value: 0,
+            value: value,
             proofModuleKey: bytes32(0),
             proofId: 0,
             nonce: nonce,
@@ -96,15 +104,23 @@ contract AttackPolicyDailyResetTest is Test {
 
         (,, uint256 spentToday,,) = boundary.agentPolicies(operator, agent);
 
-        assertEq(spentToday, 10 ether);
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit (no funds at risk).
+        assertEq(spentToday, 0);
     }
 
     function test_SpendAboveDailyLimitIsRejectedSameDay() public {
+        // GAP-1 hardening 2026-10-01: rewritten to use native WITH value.
+        // Zero-value intents no longer consume the limit, so we test the
+        // limit enforcement with real value transfers.
         uint256 firstAmount = 6 ether;
 
         uint256 secondAmount = 5 ether;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory first = _intent(firstAmount, 0);
+        // Fund the agent for value transfers
+        vm.deal(agent, 20 ether);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory first = _intentWithValue(firstAmount, firstAmount, 0);
 
         bytes memory firstPayload = abi.encodeWithSelector(DailyResetTarget.execute.selector, firstAmount);
 
@@ -112,9 +128,9 @@ contract AttackPolicyDailyResetTest is Test {
 
         vm.prank(agent);
 
-        boundary.executeAuthorizedAgentCall(first, firstPayload, firstSignature);
+        boundary.executeAuthorizedAgentCall{value: firstAmount}(first, firstPayload, firstSignature);
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory second = _intent(secondAmount, 1);
+        AkmenaExecutionAuthorization.ExecutionIntent memory second = _intentWithValue(secondAmount, secondAmount, 1);
 
         bytes memory secondPayload = abi.encodeWithSelector(DailyResetTarget.execute.selector, secondAmount);
 
@@ -124,7 +140,7 @@ contract AttackPolicyDailyResetTest is Test {
 
         vm.expectRevert(AkmenaPolicyBoundary.PolicyExceeded.selector);
 
-        boundary.executeAuthorizedAgentCall(second, secondPayload, secondSignature);
+        boundary.executeAuthorizedAgentCall{value: secondAmount}(second, secondPayload, secondSignature);
 
         assertEq(target.calls(), 1);
     }
@@ -166,7 +182,9 @@ contract AttackPolicyDailyResetTest is Test {
 
         (,, uint256 spentToday, uint256 resetTimestamp,) = boundary.agentPolicies(operator, agent);
 
-        assertEq(spentToday, 10 ether);
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit (no funds at risk).
+        assertEq(spentToday, 0);
 
         assertEq(resetTimestamp, block.timestamp);
     }

@@ -92,6 +92,14 @@ contract AttackProductionReentrancyTest is Test {
         view
         returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
     {
+        return _intentWithValue(amount, 0, nonce);
+    }
+
+    function _intentWithValue(uint256 amount, uint256 value, uint256 nonce)
+        internal
+        view
+        returns (AkmenaExecutionAuthorization.ExecutionIntent memory)
+    {
         bytes memory payload = abi.encodeWithSelector(ReentrantExecutionTarget.execute.selector);
 
         return AkmenaExecutionAuthorization.ExecutionIntent({
@@ -102,7 +110,7 @@ contract AttackProductionReentrancyTest is Test {
             asset: address(0),
             calldataHash: keccak256(payload),
             amount: amount,
-            value: 0,
+            value: value,
             proofModuleKey: bytes32(0),
             proofId: 0,
             nonce: nonce,
@@ -168,6 +176,8 @@ contract AttackProductionReentrancyTest is Test {
     }
 
     function test_SequentialAuthorizedSpendsRespectDailyPolicy() public {
+        // GAP-1 hardening 2026-10-01: rewritten to use native WITH value.
+        // Zero-value intents no longer consume the daily limit.
         // Daily policy limit is 20 ETH.
         // First execution succeeds at 12 ETH.
         // Second execution would push cumulative spend
@@ -175,7 +185,10 @@ contract AttackProductionReentrancyTest is Test {
         uint256 firstAmount = 12 ether;
         uint256 secondAmount = 9 ether;
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory first = _intent(firstAmount, 0);
+        // Fund the agent for value transfers
+        vm.deal(agent, 30 ether);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory first = _intentWithValue(firstAmount, firstAmount, 0);
 
         bytes memory payload = abi.encodeWithSelector(ReentrantExecutionTarget.execute.selector);
 
@@ -183,9 +196,9 @@ contract AttackProductionReentrancyTest is Test {
 
         vm.prank(agent);
 
-        boundary.executeAuthorizedAgentCall(first, payload, firstSignature);
+        boundary.executeAuthorizedAgentCall{value: firstAmount}(first, payload, firstSignature);
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory second = _intent(secondAmount, 1);
+        AkmenaExecutionAuthorization.ExecutionIntent memory second = _intentWithValue(secondAmount, secondAmount, 1);
 
         bytes memory secondSignature = _sign(second);
 
@@ -193,6 +206,6 @@ contract AttackProductionReentrancyTest is Test {
 
         vm.expectRevert(AkmenaPolicyBoundary.PolicyExceeded.selector);
 
-        boundary.executeAuthorizedAgentCall(second, payload, secondSignature);
+        boundary.executeAuthorizedAgentCall{value: secondAmount}(second, payload, secondSignature);
     }
 }

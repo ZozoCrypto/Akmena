@@ -93,7 +93,9 @@ contract AttackEconomicSemanticBoundaryTest is Test {
 
         (,, uint256 spentToday,,) = boundary.agentPolicies(operator, agent);
 
-        assertEq(spentToday, 1 ether);
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit (no funds at risk).
+        assertEq(spentToday, 0);
     }
 
     function test_SignedIntentCanAuthorizeCalldataWithDifferentEconomicParameter() public {
@@ -116,7 +118,9 @@ contract AttackEconomicSemanticBoundaryTest is Test {
 
         (,, uint256 spentToday,,) = boundary.agentPolicies(operator, agent);
 
-        assertEq(spentToday, 1 ether, "policy accounting should reflect signed intent amount");
+        // GAP-1 hardening 2026-10-01: zero-value native intents no longer
+        // consume the economic daily limit (no funds at risk).
+        assertEq(spentToday, 0, "zero-value native should not charge policy");
     }
 
     function test_ChangingPayloadRequiresNewAuthorization() public {
