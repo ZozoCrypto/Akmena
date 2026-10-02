@@ -24,7 +24,14 @@
 1. **Pause the protocol** (any of these):
    - Guardian calls `core.setPaused(true)` — fastest if guardian key is hot
    - Deployer calls `core.setPaused(true)` — if guardian unavailable
-   - Safe multisig calls `core.setPaused(true)` — if both above unavailable (slower)
+   - Note: Safe multisig CANNOT pause (it is neither guardian nor deployer). If both
+     guardian and deployer are unavailable, pause is not possible — escalate to P0
+     key-recovery procedure.
+
+**Pause scope:** Pausing halts `executeAuthorizedAgentCall` (new settlements). It does NOT
+halt `EscrowEngine.releaseEscrow`/`refundEscrow` — users can still recover escrowed funds
+during a pause. This is intentional: pause stops the attack vector (agent settlements)
+without trapping user funds in escrow.
 
 2. **Verify pause took effect:**
    ```bash
