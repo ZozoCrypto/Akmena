@@ -1,22 +1,23 @@
 # R15 Independent Review Package
-**Date:** 2026-10-01
+**Date:** 2026-10-02 (updated)
 **Status:** PREPARATION — reviewer not yet commissioned
 **Gate:** R15 is the final gate before mainnet deployment consideration
+**Target revision:** `c4693934` (see commit history below)
 
 ## 1. Scope and Threat Model
 
 ### In Scope
-- **AkmenaPolicyBoundary** (`src/authorization/AkmenaPolicyBoundary.sol`): ERC20 settlement via operator-retained custody (Model D). Pull-from-operator, push-to-adapter flow.
-- **AkmenaExecutionAuthorization** (`src/authorization/AkmenaExecutionAuthorization.sol`): EIP-712 intent verification, nonce management, replay protection.
-- **AkmenaCore** (`src/core/AkmenaCore.sol`): Pause guardian, module registry, deployer roles.
+- **AkmenaPolicyBoundary** (`src/authorization/AkmenaPolicyBoundary.sol`): ERC20 AND native ETH settlement via operator-retained custody (Model D). Pull-from-operator, push-to-adapter flow.
+- **AkmenaExecutionAuthorization** (`src/authorization/AkmenaExecutionAuthorization.sol`): EIP-712 v2 intent verification, nonce management, replay protection.
+- **AkmenaCore** (`src/core/AkmenaCore.sol`): Pause guardian, module registry, deployer roles (now transferable via two-step).
 - **Economic adapter interface**: Allowlist management, `setEconomicAdapter`, `setStandardDebit`.
 - **Escrow module**: `createEscrow` with real ERC20 custody (post-`8deead98` hardening).
+- **Native ETH settlement path**: IN SCOPE. GAP-1 (zero-value native DoS) was patched in `3e02c3ad`; the native path is now fuzzed via the extended Medusa handler.
 
 ### Out of Scope
-- **PrivacyEngine**: Dead on both Base chains (address `0x7e5095d10a4B71220938b816398918239981030a` returns 0x). Redeploy prepped but not executed. Frontend must not wire to it.
+- **PrivacyEngine**: Dead on both Base chains (address `0x7e5095d10a4B71220938b816398918239981030a` returns 0x). Redeploy DEFERRED per Elijah 2026-10-01. Frontend must not wire to it.
 - **Frontend**: Parked until contracts, signing, custody, governance, privacy, and deployment semantics stabilize.
-- **AkmenaGovernor/AkmenaTimelock**: Dead code, unwired. G-7 will use OZ TimelockController instead.
-- **Native ETH settlement path**: Documented but not the primary focus (Model D is ERC20-centric).
+- **AkmenaGovernor/AkmenaTimelock**: DELETED 2026-10-01 (were dead, unaudited, conflicted with G-7). G-7 uses OZ TimelockController.
 
 ### Threat Model
 **Attackers:**
@@ -45,8 +46,19 @@
 | `bdc65f90` | EconomicBalanceIncrease revert guard | Net-delta accounting hardening |
 | `8deead98` | v2.6.0-security-hardened | PrivacyEngine fix, PolicyBoundary fix, Escrow hardening |
 | `27167778` | R11: 13 symbolic properties | Halmos proofs (escrow, accounting, governance) |
-| `be75aa6e` | R14: 868/868 pass | Full regression at tested revision |
-| `4498937a` | R9: Medusa harness repair | Self-contained handler, 5/5 proof, 1043-call fuzz |
+| `3c6b95f6` | R14: 873/873 (843 unit + 30 invariant) | Full regression at tested revision |
+| `5aa7f9f3` | R9: Medusa 100k campaign | 100,022 calls, 0 failures, 26/26 pass |
+| `3e02c3ad` | **GAP-1 patch**: zero-value native DoS fix | Production: native zero-value no longer charges daily limit |
+| `968cc8fb` / `308d6ab8` | GAP-1 test updates (9 tests) | Hardened semantics |
+| `0eb929a9` | **GAP-3 hardening** + deployer transfer | Zero-amount target allowlist; two-step deployer transfer; 11 new tests |
+| `c4693934` | Medusa native path extension | Handler now fuzzes native ETH settlement (4 new intents) |
+| `HEAD` | R14: **870/870** unit, invariant re-run | Full regression at hardened revision |
+
+### Security Findings Since Last Update
+- **GAP-1** (patched `3e02c3ad`): Native zero-value intents charged `intent.amount` to daily limit without moving funds. 10 spam intents could consume full limit. **Fixed:** zero-value native no longer charges. Verified by 7-test independent suite.
+- **GAP-2** (documented): Native intents skip adapter allowlist. **Intentional:** agent supplies own ETH; boundary never holds native. NatSpec added with integrator warning.
+- **GAP-3** (patched `0eb929a9`): Zero-amount ERC20 intents could call arbitrary targets as boundary (confused deputy). **Fixed:** target must be registered proof module or allowlisted adapter. New error `UnauthorizedZeroAmountTarget`.
+- **GAP-4** (non-issue): ERC777 hooks blocked by transient reentrancy guard. Test was vacuous; underlying mechanism proven by `Attack_SmartAgentReentrancy`.
 
 ### Key Files
 - `src/authorization/AkmenaPolicyBoundary.sol`: Settlement logic, allowlist, policies
