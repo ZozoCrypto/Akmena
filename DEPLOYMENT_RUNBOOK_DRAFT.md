@@ -75,20 +75,20 @@ Deploy in order (dependencies):
 **Prerequisite:** All contracts deployed and verified. Multisig and timelock deployed.
 
 ### 3.1 Transfer Allowlist Admin (Slow Path)
-1. Deployer calls `boundary.transferAllowlistAdmin(<timelock_address>)`
+1. Deployer calls `boundary.setAllowlistAdmin(<timelock_address>)`
 2. Verify `boundary.allowlistAdmin()` == timelock address
 3. Verify deployer can NO LONGER call `setEconomicAdapter`
 
 ### 3.2 Transfer Emergency Admin (Fast Path)
-1. Deployer calls `boundary.transferEmergencyAdmin(<safe_address>)`
+1. Deployer calls `boundary.setEmergencyAdmin(<safe_address>)`
 2. Verify `boundary.emergencyAdmin()` == Safe address
-3. Verify deployer can NO LONGER call `emergencyRemoveAdapter`
+3. Verify deployer can NO LONGER call `emergencyRemoveEconomicAdapter`
 
 ### 3.3 Verify Deployer Disempowerment
 - [ ] Attempt `setEconomicAdapter` from deployer → must revert
-- [ ] Attempt `emergencyRemoveAdapter` from deployer → must revert
+- [ ] Attempt `emergencyRemoveEconomicAdapter` from deployer → must revert
 - [ ] Confirm timelock can queue `setEconomicAdapter` (via Safe proposal)
-- [ ] Confirm Safe can directly call `emergencyRemoveAdapter`
+- [ ] Confirm Safe can directly call `emergencyRemoveEconomicAdapter`
 
 ### 3.4 Emergency Drill
 **Purpose:** Validate the full governance chain works under pressure.
@@ -96,7 +96,7 @@ Deploy in order (dependencies):
 1. **Queue test:** Safe proposes a test adapter addition via timelock. Verify it queues with 24h delay.
 2. **Cancel test:** Safe cancels the queued proposal during the delay. Verify cancellation works.
 3. **Pause test:** Guardian calls `core.setPaused(true)`. Verify all settlements halt.
-4. **Remove test:** Safe calls `emergencyRemoveAdapter`. Verify immediate removal.
+4. **Remove test:** Safe calls `emergencyRemoveEconomicAdapter`. Verify immediate removal.
 5. **Unpause test:** Deployer calls `core.setPaused(false)` (or via timelock if migrated). Verify resumption.
 6. **Document:** Record all transaction hashes, block numbers, and timing.
 
@@ -110,7 +110,7 @@ Deploy in order (dependencies):
 - If a contract was deployed but configuration failed, assess whether redeployment is cleaner than repair.
 
 ### 4.2 If Governance Migration Fails
-- If `transferAllowlistAdmin` succeeds but `transferEmergencyAdmin` fails: the timelock controls adds, deployer still controls emergency removal. This is a degraded but functional state. Complete the emergency transfer before proceeding.
+- If `setAllowlistAdmin` succeeds but `setEmergencyAdmin` fails: the timelock controls adds, deployer still controls emergency removal. This is a degraded but functional state. Complete the emergency transfer before proceeding.
 - If both transfers fail: deployer retains full control. Do not proceed to mainnet. Diagnose and retry.
 
 ### 4.3 If Emergency Drill Fails

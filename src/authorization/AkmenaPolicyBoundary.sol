@@ -71,6 +71,7 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
     error EconomicAdapterNotAllowed();
     error NativeValueMismatch();
     error InsufficientOperatorAllowance();
+    error UnauthorizedZeroAmountTarget();
     /// @notice Reverted when a positive-amount ERC20 intent names an asset
     /// that has not been admitted to the Standard-Debit allowlist (§7.2).
     /// Default-deny: only explicitly admitted tokens can settle value.
@@ -378,6 +379,13 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         }
 
         bool isNative = intent.asset == address(0);
+        // GAP-2 design note (2026-10-01): native intents intentionally skip the adapter
+        // allowlist. Rationale: the agent supplies msg.value from their own wallet; the
+        // boundary forwards exactly msg.value and never holds native balance (no receive/
+        // fallback). No operator or boundary funds are at risk — economic exposure is the
+        // agent's own ETH, bounded per-tx and daily by policy. Residual risk: calls execute
+        // with msg.sender == boundary (confused deputy). Integrators MUST NOT grant authority
+        // based on msg.sender == boundary alone. See GAP-3 for the ERC20 zero-amount analogue.
         bool isEconomicAdapter = !isNative && economicAdapters[intent.asset][intent.target];
 
         if (isNative) {
@@ -527,6 +535,20 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
         bytes memory returnData;
 
         if (intent.amount == 0) {
+            // GAP-3 hardening (2026-10-01): zero-amount calls may only target
+            // registered proof modules or allowlisted adapters. This closes the
+            // confused-deputy vector where an authorized agent could invoke
+            // arbitrary contracts with the boundary as msg.sender. The stated
+            // use case (proof-context/authorization operations) is preserved:
+            // proof modules are registered via core.getModule(), and adapters
+            // via the economic adapter allowlist.
+            (address moduleAddress,,) = core.getModule(intent.proofModuleKey);
+            bool isProofModule = moduleAddress != address(0) && moduleAddress == intent.target;
+            bool isAdapter = economicAdapters[intent.asset][intent.target];
+            if (!isProofModule && !isAdapter) {
+                revert UnauthorizedZeroAmountTarget();
+            }
+
             (success, returnData) = intent.target.call(payload);
 
             if (!success) {

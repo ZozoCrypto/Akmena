@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+/// @notice DEPRECATED — NOT FOR LAUNCH.
+/// @dev This script deploys the full 20-contract v2 suite including PrivacyEngine (which is
+/// formally DEFERRED per Elijah 2026-10-01) and other modules outside the launch scope.
+/// For the actual launch, use script/DeployCoreArchitecture.s.sol which deploys exactly:
+/// AkmenaCore + AkmenaPolicyBoundary (+ AkmenaExecutionAuthorization) + EscrowEngine (+ AkmenaToken).
+/// This file is retained for historical reference only. DO NOT USE for mainnet deployment.
+
 import {Script, console} from "forge-std/Script.sol";
 
 import {AkmenaCore} from "../src/core/AkmenaCore.sol";

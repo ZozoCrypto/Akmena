@@ -9,15 +9,23 @@ import {LibStorage} from "../storage/LibStorage.sol";
 contract AkmenaCore {
     string public constant PROTOCOL_VERSION = "2.0.0";
 
-    address public immutable deployer;
+    /// @notice Protocol deployer with privileged powers (pause/unpause, guardian rotation, module registry).
+    /// @dev Transferable via the two-step propose/accept pattern. After the G-7 migration,
+    /// this should be transferred to the timelock or a cold multisig. Until then, treat the
+    /// deployer key as a permanent cold-storage privileged key — it can never be nullified,
+    /// only transferred.
+    address public deployer;
+
+    /// @notice Pending deployer transfer (proposed by current deployer, accepted by proposed).
+    address public pendingDeployer;
 
     bool private paused;
 
     /// @notice Pause guardian (spec §7.1).
     /// @dev Narrowly scoped: may pause execution immediately (containment is
-    /// fail-closed) but may NEVER unpause. Unpause is deployer-only (which
-    /// becomes the timelock after the G-7 migration). Set to address(0) to
-    /// disable the guardian role.
+    /// fail-closed) but may NEVER unpause. Unpause is deployer-only. After the G-7
+    /// migration, the deployer role itself can be transferred to the timelock via
+    /// proposeDeployer/acceptDeployer. Set to address(0) to disable the guardian role.
     address public pauseGuardian;
 
     event ModuleRegistered(bytes32 indexed moduleKey, address indexed moduleAddress, string version);
@@ -29,9 +37,17 @@ contract AkmenaCore {
     /// @notice Emitted when the pause guardian changes.
     event PauseGuardianUpdated(address indexed guardian);
 
+    /// @notice Emitted when a deployer transfer is proposed.
+    event DeployerTransferProposed(address indexed currentDeployer, address indexed proposedDeployer);
+
+    /// @notice Emitted when a deployer transfer is accepted.
+    event DeployerTransferred(address indexed oldDeployer, address indexed newDeployer);
+
     error UnauthorizedAccess();
     error InvalidModuleAddress();
     error ModuleAlreadyRegistered();
+    error InvalidDeployer();
+    error NoPendingTransfer();
 
     modifier onlyDeployer() {
         if (msg.sender != deployer) {
@@ -42,6 +58,38 @@ contract AkmenaCore {
 
     constructor() {
         deployer = msg.sender;
+    }
+
+    /// @notice Propose a new deployer. The proposed address must call acceptDeployer() to complete.
+    /// @dev Two-step pattern prevents fat-finger loss of the privileged role. Only the current
+    /// deployer can propose. Proposing address(0) is rejected.
+    function proposeDeployer(address newDeployer) external onlyDeployer {
+        if (newDeployer == address(0)) {
+            revert InvalidDeployer();
+        }
+        pendingDeployer = newDeployer;
+        emit DeployerTransferProposed(deployer, newDeployer);
+    }
+
+    /// @notice Accept a pending deployer transfer. Only the proposed address can call.
+    /// @dev Completing the transfer clears pendingDeployer. The old deployer loses all powers immediately.
+    function acceptDeployer() external {
+        if (pendingDeployer == address(0)) {
+            revert NoPendingTransfer();
+        }
+        if (msg.sender != pendingDeployer) {
+            revert UnauthorizedAccess();
+        }
+        address oldDeployer = deployer;
+        deployer = pendingDeployer;
+        pendingDeployer = address(0);
+        emit DeployerTransferred(oldDeployer, deployer);
+    }
+
+    /// @notice Cancel a pending deployer transfer. Only the current deployer can cancel.
+    function cancelDeployerTransfer() external onlyDeployer {
+        pendingDeployer = address(0);
+        emit DeployerTransferProposed(deployer, address(0));
     }
 
     function registerModule(bytes32 key, address moduleAddress, string calldata version) external onlyDeployer {

@@ -28,7 +28,7 @@
 
 2. **Verify pause took effect:**
    ```bash
-   cast call <core_address> "paused()" --rpc-url <RPC>
+   cast call <core_address> "isPaused()(bool)" --rpc-url <RPC>
    # Must return: true
    ```
 
@@ -51,7 +51,7 @@
 ### 2.3 Remediation
 
 1. **Remove the malicious adapter:**
-   - Safe calls `boundary.emergencyRemoveAdapter(asset, adapter)` — immediate, no timelock
+   - Safe calls `boundary.emergencyRemoveEconomicAdapter(asset, adapter)` — immediate, no timelock
 
 2. **Notify operators:**
    - Broadcast: revoke allowances to the malicious adapter

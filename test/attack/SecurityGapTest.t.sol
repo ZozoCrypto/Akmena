@@ -134,43 +134,37 @@ contract SecurityGapTest is Test {
         return abi.encodePacked(r, s, v);
     }
 
-    /// @notice GAP-1: Authorized agent spams zero-value intents to fill daily limit.
-    /// @dev The policy is charged intent.amount even when amount == 0 and no funds move.
-    /// This test documents the DoS vector. The operator's mitigation is policy revocation.
+    /// @notice GAP-1 (ERC20 leg): Zero-amount ERC20 intents never charge the daily limit.
+    /// @dev HARDENED: This test now asserts the correct behavior with the proper struct field.
+    /// (TQ-1 fix: was reading lastResetTimestamp as totalSpentToday.)
     function test_GAP1_ZeroValueIntentFillsDailyLimit() public {
-        // Daily limit is 1000 ether. Spam 10 zero-value intents of 100 ether each.
+        // Daily limit is 1000 ether. Submit 10 zero-value intents.
         for (uint256 i = 0; i < 10; i++) {
             bytes memory payload = abi.encodeWithSelector(GapMockAdapter.execute.selector, 0);
             // Zero-amount intent to allowlisted adapter
             AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(
                 address(adapter), payload, GapMockAdapter.execute.selector, 0, i, address(token)
             );
-            // Note: amount is 0, but we need to check if policy is charged.
-            // Actually for ERC20 zero-amount, the policy charge happens in _settleERC20.
-            // Let me use a different approach - check the actual behavior.
             bytes memory sig = _sign(intent);
             vm.prank(agent);
-            // This should succeed (zero-amount calls are allowed)
             boundary.executeAuthorizedAgentCall(intent, payload, sig);
         }
 
-        // Check how much was charged to the daily limit
-        (,,, uint256 totalSpentToday,) = boundary.agentAssetPolicies(operator, agent, address(token));
-        emit log_named_uint("GAP-1: totalSpentToday after 10 zero-value intents", totalSpentToday);
+        // Check how much was charged to the daily limit (TQ-1: correct field index 2)
+        (,, uint256 totalSpentToday,,) = boundary.agentAssetPolicies(operator, agent, address(token));
+        assertEq(totalSpentToday, 0, "Zero-amount intents must not charge the daily limit");
 
-        // Now try a legitimate 100 ether settlement - should it be blocked?
+        // Legitimate settlement should succeed (limit not consumed by spam)
         bytes memory legitPayload = abi.encodeWithSelector(GapMockAdapter.execute.selector, 100 ether);
         AkmenaExecutionAuthorization.ExecutionIntent memory legitIntent = _intent(
             address(adapter), legitPayload, GapMockAdapter.execute.selector, 100 ether, 10, address(token)
         );
         bytes memory legitSig = _sign(legitIntent);
         vm.prank(agent);
-        // If GAP-1 is real, this reverts with PolicyExceeded because daily limit is filled
-        try boundary.executeAuthorizedAgentCall(legitIntent, legitPayload, legitSig) {
-            emit log("GAP-1: Legitimate settlement SUCCEEDED (zero-value intents did not fill limit)");
-        } catch {
-            emit log("GAP-1: Legitimate settlement BLOCKED (zero-value intents filled daily limit - DoS confirmed)");
-        }
+        boundary.executeAuthorizedAgentCall(legitIntent, legitPayload, legitSig);
+        // Verify the legitimate settlement was charged
+        (,, uint256 spentAfter,,) = boundary.agentAssetPolicies(operator, agent, address(token));
+        assertEq(spentAfter, 100 ether, "Legitimate settlement should charge exactly 100 ether");
     }
 
     /// @notice GAP-2: Native intent to non-allowlisted target.
@@ -213,11 +207,12 @@ contract SecurityGapTest is Test {
     }
 
     /// @notice GAP-3: Zero-amount ERC20 intent to non-allowlisted target.
-    /// @dev Documents the allowlist bypass for zero-amount calls.
+    /// @dev HARDENED (2026-10-01): Zero-amount calls now revert unless the target is a
+    /// registered proof module or allowlisted adapter. This closes the confused-deputy vector.
     function test_GAP3_ZeroAmountBypassesAllowlist() public {
         bytes memory payload = abi.encodeWithSelector(GapCallRecorder.record.selector);
 
-        // Zero-amount ERC20 intent to non-allowlisted target
+        // Zero-amount ERC20 intent to non-allowlisted, non-module target
         AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(
             address(recorder),
             payload,
@@ -229,13 +224,35 @@ contract SecurityGapTest is Test {
 
         bytes memory sig = _sign(intent);
         vm.prank(agent);
-        try boundary.executeAuthorizedAgentCall(intent, payload, sig) {
-            emit log("GAP-3: Zero-amount intent to non-allowlisted target SUCCEEDED");
-            assertEq(recorder.callCount(), 1, "Recorder should have been called");
-            assertEq(recorder.lastCaller(), address(boundary), "Caller should be boundary (confused deputy risk)");
-        } catch {
-            emit log("GAP-3: Zero-amount intent to non-allowlisted target REVERTED");
-        }
+        // HARDENED: must revert — target is neither a registered proof module nor an adapter
+        vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedZeroAmountTarget.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+    }
+
+    /// @notice GAP-3 positive: Zero-amount intent to a registered proof module succeeds.
+    /// @dev Preserves the stated use case (proof-context/authorization operations).
+    function test_GAP3_ZeroAmountToProofModuleSucceeds() public {
+        bytes32 moduleKey = keccak256("gap3.proof.module");
+        core.registerModule(moduleKey, address(recorder), "1.0.0");
+
+        bytes memory payload = abi.encodeWithSelector(GapCallRecorder.record.selector);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(
+            address(recorder),
+            payload,
+            GapCallRecorder.record.selector,
+            0, // zero amount
+            201,
+            address(token)
+        );
+        // Set the proof module key to match the registered module
+        intent.proofModuleKey = moduleKey;
+
+        bytes memory sig = _sign(intent);
+        vm.prank(agent);
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+        assertEq(recorder.callCount(), 1, "Recorder (as proof module) should have been called");
+        assertEq(recorder.lastCaller(), address(boundary), "Caller should be boundary");
     }
 
     /// @notice GAP-4: ERC777-style hook behavior.

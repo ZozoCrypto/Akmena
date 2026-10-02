@@ -137,9 +137,9 @@ emergencyAdmin = core.deployer();
 
 ### Migration sequence:
 1. Deploy Safe (3-of-5) with designated holders.
-2. Deploy OZ TimelockController (48h delay) with Safe as proposer/executor.
-3. Deployer calls `transferAllowlistAdmin(timelockAddress)`.
-4. Deployer calls `transferEmergencyAdmin(safeAddress)`.
+2. Deploy OZ TimelockController (24h delay) with Safe as proposer/executor.
+3. Deployer calls `setAllowlistAdmin(timelockAddress)`.
+4. Deployer calls `setEmergencyAdmin(safeAddress)`.
 5. Deployer calls `setPauseGuardian(guardianKey)`.
 6. Verify: deployer can no longer add/remove adapters or pause.
 7. Document the incident-response runbook.
@@ -147,7 +147,7 @@ emergencyAdmin = core.deployer();
 ## 8. Assumptions
 
 - **ASSUMPTION:** Elijah will designate the additional 4 multisig key holders. Their identities and key security practices are outside the scope of this brief.
-- **ASSUMPTION:** The 48-hour timelock delay is acceptable for the protocol's operational needs. If faster adapter rotation is required, consider 24h.
+- **ASSUMPTION:** The 24-hour timelock delay is acceptable for the protocol's operational needs. 
 - **ASSUMPTION:** The pause guardian key will be held securely (hardware wallet or equivalent). Compromise of the guardian key allows only pausing (denial of service), not fund theft.
 - **ASSUMPTION:** Operators monitor the `EconomicAdapterUpdated` event and will revoke allowances if a malicious adapter is queued during the timelock delay. This is an off-chain social assumption, not enforced on-chain.
 - **NOT-ASSESSED:** The specific Safe deployment parameters (nonce, version, network). These are operational details for the deployment ceremony.
@@ -155,7 +155,7 @@ emergencyAdmin = core.deployer();
 
 ## Decisions Required from Elijah
 
-1. **Timelock:** Approve OZ TimelockController with 48h delay? (Or choose alternative)
+1. **Timelock:** Approve OZ TimelockController with 24h delay? (Or choose alternative)
 2. **Multisig:** Approve Safe 3-of-5? Designate the 4 additional key holders.
 3. **Pause guardian:** Approve separate operational key? Designate the holder.
 4. **Timeline:** When should the migration ceremony occur? (Pre-mainnet, obviously, but specific date?)
