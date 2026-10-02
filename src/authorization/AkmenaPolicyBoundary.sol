@@ -542,8 +542,10 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
             // use case (proof-context/authorization operations) is preserved:
             // proof modules are registered via core.getModule(), and adapters
             // via the economic adapter allowlist.
-            (address moduleAddress,,) = core.getModule(intent.proofModuleKey);
-            bool isProofModule = moduleAddress != address(0) && moduleAddress == intent.target;
+            // 2026-10-02: require the proof module be ENABLED, not merely
+            // registered. A disabled module must not receive zero-amount calls.
+            (address moduleAddress, bool moduleEnabled,) = core.getModule(intent.proofModuleKey);
+            bool isProofModule = moduleEnabled && moduleAddress != address(0) && moduleAddress == intent.target;
             bool isAdapter = economicAdapters[intent.asset][intent.target];
             if (!isProofModule && !isAdapter) {
                 revert UnauthorizedZeroAmountTarget();

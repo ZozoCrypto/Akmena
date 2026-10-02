@@ -255,6 +255,34 @@ contract SecurityGapTest is Test {
         assertEq(recorder.lastCaller(), address(boundary), "Caller should be boundary");
     }
 
+    /// @notice GAP-3 hardening: Zero-amount intent to a DISABLED proof module reverts.
+    /// @dev 2026-10-02: The isEnabled flag is now enforced. A registered-but-disabled
+    /// module must not receive zero-amount calls as the boundary.
+    function test_GAP3_ZeroAmountToDisabledModuleReverts() public {
+        bytes32 moduleKey = keccak256("gap3.disabled.module");
+        core.registerModule(moduleKey, address(recorder), "1.0.0");
+        // Disable the module
+        core.setModuleStatus(moduleKey, false);
+
+        bytes memory payload = abi.encodeWithSelector(GapCallRecorder.record.selector);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(
+            address(recorder),
+            payload,
+            GapCallRecorder.record.selector,
+            0, // zero amount
+            202,
+            address(token)
+        );
+        intent.proofModuleKey = moduleKey;
+
+        bytes memory sig = _sign(intent);
+        vm.prank(agent);
+        vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedZeroAmountTarget.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, sig);
+        assertEq(recorder.callCount(), 0, "Disabled module must not have been called");
+    }
+
     /// @notice GAP-4: ERC777-style hook behavior.
     /// @dev Verifies that token hooks cannot reenter the boundary.
     function test_GAP4_ERC777HookCannotReenter() public {
