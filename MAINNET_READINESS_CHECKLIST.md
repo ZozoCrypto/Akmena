@@ -15,9 +15,9 @@
 
 | # | Item | Evidence | Exact Revision | Status | Approver |
 |---|------|----------|----------------|--------|----------|
-| T-1 | Unit test suite passes | R14: 843 unit tests across 163 suites, 0 failures. Log: `/tmp/g2_unit.log` (in progress — G-2 re-run) | `27167778` (reported in `be75aa6e`) | BLOCKED | MUSE |
-| T-2 | Invariant test suite passes | R14: 25 invariant tests across 16 suites, 0 failures | `27167778` (reported in `be75aa6e`) | BLOCKED | MUSE |
-| T-3 | G-2 full-suite baseline at current HEAD | Subagent running full suite at `3c6b95f6`. Results pending. | `3c6b95f6` | BLOCKED | MUSE |
+| T-1 | Unit test suite passes | G-2: 843 unit tests across 163 suites, 0 failures. 27 min. Log: `/tmp/g2_unit.log`. | `3c6b95f6` | COMPLETE | MUSE |
+| T-2 | Invariant test suite passes | G-2: 30 invariant tests across 17 suites, 0 failures. 51 min. Log: `/tmp/g2_invariant.log`. | `3c6b95f6` | COMPLETE | MUSE |
+| T-3 | G-2 full-suite baseline at current HEAD | 873/873 (843+30). Vs 868/868 baseline: +5 = MedusaSettlementProofTest (new in 4498937a). Zero failures. ~78 min total. | `3c6b95f6` | COMPLETE | MUSE |
 | T-4 | Seed sensitivity documented | R14 report notes 868/868 supersedes seed-sensitive 820/820 claim. Exact commands recorded. | `be75aa6e` | COMPLETE | MUSE |
 | T-5 | Integration tests (cross-module) | Phase 3 adversarial settlement tests: AR-3, AR-4, AR-5 pass. SettlementInvariant 2/2, EconomicLayerInvariant 1/1. | `00428402` lineage | COMPLETE | MUSE |
 | T-6 | Manual testing | Not conducted as a distinct phase. Adversarial manual PoCs exist (V-0, A-8 battery, gross-outflow). | — | NOT-ASSESSED | ELIJAH |
