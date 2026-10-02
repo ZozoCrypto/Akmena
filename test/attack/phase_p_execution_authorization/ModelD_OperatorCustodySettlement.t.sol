@@ -207,16 +207,34 @@ contract ModelDOperatorCustodySettlementTest is Test {
     }
 
     function test_ZeroAmount_GenericCallNoCharge() public {
-        // Zero-amount call to a non-allowlisted target: generic-call path.
+        // GAP-3 HARDENED (2026-10-01): Zero-amount call to a non-allowlisted,
+        // non-module target now reverts with UnauthorizedZeroAmountTarget.
+        // This closes the confused-deputy vector.
         ModelDMockAdapter plainTarget = new ModelDMockAdapter();
         bytes memory payload = abi.encodeWithSelector(ModelDMockAdapter.execute.selector, 0);
         AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(address(plainTarget), payload, 0, 0);
 
         bytes memory signature = _sign(intent);
         vm.prank(agent);
+        vm.expectRevert(AkmenaPolicyBoundary.UnauthorizedZeroAmountTarget.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
+    }
+
+    function test_ZeroAmount_ToProofModuleSucceedsNoCharge() public {
+        // GAP-3: Zero-amount call to a registered proof module succeeds (preserves use case).
+        ModelDMockAdapter moduleTarget = new ModelDMockAdapter();
+        bytes32 moduleKey = keccak256("test.proof.module");
+        core.registerModule(moduleKey, address(moduleTarget), "1.0.0");
+
+        bytes memory payload = abi.encodeWithSelector(ModelDMockAdapter.execute.selector, 0);
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(address(moduleTarget), payload, 0, 1);
+        intent.proofModuleKey = moduleKey;
+
+        bytes memory signature = _sign(intent);
+        vm.prank(agent);
         boundary.executeAuthorizedAgentCall(intent, payload, signature);
 
-        assertEq(plainTarget.calls(), 1);
+        assertEq(moduleTarget.calls(), 1);
         assertEq(_spentToday(), 0);
         assertEq(token.balanceOf(address(boundary)), 0);
     }
