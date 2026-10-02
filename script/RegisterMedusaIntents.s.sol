@@ -19,7 +19,7 @@ import {AkmenaExecutionAuthorization} from "../src/authorization/AkmenaExecution
 ///      registration time. Signatures are dummy bytes (test-harness only).
 contract RegisterMedusaIntents is Script {
     function run(address handlerAddr) external {
-        ModelDBoundaryHandlerMedusa handler = ModelDBoundaryHandlerMedusa(handlerAddr);
+        ModelDBoundaryHandlerMedusa handler = ModelDBoundaryHandlerMedusa(payable(handlerAddr));
 
         // Collect all intents first: registerPresigned is one-shot.
         uint256 total = 8; // 2 operators x 4 amounts
