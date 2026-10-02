@@ -24,7 +24,7 @@
     "escrowModuleVersion": "2.1.0",
     "eip712": {
       "name": "AkmenaExecutionAuthorization",
-      "version": "1",
+      "version": "2",
       "chainId": 84532,
       "verifyingContract": "0x12e1dC708c5A37ee4e45B550E9318966c3C5Eb34"
     }

@@ -188,9 +188,9 @@ See `G7_GOVERNANCE_BRIEF.md` for the full governance design.
 
 | Contract | Address |
 |----------|---------|
-| AkmenaPolicyBoundary (legacy) | `0xdC3fC3e840b14Ce345638549D0d4617b75cD89b9` |
+| AkmenaPolicyBoundary (legacy) | `0xdC3fC3e840b14Ce345638549D0d4617b75cD89b9` ⚠️ **DEPRECATED** |
 
-> **Note:** The legacy Sepolia deployment predates the current architecture. Fresh deployment addresses will be published in `deployments/` after the G-7 governance migration.
+> **Note:** The legacy Sepolia deployment is **DEPRECATED** per Elijah 2026-10-02 (Decision G-5: ABANDON). Do not use for new tests. Fresh deployment addresses will be published in `deployments/` after the G-7 governance migration.
 
 ### Base Mainnet
 
