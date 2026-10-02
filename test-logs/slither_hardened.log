@@ -1,0 +1,691 @@
+
+Detector: arbitrary-send-erc20
+AkmenaPolicyBoundary._settleERC20(AkmenaExecutionAuthorization.ExecutionIntent,bytes,AkmenaPolicyBoundary.SpendingPolicy) (src/authorization/AkmenaPolicyBoundary.sol#529-611) uses arbitrary from in transferFrom: IERC20(intent.asset).safeTransferFrom(intent.operator,address(this),intent.amount) (src/authorization/AkmenaPolicyBoundary.sol#588)
+EscrowEngine._createEscrow(address,address,address,uint256,bytes32) (src/economics/EscrowEngine.sol#89-151) uses arbitrary from in transferFrom: escrowAsset.safeTransferFrom(buyer,address(this),amount) (src/economics/EscrowEngine.sol#118)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
+
+Detector: arbitrary-send-eth
+PrivacyEngine.executePrivateSettlement(bytes32,bytes32,uint256,address) (src/privacy/PrivacyEngine.sol#29-60) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = stealthRecipient.call{value: amount}() (src/privacy/PrivacyEngine.sol#56)
+AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256) (src/privacy/v2/AkmenaPrivatePool.sol#190-230) sends eth to arbitrary user
+	Dangerous calls:
+	- (okR,None) = _recipient.call{value: recipientAmount}() (src/privacy/v2/AkmenaPrivatePool.sol#223)
+	- (okF,None) = _relayer.call{value: _fee}() (src/privacy/v2/AkmenaPrivatePool.sol#227)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+
+Detector: incorrect-exp
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) has bitwise-xor operator ^ instead of the exponentiation operator **: 
+	 - inverse = (3 * denominator) ^ 2 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#259)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-exponentiation
+
+Detector: incorrect-return
+AkmenaPrivatePool.deposit(bytes32) (src/privacy/v2/AkmenaPrivatePool.sol#132-140) calls AkmenaPrivatePool._insert(bytes32,uint32) (src/privacy/v2/AkmenaPrivatePool.sol#143-164) which halt the execution return(uint256,uint256)(0,0x20) (src/privacy/v2/PoseidonT3.sol#388)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-return-in-assembly
+
+Detector: divide-before-multiply
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse = (3 * denominator) ^ 2 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#259)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#263)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#264)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#265)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#266)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#267)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#244)
+	- inverse *= 2 - denominator * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#268)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) performs a multiplication on the result of a division:
+	- low = low / twos (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#247)
+	- result = low * inverse (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#274)
+Math.invMod(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#317-363) performs a multiplication on the result of a division:
+	- quotient = gcd / remainder (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#339)
+	- (gcd,remainder) = (remainder,gcd - remainder * quotient) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#341-348)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+
+Detector: incorrect-equality
+AgentAvailabilityEngine.isAvailable(bytes32) (src/availability/AgentAvailabilityEngine.sol#19-21) uses a dangerous strict equality:
+	- availability[agentId].status == Availability.Available (src/availability/AgentAvailabilityEngine.sol#20)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Detector: reentrancy-no-eth
+Reentrancy in AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256) (src/privacy/v2/AkmenaPrivatePool.sol#190-230):
+	External calls:
+	- ! VERIFIER.verifyProof(_pA,_pB,_pC,pubSignals) (src/privacy/v2/AkmenaPrivatePool.sol#214)
+	State variables written after the call(s):
+	- nullifierHashes[_nullifierHash] = true (src/privacy/v2/AkmenaPrivatePool.sol#216)
+	AkmenaPrivatePool.nullifierHashes (src/privacy/v2/AkmenaPrivatePool.sol#82) can be used in cross function reentrancies:
+	- AkmenaPrivatePool.nullifierHashes (src/privacy/v2/AkmenaPrivatePool.sol#82)
+	- AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256) (src/privacy/v2/AkmenaPrivatePool.sol#190-230)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+
+Detector: unused-return
+SignatureChecker.isValidSignatureNow(address,bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#32-39) ignores return value by (recovered,err,None) = ECDSA.tryRecover(hash,signature) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#34)
+SignatureChecker.isValidSignatureNowCalldata(address,bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#44-55) ignores return value by (recovered,err,None) = ECDSA.tryRecoverCalldata(hash,signature) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#50)
+AkmenaPolicyBoundary._verifyActiveEscrow(AkmenaPolicyBoundary.SpendingPolicy,AkmenaExecutionAuthorization.ExecutionIntent,address) (src/authorization/AkmenaPolicyBoundary.sol#311-330) ignores return value by (moduleAddr,active,None) = core.getModule(intent.proofModuleKey) (src/authorization/AkmenaPolicyBoundary.sol#320)
+AkmenaPolicyBoundary.executeAuthorizedAgentCall(AkmenaExecutionAuthorization.ExecutionIntent,bytes,bytes) (src/authorization/AkmenaPolicyBoundary.sol#354-516) ignores return value by executionAuthorization.verifyAndConsume(intent,payload,msg.value,signature) (src/authorization/AkmenaPolicyBoundary.sol#484)
+AkmenaPolicyBoundary._settleERC20(AkmenaExecutionAuthorization.ExecutionIntent,bytes,AkmenaPolicyBoundary.SpendingPolicy) (src/authorization/AkmenaPolicyBoundary.sol#529-611) ignores return value by (moduleAddress,None,None) = core.getModule(intent.proofModuleKey) (src/authorization/AkmenaPolicyBoundary.sol#545)
+DelegationEngine._validateIdentity(address) (src/authorization/DelegationEngine.sol#125-132) ignores return value by IIdentity(identity).identityId() (src/authorization/DelegationEngine.sol#131)
+WorkflowEngine._getModuleAddress(bytes32) (src/orchestration/WorkflowEngine.sol#142-150) ignores return value by (moduleAddr,isEnabled,None) = IAkmenaCoreRegistry(akmenaCore).getModule(key) (src/orchestration/WorkflowEngine.sol#143)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+Detector: shadowing-local
+ERC20Permit.constructor(string).name (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#39) shadows:
+	- ERC20.name() (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#52-54) (function)
+	- IERC20Metadata.name() (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#15) (function)
+IRegistry.identityAddress(uint256).identityId (src/registry/IRegistry.sol#56) shadows:
+	- IRegistry.identityId(address) (src/registry/IRegistry.sol#58) (function)
+IRegistry.exists(uint256).identityId (src/registry/IRegistry.sol#60) shadows:
+	- IRegistry.identityId(address) (src/registry/IRegistry.sol#58) (function)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#local-variable-shadowing
+
+Detector: missing-zero-check
+AkmenaCore.setPauseGuardian(address).guardian_ (src/core/AkmenaCore.sol#146) lacks a zero-check on :
+		- pauseGuardian = guardian_ (src/core/AkmenaCore.sol#147)
+IdentityClone.initialize(uint256,IIdentity.IdentityType,address).owner_ (src/identity/IdentityClone.sol#19) lacks a zero-check on :
+		- _owner = owner_ (src/identity/IdentityClone.sol#24)
+AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._recipient (src/privacy/v2/AkmenaPrivatePool.sol#196) lacks a zero-check on :
+		- (okR,None) = _recipient.call{value: recipientAmount}() (src/privacy/v2/AkmenaPrivatePool.sol#223)
+AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._relayer (src/privacy/v2/AkmenaPrivatePool.sol#197) lacks a zero-check on :
+		- (okF,None) = _relayer.call{value: _fee}() (src/privacy/v2/AkmenaPrivatePool.sol#227)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+Detector: reentrancy-events
+Reentrancy in IdentityFactory.createIdentity(IIdentity.IdentityType,string) (src/identity/IdentityFactory.sol#42-61):
+	External calls:
+	- newId = registry.allocateIdentityId() (src/identity/IdentityFactory.sol#48)
+	- IIdentityImplementation(clone).initialize(newId,msg.sender,identityType,metadataURI) (src/identity/IdentityFactory.sol#54)
+	- registry.registerIdentity(clone) (src/identity/IdentityFactory.sol#57)
+	Event emitted after the call(s):
+	- IdentityCreated(clone,newId,identityType) (src/identity/IdentityFactory.sol#59)
+Reentrancy in AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256) (src/privacy/v2/AkmenaPrivatePool.sol#190-230):
+	External calls:
+	- ! VERIFIER.verifyProof(_pA,_pB,_pC,pubSignals) (src/privacy/v2/AkmenaPrivatePool.sol#214)
+	Event emitted after the call(s):
+	- Withdrawal(_recipient,_nullifierHash,_relayer,_fee) (src/privacy/v2/AkmenaPrivatePool.sol#218)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+
+Detector: timestamp
+ERC20Permit.permit(address,address,uint256,uint256,uint8,bytes32,bytes32) (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#42-65) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > deadline (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#51)
+AgentAnalyticsEngine.hasAnalytics(bytes32) (src/analytics/AgentAnalyticsEngine.sol#32-34) uses timestamp for comparisons
+	Dangerous comparisons:
+	- analytics[agentId].updatedAt > 0 (src/analytics/AgentAnalyticsEngine.sol#33)
+AkmenaExecutionAuthorization.verifyAndConsume(AkmenaExecutionAuthorization.ExecutionIntent,bytes,uint256,bytes) (src/authorization/AkmenaExecutionAuthorization.sol#101-164) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < intent.validAfter (src/authorization/AkmenaExecutionAuthorization.sol#117)
+	- block.timestamp > intent.deadline (src/authorization/AkmenaExecutionAuthorization.sol#123)
+AkmenaPolicyBoundary.executeAuthorizedAgentCall(AkmenaExecutionAuthorization.ExecutionIntent,bytes,bytes) (src/authorization/AkmenaPolicyBoundary.sol#354-516) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > policy.lastResetTimestamp + 86400 (src/authorization/AkmenaPolicyBoundary.sol#456)
+AttestationEngine.recordAttestationTyped(address,address,bytes32,uint256,bytes) (src/authorization/AttestationEngine.sol#29-54) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp <= deadline,Signature expired) (src/authorization/AttestationEngine.sol#40)
+DelegationEngine.setDelegate(address,address,bytes32,uint256,bool) (src/authorization/DelegationEngine.sol#29-62) uses timestamp for comparisons
+	Dangerous comparisons:
+	- deadline <= block.timestamp (src/authorization/DelegationEngine.sol#46)
+DelegationEngine.setDelegateTyped(address,address,bytes32,uint256,bool,bytes) (src/authorization/DelegationEngine.sol#66-109) uses timestamp for comparisons
+	Dangerous comparisons:
+	- status && deadline <= block.timestamp (src/authorization/DelegationEngine.sol#80)
+DelegationEngine.isDelegate(address,address,bytes32) (src/authorization/DelegationEngine.sol#111-123) uses timestamp for comparisons
+	Dangerous comparisons:
+	- deadline > block.timestamp && deadline != 0 (src/authorization/DelegationEngine.sol#122)
+AgreementEngine.executeAgreement(bytes32) (src/autonomous/AgreementEngine.sol#28-41) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > agreementData.validUntil (src/autonomous/AgreementEngine.sol#35)
+AgentAvailabilityEngine.isAvailable(bytes32) (src/availability/AgentAvailabilityEngine.sol#19-21) uses timestamp for comparisons
+	Dangerous comparisons:
+	- availability[agentId].status == Availability.Available (src/availability/AgentAvailabilityEngine.sol#20)
+DisputeEngine.exists(bytes32) (src/disputes/DisputeEngine.sol#67-69) uses timestamp for comparisons
+	Dangerous comparisons:
+	- disputes[disputeId].claimant != address(0) (src/disputes/DisputeEngine.sol#68)
+EconomicCommitmentEngine.createCommitment(bytes32,address,uint256) (src/economics/EconomicCommitmentEngine.sol#51-128) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > agreementData.validUntil (src/economics/EconomicCommitmentEngine.sol#72)
+TaskMarketplace.exists(bytes32) (src/marketplace/TaskMarketplace.sol#78-80) uses timestamp for comparisons
+	Dangerous comparisons:
+	- tasks[taskId].createdAt != 0 (src/marketplace/TaskMarketplace.sol#79)
+AgentRegistry.exists(bytes32) (src/registry/AgentRegistry.sol#158-160) uses timestamp for comparisons
+	Dangerous comparisons:
+	- agents[id].owner != address(0) (src/registry/AgentRegistry.sol#159)
+AKMAuthorization._requireValidAuthorization(uint256,uint256) (src/token/extensions/AKMAuthorization.sol#91-101) uses timestamp for comparisons
+	Dangerous comparisons:
+	- timestamp <= validAfter (src/token/extensions/AKMAuthorization.sol#94)
+	- timestamp >= validBefore (src/token/extensions/AKMAuthorization.sol#98)
+AgentTreasuryEngine.withdraw(uint256) (src/treasury/AgentTreasuryEngine.sol#23-36) uses timestamp for comparisons
+	Dangerous comparisons:
+	- treasury.balance < amount (src/treasury/AgentTreasuryEngine.sol#28)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Detector: assembly
+Initializable._getInitializableStorage() (lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol#232-237) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol#234-236)
+SafeERC20._safeTransfer(IERC20,address,uint256,bool) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#176-200) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#179-199)
+SafeERC20._safeTransferFrom(IERC20,address,address,uint256,bool) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#212-244) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#221-243)
+SafeERC20._safeApprove(IERC20,address,uint256,bool) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#255-279) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#258-278)
+Bytes.slice(bytes,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#86-98) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#93-95)
+Bytes.splice(bytes,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#117-129) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#123-126)
+Bytes.replace(bytes,uint256,bytes,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#154-172) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#167-169)
+Bytes.concat(bytes[]) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#183-203) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#194-196)
+Bytes.toNibbles(bytes) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#210-245) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#211-244)
+Bytes._unsafeReadBytesOffset(bytes,uint256) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#326-331) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#328-330)
+Panic.panic(uint256) (lib/openzeppelin-contracts/contracts/utils/Panic.sol#50-56) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Panic.sol#51-55)
+ShortStrings.toString(ShortString) (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#63-72) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#67-70)
+StorageSlot.getAddressSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#66-70) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#67-69)
+StorageSlot.getBooleanSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#75-79) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#76-78)
+StorageSlot.getBytes32Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#84-88) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#85-87)
+StorageSlot.getUint256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#93-97) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#94-96)
+StorageSlot.getInt256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#102-106) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#103-105)
+StorageSlot.getStringSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#111-115) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#112-114)
+StorageSlot.getStringSlot(string) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#120-124) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#121-123)
+StorageSlot.getBytesSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#129-133) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#130-132)
+StorageSlot.getBytesSlot(bytes) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#138-142) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#139-141)
+Strings.toString(uint256) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#42-60) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#47-49)
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#52-54)
+Strings.toChecksumHexString(address) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#108-126) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#113-115)
+Strings.escapeJSON(string) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#461-505) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#468-470)
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#499-502)
+Strings._unsafeReadBytesOffset(bytes,uint256) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#513-518) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#515-517)
+Strings._unsafeWriteBytesOffset(bytes,uint256,bytes1) (lib/openzeppelin-contracts/contracts/utils/Strings.sol#526-531) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Strings.sol#528-530)
+TransientSlot.tload(TransientSlot.AddressSlot) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#97-101) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#98-100)
+TransientSlot.tstore(TransientSlot.AddressSlot,address) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#106-110) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#107-109)
+TransientSlot.tload(TransientSlot.BooleanSlot) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#115-119) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#116-118)
+TransientSlot.tstore(TransientSlot.BooleanSlot,bool) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#124-128) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#125-127)
+TransientSlot.tload(TransientSlot.Bytes32Slot) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#133-137) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#134-136)
+TransientSlot.tstore(TransientSlot.Bytes32Slot,bytes32) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#142-146) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#143-145)
+TransientSlot.tload(TransientSlot.Uint256Slot) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#151-155) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#152-154)
+TransientSlot.tstore(TransientSlot.Uint256Slot,uint256) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#160-164) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#161-163)
+TransientSlot.tload(TransientSlot.Int256Slot) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#169-173) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#170-172)
+TransientSlot.tstore(TransientSlot.Int256Slot,int256) (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#178-182) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#179-181)
+ECDSA.tryRecover(bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#61-80) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#71-75)
+ECDSA.tryRecoverCalldata(bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#85-104) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#95-99)
+ECDSA.parse(bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#217-240) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#218-239)
+ECDSA.parseCalldata(bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#245-268) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#246-267)
+MessageHashUtils.toEthSignedMessageHash(bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#32-38) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#33-37)
+MessageHashUtils.toDataWithIntendedValidatorHash(address,bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#71-81) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#75-80)
+MessageHashUtils.toTypedDataHash(bytes32,bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#92-100) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#93-99)
+MessageHashUtils.toDomainSeparator(bytes1,bytes32,bytes32,uint256,address,bytes32) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#137-179) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#147-178)
+MessageHashUtils.toDomainTypeHash(bytes1) (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#182-227) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#185-226)
+SignatureChecker.isValidERC1271SignatureNow(address,bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#64-88) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#72-87)
+SignatureChecker.isValidERC1271SignatureNowCalldata(address,bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#90-115) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#98-114)
+Math.add512(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#25-30) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#26-29)
+Math.mul512(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#37-46) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#41-45)
+Math.tryMul(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#73-84) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#76-80)
+Math.tryDiv(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#89-97) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#92-95)
+Math.tryMod(uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#102-110) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#105-108)
+Math.mulDiv(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#206-277) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#229-236)
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#242-251)
+Math.tryModExp(uint256,uint256,uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#411-435) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#413-434)
+Math.tryModExp(bytes,bytes,bytes) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#451-473) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#463-472)
+Math._zeroBytes(bytes) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#478-490) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#482-484)
+Math.log2(uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#619-658) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#655-657)
+SafeCast.toUint(bool) (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#1157-1161) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#1158-1160)
+AkmenaExecutionAuthorization.verifyAndConsume(AkmenaExecutionAuthorization.ExecutionIntent,bytes,uint256,bytes) (src/authorization/AkmenaExecutionAuthorization.sol#101-164) uses assembly
+	- INLINE ASM (src/authorization/AkmenaExecutionAuthorization.sol#137-139)
+AkmenaPolicyBoundary.executeAuthorizedAgentCall(AkmenaExecutionAuthorization.ExecutionIntent,bytes,bytes) (src/authorization/AkmenaPolicyBoundary.sol#354-516) uses assembly
+	- INLINE ASM (src/authorization/AkmenaPolicyBoundary.sol#490-492)
+AkmenaPolicyBoundary._settleERC20(AkmenaExecutionAuthorization.ExecutionIntent,bytes,AkmenaPolicyBoundary.SpendingPolicy) (src/authorization/AkmenaPolicyBoundary.sol#529-611) uses assembly
+	- INLINE ASM (src/authorization/AkmenaPolicyBoundary.sol#555-557)
+	- INLINE ASM (src/authorization/AkmenaPolicyBoundary.sol#600-602)
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#64-74) uses assembly
+	- INLINE ASM (src/identity/IdentityFactory.sol#66-72)
+LibTransientProof.setEscrowProof(uint256,address,address,uint256) (src/libraries/LibTransientProof.sol#25-31) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#28-30)
+LibTransientProof.verifyEscrowProof(uint256,address,address,uint256) (src/libraries/LibTransientProof.sol#34-44) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#41-43)
+LibTransientProof.setPrivacyProof(uint256,address,address,uint256) (src/libraries/LibTransientProof.sol#47-53) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#50-52)
+LibTransientProof.verifyPrivacyProof(uint256,address,address,uint256) (src/libraries/LibTransientProof.sol#56-66) uses assembly
+	- INLINE ASM (src/libraries/LibTransientProof.sol#63-65)
+PoseidonT3.hash(uint256[2]) (src/privacy/v2/PoseidonT3.sol#14-390) uses assembly
+	- INLINE ASM (src/privacy/v2/PoseidonT3.sol#15-389)
+LibEconomicCommitmentStorage.economic() (src/storage/LibEconomicCommitmentStorage.sol#40-46) uses assembly
+	- INLINE ASM (src/storage/LibEconomicCommitmentStorage.sol#43-45)
+LibStorage.identity() (src/storage/LibStorage.sol#106-109) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#108)
+LibStorage.registry() (src/storage/LibStorage.sol#111-114) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#113)
+LibStorage.authorization() (src/storage/LibStorage.sol#116-119) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#118)
+LibStorage.treasury() (src/storage/LibStorage.sol#121-124) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#123)
+LibStorage.escrow() (src/storage/LibStorage.sol#126-129) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#128)
+LibStorage.settlement() (src/storage/LibStorage.sol#131-134) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#133)
+LibStorage.payments() (src/storage/LibStorage.sol#136-139) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#138)
+LibStorage.marketplace() (src/storage/LibStorage.sol#141-144) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#143)
+LibStorage.reputation() (src/storage/LibStorage.sol#146-149) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#148)
+LibStorage.memoryStorage() (src/storage/LibStorage.sol#151-154) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#153)
+LibStorage.discovery() (src/storage/LibStorage.sol#156-159) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#158)
+LibStorage.agreement() (src/storage/LibStorage.sol#161-164) uses assembly
+	- INLINE ASM (src/storage/LibStorage.sol#163)
+LibWorkflowStorage.workflowStorage() (src/storage/LibWorkflowStorage.sol#23-29) uses assembly
+	- INLINE ASM (src/storage/LibWorkflowStorage.sol#26-28)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+
+Detector: pragma
+10 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#3)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Nonces.sol#3)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Panic.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#5)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#4)
+	- Version constraint >=0.5.0 is used by:
+		->=0.5.0 (lib/openzeppelin-contracts/contracts/interfaces/IERC1271.sol#4)
+		->=0.5.0 (lib/openzeppelin-contracts/contracts/interfaces/IERC7913.sol#4)
+	- Version constraint >=0.6.2 is used by:
+		->=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#4)
+		->=0.6.2 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)
+	- Version constraint >=0.4.16 is used by:
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#4)
+		->=0.4.16 (lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#4)
+	- Version constraint >=0.8.4 is used by:
+		->=0.8.4 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#4)
+	- Version constraint ^0.8.24 is used by:
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuardTransient.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/Strings.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/TransientSlot.sol#5)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol#4)
+		-^0.8.24 (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#4)
+	- Version constraint >=0.6.2<0.9.0 is used by:
+		->=0.6.2<0.9.0 (src/Vm.sol#4)
+	- Version constraint 0.8.28 is used by:
+		-0.8.28 (src/analytics/AgentAnalyticsEngine.sol#2)
+		-0.8.28 (src/availability/AgentAvailabilityEngine.sol#2)
+		-0.8.28 (src/credentials/AgentCredentialEngine.sol#2)
+		-0.8.28 (src/discovery/AgentDiscovery.sol#2)
+		-0.8.28 (src/disputes/DisputeEngine.sol#2)
+		-0.8.28 (src/earnings/AgentEarningsEngine.sol#2)
+		-0.8.28 (src/governance/AgentGovernanceEngine.sol#2)
+		-0.8.28 (src/interfaces/IAKMPayments.sol#2)
+		-0.8.28 (src/interfaces/IAgentAnalyticsEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentAvailabilityEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentCredentialEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentDiscovery.sol#2)
+		-0.8.28 (src/interfaces/IAgentEarningsEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentGovernanceEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentMatchingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentPortfolioEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRatingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRegistry.sol#2)
+		-0.8.28 (src/interfaces/IAgentReviewEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentRewardEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentSkillEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentSlashingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentStakingEngine.sol#2)
+		-0.8.28 (src/interfaces/IAgentTreasuryEngine.sol#2)
+		-0.8.28 (src/interfaces/IDisputeEngine.sol#2)
+		-0.8.28 (src/interfaces/IMemoryEngine.sol#2)
+		-0.8.28 (src/interfaces/IReputationEngine.sol#2)
+		-0.8.28 (src/interfaces/ITaskMarketplace.sol#2)
+		-0.8.28 (src/interfaces/ITreasury.sol#2)
+		-0.8.28 (src/interfaces/ITrustEngine.sol#2)
+		-0.8.28 (src/interfaces/IVerifier.sol#2)
+		-0.8.28 (src/libraries/Errors.sol#2)
+		-0.8.28 (src/libraries/Events.sol#2)
+		-0.8.28 (src/libraries/Types.sol#2)
+		-0.8.28 (src/libraries/Validation.sol#2)
+		-0.8.28 (src/marketplace/TaskMarketplace.sol#2)
+		-0.8.28 (src/matching/AgentMatchingEngine.sol#2)
+		-0.8.28 (src/portfolio/AgentPortfolioEngine.sol#2)
+		-0.8.28 (src/ratings/AgentRatingEngine.sol#2)
+		-0.8.28 (src/registry/AgentRegistry.sol#2)
+		-0.8.28 (src/reviews/AgentReviewEngine.sol#2)
+		-0.8.28 (src/rewards/AgentRewardEngine.sol#2)
+		-0.8.28 (src/skills/AgentSkillEngine.sol#2)
+		-0.8.28 (src/slashing/AgentSlashingEngine.sol#2)
+		-0.8.28 (src/staking/AgentStakingEngine.sol#2)
+		-0.8.28 (src/treasury/AgentTreasuryEngine.sol#2)
+	- Version constraint ^0.8.28 is used by:
+		-^0.8.28 (src/authorization/AkmenaExecutionAuthorization.sol#2)
+		-^0.8.28 (src/authorization/AkmenaPolicyBoundary.sol#2)
+		-^0.8.28 (src/authorization/AttestationEngine.sol#2)
+		-^0.8.28 (src/authorization/AuthorizationResolver.sol#2)
+		-^0.8.28 (src/authorization/CapabilityEngine.sol#2)
+		-^0.8.28 (src/authorization/DelegationEngine.sol#2)
+		-^0.8.28 (src/authorization/IAttestationEngine.sol#2)
+		-^0.8.28 (src/authorization/IAuthorizationResolver.sol#2)
+		-^0.8.28 (src/authorization/ICapabilityEngine.sol#2)
+		-^0.8.28 (src/authorization/IDelegationEngine.sol#2)
+		-^0.8.28 (src/authorization/ITransientProofVerifier.sol#2)
+		-^0.8.28 (src/autonomous/AgreementEngine.sol#2)
+		-^0.8.28 (src/autonomous/DiscoveryEngine.sol#2)
+		-^0.8.28 (src/autonomous/IAgreementEngine.sol#2)
+		-^0.8.28 (src/autonomous/IDiscoveryEngine.sol#2)
+		-^0.8.28 (src/autonomous/IMarketplaceEngine.sol#2)
+		-^0.8.28 (src/autonomous/MarketplaceEngine.sol#2)
+		-^0.8.28 (src/core/AkmenaCore.sol#2)
+		-^0.8.28 (src/economics/EconomicCommitmentEngine.sol#2)
+		-^0.8.28 (src/economics/EscrowEngine.sol#2)
+		-^0.8.28 (src/economics/IEconomicCommitmentEngine.sol#2)
+		-^0.8.28 (src/economics/IEscrowEngine.sol#2)
+		-^0.8.28 (src/economics/IPaymentsEngine.sol#2)
+		-^0.8.28 (src/economics/ISettlementEngine.sol#2)
+		-^0.8.28 (src/economics/ITreasuryEngine.sol#2)
+		-^0.8.28 (src/economics/PaymentsEngine.sol#2)
+		-^0.8.28 (src/economics/SettlementEngine.sol#2)
+		-^0.8.28 (src/economics/TreasuryEngine.sol#2)
+		-^0.8.28 (src/identity/IHumanIdentity.sol#2)
+		-^0.8.28 (src/identity/IIdentity.sol#2)
+		-^0.8.28 (src/identity/IMachineIdentity.sol#2)
+		-^0.8.28 (src/identity/IOrganizationIdentity.sol#2)
+		-^0.8.28 (src/identity/Identity.sol#2)
+		-^0.8.28 (src/identity/IdentityBase.sol#2)
+		-^0.8.28 (src/identity/IdentityClone.sol#2)
+		-^0.8.28 (src/identity/IdentityFactory.sol#2)
+		-^0.8.28 (src/interfaces/IAKMAuthorization.sol#2)
+		-^0.8.28 (src/interfaces/IAKMPaymentRail.sol#2)
+		-^0.8.28 (src/interfaces/IAKMToken.sol#2)
+		-^0.8.28 (src/libraries/LibTransientProof.sol#2)
+		-^0.8.28 (src/libraries/ModuleKeys.sol#2)
+		-^0.8.28 (src/memory/IMemoryEngine.sol#2)
+		-^0.8.28 (src/memory/MemoryEngine.sol#2)
+		-^0.8.28 (src/orchestration/IWorkflowEngine.sol#2)
+		-^0.8.28 (src/orchestration/WorkflowEngine.sol#2)
+		-^0.8.28 (src/orchestration/adapters/WorkflowEconomicSettlementAdapter.sol#2)
+		-^0.8.28 (src/orchestration/adapters/WorkflowMemoryAdapter.sol#2)
+		-^0.8.28 (src/orchestration/adapters/WorkflowReputationAdapter.sol#2)
+		-^0.8.28 (src/privacy/PrivacyEngine.sol#2)
+		-^0.8.28 (src/privacy/StealthAddressRegistry.sol#2)
+		-^0.8.28 (src/privacy/v2/AkmenaPrivatePool.sol#2)
+		-^0.8.28 (src/registry/IRegistry.sol#2)
+		-^0.8.28 (src/registry/Registry.sol#2)
+		-^0.8.28 (src/reputation/IReputationEngine.sol#2)
+		-^0.8.28 (src/reputation/ReputationEngine.sol#2)
+		-^0.8.28 (src/storage/LibEconomicCommitmentStorage.sol#2)
+		-^0.8.28 (src/storage/LibStorage.sol#2)
+		-^0.8.28 (src/storage/LibWorkflowStorage.sol#2)
+		-^0.8.28 (src/storage/StorageNamespaces.sol#2)
+		-^0.8.28 (src/token/core/AkmenaToken.sol#2)
+		-^0.8.28 (src/token/extensions/AKMAuthorization.sol#2)
+		-^0.8.28 (src/token/extensions/AKMPayments.sol#2)
+	- Version constraint >=0.7.0 is used by:
+		->=0.7.0 (src/privacy/v2/PoseidonT3.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+
+Detector: cyclomatic-complexity
+AkmenaPolicyBoundary.executeAuthorizedAgentCall(AkmenaExecutionAuthorization.ExecutionIntent,bytes,bytes) (src/authorization/AkmenaPolicyBoundary.sol#354-516) has a high cyclomatic complexity (22).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+
+Detector: solc-version
+Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- VerbatimInvalidDeduplication
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess.
+It is used by:
+	- ^0.8.20 (lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol#3)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Nonces.sol#3)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Panic.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol#5)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol#4)
+Version constraint >=0.5.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- DirtyBytesArrayToStorage
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow
+	- privateCanBeOverridden
+	- SignedArrayStorageCopy
+	- ABIEncoderV2StorageArrayWithMultiSlotElement
+	- DynamicConstructorArgumentsClippedABIV2
+	- UninitializedFunctionPointerInConstructor
+	- IncorrectEventSignatureInLibraries
+	- ABIEncoderV2PackedStorage.
+It is used by:
+	- >=0.5.0 (lib/openzeppelin-contracts/contracts/interfaces/IERC1271.sol#4)
+	- >=0.5.0 (lib/openzeppelin-contracts/contracts/interfaces/IERC7913.sol#4)
+Version constraint >=0.6.2 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- MissingEscapingInFormatting
+	- ArraySliceDynamicallyEncodedBaseType
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow.
+It is used by:
+	- >=0.6.2 (lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol#4)
+	- >=0.6.2 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)
+Version constraint >=0.4.16 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- DirtyBytesArrayToStorage
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow
+	- privateCanBeOverridden
+	- SignedArrayStorageCopy
+	- ABIEncoderV2StorageArrayWithMultiSlotElement
+	- DynamicConstructorArgumentsClippedABIV2
+	- UninitializedFunctionPointerInConstructor_0.4.x
+	- IncorrectEventSignatureInLibraries_0.4.x
+	- ExpExponentCleanup
+	- NestedArrayFunctionCallDecoder
+	- ZeroFunctionSelector.
+It is used by:
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol#4)
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol#4)
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/interfaces/IERC5267.sol#4)
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol#4)
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#4)
+	- >=0.4.16 (lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol#4)
+Version constraint >=0.8.4 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables.
+It is used by:
+	- >=0.8.4 (lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol#4)
+Version constraint >=0.6.2<0.9.0 is too complex.
+It is used by:
+	- >=0.6.2<0.9.0 (src/Vm.sol#4)
+Version constraint >=0.7.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup.
+It is used by:
+	- >=0.7.0 (src/privacy/v2/PoseidonT3.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+
+Detector: low-level-calls
+Low level call in SignatureChecker.isValidSignatureNow(bytes,bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#132-149):
+	- (success,result) = address(bytes20(signer)).staticcall(abi.encodeCall(IERC7913SignatureVerifier.verify,(signer.slice(20),hash,signature))) (lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol#142-144)
+Low level call in AkmenaPolicyBoundary.executeAuthorizedAgentCall(AkmenaExecutionAuthorization.ExecutionIntent,bytes,bytes) (src/authorization/AkmenaPolicyBoundary.sol#354-516):
+	- (success,returnData) = intent.target.call{value: msg.value}(payload) (src/authorization/AkmenaPolicyBoundary.sol#487)
+Low level call in AkmenaPolicyBoundary._settleERC20(AkmenaExecutionAuthorization.ExecutionIntent,bytes,AkmenaPolicyBoundary.SpendingPolicy) (src/authorization/AkmenaPolicyBoundary.sol#529-611):
+	- (success,returnData) = intent.target.call(payload) (src/authorization/AkmenaPolicyBoundary.sol#552)
+	- (success,returnData) = intent.target.call(payload) (src/authorization/AkmenaPolicyBoundary.sol#597)
+Low level call in PrivacyEngine.executePrivateSettlement(bytes32,bytes32,uint256,address) (src/privacy/PrivacyEngine.sol#29-60):
+	- (success,None) = stealthRecipient.call{value: amount}() (src/privacy/PrivacyEngine.sol#56)
+Low level call in AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256) (src/privacy/v2/AkmenaPrivatePool.sol#190-230):
+	- (okR,None) = _recipient.call{value: recipientAmount}() (src/privacy/v2/AkmenaPrivatePool.sol#223)
+	- (okF,None) = _relayer.call{value: _fee}() (src/privacy/v2/AkmenaPrivatePool.sol#227)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+Detector: missing-inheritance
+AkmenaCore (src/core/AkmenaCore.sol#9-164) should inherit from IAkmenaCoreRegistry (src/orchestration/IWorkflowEngine.sol#31-33)
+Identity (src/identity/Identity.sol#9-24) should inherit from IIdentityImplementation (src/identity/IdentityFactory.sol#7-14)
+PrivacyEngine (src/privacy/PrivacyEngine.sol#6-75) should inherit from ITransientProofVerifier (src/authorization/ITransientProofVerifier.sol#7-12)
+AgentRegistry (src/registry/AgentRegistry.sol#6-189) should inherit from IAgentRegistry (src/interfaces/IAgentRegistry.sol#7-76)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+
+Detector: naming-convention
+Function ERC20Permit.DOMAIN_SEPARATOR() (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol#74-76) is not in mixedCase
+Function IERC20Permit.DOMAIN_SEPARATOR() (lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol#89) is not in mixedCase
+Function EIP712._EIP712Name() (lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol#146-148) is not in mixedCase
+Function EIP712._EIP712Version() (lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol#157-159) is not in mixedCase
+Function VmSafe.eth_getLogs(uint256,uint256,address,bytes32[]) (src/Vm.sol#667-670) is not in mixedCase
+Function IdentityBase.__IdentityBase_init(uint256,address,string) (src/identity/IdentityBase.sol#19-31) is not in mixedCase
+Parameter AkmenaPrivatePool.deposit(bytes32)._commitment (src/privacy/v2/AkmenaPrivatePool.sol#132) is not in mixedCase
+Parameter AkmenaPrivatePool.isKnownRoot(bytes32)._root (src/privacy/v2/AkmenaPrivatePool.sol#167) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._pA (src/privacy/v2/AkmenaPrivatePool.sol#191) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._pB (src/privacy/v2/AkmenaPrivatePool.sol#192) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._pC (src/privacy/v2/AkmenaPrivatePool.sol#193) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._root (src/privacy/v2/AkmenaPrivatePool.sol#194) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._nullifierHash (src/privacy/v2/AkmenaPrivatePool.sol#195) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._recipient (src/privacy/v2/AkmenaPrivatePool.sol#196) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._relayer (src/privacy/v2/AkmenaPrivatePool.sol#197) is not in mixedCase
+Parameter AkmenaPrivatePool.withdraw(uint256[2],uint256[2][2],uint256[2],bytes32,bytes32,address,address,uint256)._fee (src/privacy/v2/AkmenaPrivatePool.sol#198) is not in mixedCase
+Variable AkmenaPrivatePool.DENOMINATION (src/privacy/v2/AkmenaPrivatePool.sol#57) is not in mixedCase
+Variable AkmenaPrivatePool.VERIFIER (src/privacy/v2/AkmenaPrivatePool.sol#59) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+
+Detector: redundant-statements
+Redundant expression "ctx (src/orchestration/adapters/WorkflowEconomicSettlementAdapter.sol#56)" inWorkflowEconomicSettlementAdapter (src/orchestration/adapters/WorkflowEconomicSettlementAdapter.sol#23-58)
+Redundant expression "ctx (src/orchestration/adapters/WorkflowMemoryAdapter.sol#45)" inWorkflowMemoryAdapter (src/orchestration/adapters/WorkflowMemoryAdapter.sol#11-47)
+Redundant expression "identityId (src/orchestration/adapters/WorkflowReputationAdapter.sol#44)" inWorkflowReputationAdapter (src/orchestration/adapters/WorkflowReputationAdapter.sol#10-46)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#redundant-statements
+
+Detector: too-many-digits
+Bytes.toNibbles(bytes) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#210-245) uses literals with too many digits:
+	- chunk_toNibbles_asm_0 = 0x0000000000000000ffffffffffffffff0000000000000000ffffffffffffffff & chunk_toNibbles_asm_0 << 64 | chunk_toNibbles_asm_0 (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#222-225)
+Bytes.toNibbles(bytes) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#210-245) uses literals with too many digits:
+	- chunk_toNibbles_asm_0 = 0x00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff & chunk_toNibbles_asm_0 << 32 | chunk_toNibbles_asm_0 (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#226-229)
+Bytes.reverseBytes32(bytes32) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#258-272) uses literals with too many digits:
+	- value = ((value >> 32) & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) | ((value & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) << 32) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#265-267)
+Bytes.reverseBytes32(bytes32) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#258-272) uses literals with too many digits:
+	- value = ((value >> 64) & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) | ((value & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) << 64) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#268-270)
+Bytes.reverseBytes16(bytes16) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#275-286) uses literals with too many digits:
+	- value = ((value & 0xFFFFFFFF00000000FFFFFFFF00000000) >> 32) | ((value & 0x00000000FFFFFFFF00000000FFFFFFFF) << 32) (lib/openzeppelin-contracts/contracts/utils/Bytes.sol#282-284)
+ShortStrings.slitherConstructorConstantVariables() (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#40-122) uses literals with too many digits:
+	- FALLBACK_SENTINEL = 0x00000000000000000000000000000000000000000000000000000000000000FF (lib/openzeppelin-contracts/contracts/utils/ShortStrings.sol#42)
+Math.log2(uint256) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#619-658) uses literals with too many digits:
+	- r = r | byte(uint256,uint256)(x >> r,0x0000010102020202030303030303030300000000000000000000000000000000) (lib/openzeppelin-contracts/contracts/utils/math/Math.sol#656)
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#64-74) uses literals with too many digits:
+	- mstore(uint256,uint256)(ptr__clone_asm_0,0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000) (src/identity/IdentityFactory.sol#68)
+IdentityFactory._clone(address) (src/identity/IdentityFactory.sol#64-74) uses literals with too many digits:
+	- mstore(uint256,uint256)(ptr__clone_asm_0 + 0x28,0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000) (src/identity/IdentityFactory.sol#70)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+
+Detector: unimplemented-functions
+AkmenaToken (src/token/core/AkmenaToken.sol#14-79) does not implement functions:
+	- AKMPayments._authorizationDigest(bytes32) (src/token/extensions/AKMPayments.sol#29)
+	- AKMPayments._transferTokens(address,address,uint256) (src/token/extensions/AKMPayments.sol#26)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unimplemented-functions
+src/ analyzed (148 contracts with 102 detectors), 179 result(s) found
+INFO:Slither:test-logs/slither_hardened.json exists already, the overwrite is prevented
+'forge clean' running (wd: /home/hatch/workspace/akmena-v260)
+'forge config --json' running
+'forge build --build-info --deny never src' running (wd: /home/hatch/workspace/akmena-v260)
+* --force' running (wd: /home/hatch/workspace/akmena-v260)
+EXIT:255
+EXIT:255
