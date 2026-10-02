@@ -459,17 +459,16 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
         // Preserve existing zero-value generic execution semantics.
         // These calls are authorization/proof-context operations rather than
-        // measured native spending, so their declared amount remains the
-        // policy-accounted amount.
+        // measured native spending. GAP-1 hardening (2026-10-01): zero-value
+        // native calls do NOT consume the economic daily limit, as no funds
+        // move. Previously, intent.amount was charged, allowing an authorized
+        // agent to DoS the operator's daily limit via spam at gas cost only.
+        // The economic daily limit bounds funds at risk; zero-value calls
+        // have zero economic exposure.
         if (isNative && msg.value == 0) {
-            // Saturating headroom (F-14): if the operator lowered dailyLimit
-            // below totalSpentToday, headroom is zero — clean PolicyExceeded,
-            // never Panic(0x11).
-            uint256 headroom =
-                policy.totalSpentToday >= policy.dailyLimit ? 0 : policy.dailyLimit - policy.totalSpentToday;
-            if (intent.amount > headroom) {
-                revert PolicyExceeded();
-            }
+            // No headroom check needed: zero-value calls do not consume limit.
+            // They are still subject to signature verification, nonce consumption,
+            // and the agent must be authorized (policy exists).
         }
 
         _verifyActiveEscrow(policy, intent, agent);
@@ -496,7 +495,10 @@ contract AkmenaPolicyBoundary is ReentrancyGuardTransient {
 
                 policy.totalSpentToday += msg.value;
             } else {
-                policy.totalSpentToday += intent.amount;
+                // GAP-1 hardening (2026-10-01): zero-value native calls do not
+                // charge the economic daily limit. No funds move, so there is
+                // zero economic exposure. Previously this charged intent.amount,
+                // allowing DoS via spam.
             }
 
             return returnData;
