@@ -123,15 +123,17 @@ emergencyAdmin = core.deployer();
 
 ## 7. Recommendation
 
-### Timelock: OpenZeppelin TimelockController, 48-hour delay
-- **Rationale:** Battle-tested, standard, 48h balances security with operational needs. The existing `AkmenaTimelock` is unaudited custom code; wiring it would require a full audit anyway.
+### Timelock: OpenZeppelin TimelockController, 24-hour delay
+- **Rationale:** Battle-tested, standard. **24h per Elijah's decision 2026-10-01** (overriding the 48h recommendation — faster emergency adapter rotation). The existing `AkmenaTimelock` is unaudited custom code; wiring it would require a full audit anyway.
 
 ### Multisig: Safe, 3-of-5 threshold
 - **Rationale:** Industry standard. 3-of-5 provides good security without excessive coordination overhead.
 - **Key holders:** Elijah designates 5 holders (including himself). At least 2 should be non-Elijah for decentralization.
+- **Safe address:** `TO_BE_DEPLOYED` (placeholder — Safe to be deployed as part of G-7 migration; address recorded here after deployment).
 
 ### Pause Guardian: Separate operational key (Option B)
 - **Rationale:** Deployer key stays cold. Guardian key is hot but limited (can only pause, cannot unpause or modify allowlist). If compromised, deployer can rotate it via `setPauseGuardian`.
+- **Designation (Elijah 2026-10-01):** Separate operational key model approved. Specific key holder address: `TO_BE_DESIGNATED` (placeholder — to be provided before G-7 migration).
 
 ### Migration sequence:
 1. Deploy Safe (3-of-5) with designated holders.
