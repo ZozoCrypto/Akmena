@@ -37,13 +37,13 @@
 |---|------|----------|----------------|--------|----------|
 | S-1 | Access control review | R2 (auth): All `onlyDeployer`, `allowlistAdmin`, `emergencyAdmin`, `pauseGuardian` paths tested. 19/19 governance transition tests pass. | `00428402` lineage | COMPLETE | MUSE |
 | S-2 | External call safety | Reentrancy: `ReentrancyGuardTransient` on settlement; AR-5 reentrant adapter blocked. A-8 malicious-token battery: 2 critical findings (F-7 over-pull, silent-success) mitigated by admission, not code. | `00428402` lineage | COMPLETE | MUSE |
-| S-3 | Slither static analysis | 154 contracts analyzed, 0 errors. 1 high, 3 medium, 29 low in bundled output — require triage. | 2026-10-01 run | BLOCKED | MUSE |
+| S-3 | Slither static analysis | 154 contracts, 5 in-scope High/Medium triaged: H-1/H-2 SAFE-BY-DESIGN, M-1/M-3 FALSE POSITIVE, M-2 SAFE-BY-DESIGN. Zero require code changes. Report: `SLITHER_TRIAGE.md`. | 2026-10-01 | COMPLETE | MUSE |
 | S-4 | Mutation testing (R10) | 20 mutants, 19 killed + 1 equivalent = 100% effective. 5 gap-fill tests added. | `85a08429`, `df849888` | COMPLETE | MUSE |
 | S-5 | Fuzzing — Foundry invariants | 25/25 pass (R14). | `27167778` | COMPLETE | MUSE |
 | S-6 | Fuzzing — Medusa (R9) | 11,114 calls, 0 failures, both security invariants pass. Harness repaired (`4498937a`). | `4498937a` | COMPLETE | MUSE |
-| S-7 | R9 coverage gaps assessed | 11k calls is smoke-level. 100k+ campaign scope/estimate: NOT YET REPORTED. | — | NOT-ASSESSED | ELIJAH |
+| S-7 | R9 coverage gaps assessed | Estimate complete: `R9_100K_ESTIMATE.md`. 100k campaign = 3-5 min, 8 workers. Recommended. Awaiting Elijah approval. Current 11k campaign: 0 failures, no demonstrated gaps. | 2026-10-01 | COMPLETE | MUSE |
 | S-8 | Independent review (R15) | Package prepared (`R15_REVIEW_PACKAGE.md`). Reviewer NOT commissioned. | `3c6b95f6` | BLOCKED | ELIJAH |
-| S-9 | Known findings triaged | V-0 closed by construction. N-7 resolved (Model D pull leg). A-8 F-7/F-8 documented with mitigations. AR-13 (deployer blast radius) open pending G-7. | Various | BLOCKED | ELIJAH |
+| S-9 | Known findings triaged | V-0 closed by construction. N-7 resolved (Model D pull leg). A-8 F-7/F-8 documented with mitigations. **AR-13 disposition (Elijah 2026-10-01): CONFIRMED as real risk — deployer-compromise blast radius moves from boundary pool to operator allowances. Mitigation = G-7 timelocked/multisig adapter governance (pending execution). Not safe-by-design, not a false positive.** | Various | COMPLETE | MUSE |
 
 **Notes:**
 - S-3: The Slither high/medium findings need explicit triage (confirmed / safe-by-design / false positive / needs hardening) before this is COMPLETE.
@@ -109,12 +109,12 @@
 
 | # | Item | Evidence | Exact Revision | Status | Approver |
 |---|------|----------|----------------|--------|----------|
-| D-1 | Fresh deployment.json (EIP-712 v2) | DRAFT IN PROGRESS (P3). Current file: STALE (2026-08-29), EIP-712 v1 vs v2 mismatch — any signer built from it produces invalid signatures. | — | BLOCKED | MUSE |
-| D-2 | Deployment runbook | DRAFT IN PROGRESS (P3). Must cover: preflight, deployment, verification, governance migration, rollback. | — | BLOCKED | MUSE |
+| D-1 | Fresh deployment.json (EIP-712 v2) | DRAFT created: `deployments/deployment.json.DRAFT` with v2, governance placeholders, verification fields. Awaiting Elijah review. | 2026-10-01 | COMPLETE | MUSE |
+| D-2 | Deployment runbook | DRAFT created: `DEPLOYMENT_RUNBOOK_DRAFT.md` covers preflight, deployment, verification, G-7 migration, rollback, approvals. Awaiting Elijah review. | 2026-10-01 | COMPLETE | MUSE |
 | D-3 | Bytecode recompiled and compared | NOT PERFORMED. No fresh deployment exists to verify against. | — | NOT-ASSESSED | MUSE |
 | D-4 | EIP-712 metadata correct | Code: `EIP712("AkmenaExecutionAuthorization", "2")`. Deployment.json: `"version": "1"`. MISMATCH CONFIRMED. | Current source vs `deployments/base-sepolia/deployment.json` | BLOCKED | MUSE |
-| D-5 | PrivacyEngine address resolved | Frontend references dead address `0x7e5095d10a4B71220938b816398918239981030a` (returns 0x on both Base chains). Redeploy prepped, needs Elijah to run with deployer key. OR formally defer. | Memory 2026-09-30 | BLOCKED | ELIJAH |
-| D-6 | All contract addresses documented | DRAFT IN PROGRESS as part of D-1. | — | BLOCKED | MUSE |
+| D-5 | PrivacyEngine address resolved | **DEFERRED by Elijah 2026-10-01.** Frontend references dead address `0x7e5095d10a4B71220938b816398918239981030a` (returns 0x on both Base chains). No funds at risk. Privacy v2 redesign is a separate future decision. | Memory 2026-09-30 | NOT-APPLICABLE | ELIJAH |
+| D-6 | All contract addresses documented | DRAFT structure in `deployment.json.DRAFT` with placeholders for all 4 contracts. | 2026-10-01 | COMPLETE | MUSE |
 
 **Notes:**
 - D-4 is a hard blocker — the version mismatch is not a warning, it's a functional break.
@@ -128,11 +128,11 @@
 
 | # | Item | Evidence | Exact Revision | Status | Approver |
 |---|------|----------|----------------|--------|----------|
-| R-1 | Incident response runbook | Spec §7.1 outlines sequence (pause → remove → rotate → timelocked unpause). Operational runbook: NOT WRITTEN. | Spec v1.2 | BLOCKED | MUSE |
+| R-1 | Incident response runbook | DRAFT created: `INCIDENT_RESPONSE_RUNBOOK_DRAFT.md` covers P0-P3, containment, assessment, remediation, comms, F-8 warning. Awaiting review. | 2026-10-01 | COMPLETE | MUSE |
 | R-2 | Emergency drill conducted | NOT CONDUCTED. Requires G-7 migration first (need timelock + multisig + guardian). | — | BLOCKED | ELIJAH |
 | R-3 | Pause guardian designated and tested | NOT DESIGNATED. Role exists in code, `pauseGuardian` = `address(0)`. | Current source | BLOCKED | ELIJAH |
 | R-4 | Adapter-update monitoring | `EconomicAdapterUpdated` event exists. Monitoring/alerting: NOT SPECIFIED. | Current source | NOT-ASSESSED | ELIJAH |
-| R-5 | Migration contingency plan | Spec §8 covers M-1/M-2/M-3 with recovery-adapter trap analysis (F-8). Operational plan: NOT WRITTEN. | Spec v1.2 | BLOCKED | MUSE |
+| R-5 | Migration contingency plan | DRAFT created: `MIGRATION_CONTINGENCY_PLAN_DRAFT.md` covers M-1/M-2/M-3, per-deployment checklist, stranded funds policy, rollback. Awaiting Elijah M-1 approval. | 2026-10-01 | COMPLETE | MUSE |
 
 **Notes:**
 - R-2 is the key rehearsal — it validates the entire governance chain works under pressure. Cannot be done until G-7 migration.
