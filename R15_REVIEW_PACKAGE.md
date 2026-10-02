@@ -52,6 +52,8 @@
 | `968cc8fb` / `308d6ab8` | GAP-1 test updates (9 tests) | Hardened semantics |
 | `0eb929a9` | **GAP-3 hardening** + deployer transfer | Zero-amount target allowlist; two-step deployer transfer; 11 new tests |
 | `c4693934` | Medusa native path extension | Handler now fuzzes native ETH settlement (4 new intents) |
+| `8ab759be` | R15 package update | Scope corrections, GAP findings documented |
+| `HEAD` | R9: Medusa 100k WITH native path | **100,387 calls, 1,174 branches, 0 failures, 31/31 pass** |
 | `HEAD` | R14: **870/870** unit, invariant re-run | Full regression at hardened revision |
 
 ### Security Findings Since Last Update
@@ -93,14 +95,18 @@
 - **Result:** 6/6 pass (native, replay, over-limit, governance, fee-token)
 - **Note:** Fork tests validate behavior on Base Sepolia state.
 
-### R9 Medusa Fuzzing: COMPLETE (harness repaired)
-- **Commit:** `4498937a`
-- **Harness:** Self-contained handler (constructor registers 8 builtin intents, ERC-1271 agent)
-- **Proof test:** `MedusaSettlementProof.t.sol` 5/5 pass (real settlements, exact amounts, replay reverts)
-- **Fuzz campaign:** 1043 calls, 0 failures, both security invariants PASSED
+### R9 Medusa Fuzzing: COMPLETE (native path covered)
+- **Latest campaign:** 2026-10-02, revision `HEAD` (hardened tree with GAP-1/3 patches)
+- **Harness:** Self-contained handler (constructor registers intents, ERC-1271 agent)
+- **Result:** **100,387 calls, 1,174 branches, corpus 67, 0 failures, 31/31 tests pass**
+- **Native path:** 4 native intents (0.1/1/10 ETH + zero-value GAP-1 probe); 118 new branches vs prior campaign
+- **Key invariants PASSED:**
   - `invariant_conservation`: Honest-mode pulled == pushed; purely-honest supply conserved
   - `invariant_boundaryClean`: Zero boundary balance in all token modes
-- **Limitation:** Short campaign (smoke-level). Full-duration campaign not yet run.
+  - `invariant_boundaryCleanNative`: Zero native balance held by boundary
+  - `invariant_nativeAccounting`: Native daily accounting matches ghost counters
+- **Prior campaign:** `5aa7f9f3` — 100,022 calls, 1,056 branches, 0 failures, 26/26 pass (pre-GAP-patches, ERC20-only)
+- **Log:** `test-logs/medusa_100k_native.log`
 
 ## 4. Known Limitations and Unresolved Assumptions
 
