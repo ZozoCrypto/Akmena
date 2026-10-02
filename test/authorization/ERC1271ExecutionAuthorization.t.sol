@@ -119,7 +119,9 @@ contract ERC1271ExecutionAuthorizationTest is Test {
 
         assertEq(target.calls(), 1);
         assertTrue(authorization.usedNonces(address(smartAgent), 0));
-        assertEq(_spentToday(), AMOUNT);
+        // GAP-1 hardening (2026-10-01): zero-value native intents do not
+        // consume the economic daily limit.
+        assertEq(_spentToday(), 0);
     }
 
     function test_RevokedERC1271AuthorizationCannotExecute() public {

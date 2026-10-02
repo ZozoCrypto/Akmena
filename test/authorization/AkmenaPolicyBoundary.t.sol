@@ -12,7 +12,7 @@ import {AkmenaExecutionAuthorization} from "../../src/authorization/AkmenaExecut
 contract DummyTarget {
     uint256 public calls;
 
-    function ping() external returns (bool) {
+    function ping() external payable returns (bool) {
         calls++;
         return true;
     }
@@ -100,7 +100,9 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
 
         assertEq(dailyLimit, 1000 ether);
 
-        assertEq(spentToday, amount);
+        // GAP-1 hardening (2026-10-01): zero-value native intents do not
+        // consume the economic daily limit (no funds move).
+        assertEq(spentToday, 0);
 
         assertFalse(requireEscrow);
     }
@@ -146,17 +148,50 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
 
         boundary.setAgentPolicy(aiAgentHotWallet, 100 ether, 100 ether, false);
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory first = _intent(60 ether, 0);
-
+        // GAP-1 hardening: use native WITH value (not zero-value) to test daily limit.
+        // Zero-value native intents no longer consume the economic limit.
         bytes memory payload = abi.encodeWithSelector(DummyTarget.ping.selector);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory first =
+            AkmenaExecutionAuthorization.ExecutionIntent({
+                operator: humanOperator,
+                agent: aiAgentHotWallet,
+                target: address(target),
+                selector: DummyTarget.ping.selector,
+                asset: address(0),
+                calldataHash: keccak256(payload),
+                amount: 60 ether,
+                value: 60 ether,
+                proofModuleKey: bytes32(0),
+                proofId: 0,
+                nonce: 0,
+                validAfter: block.timestamp,
+                deadline: block.timestamp + 1 hours
+            });
 
         bytes memory firstSignature = _sign(first);
 
+        vm.deal(aiAgentHotWallet, 200 ether);
         vm.prank(aiAgentHotWallet);
 
-        boundary.executeAuthorizedAgentCall(first, payload, firstSignature);
+        boundary.executeAuthorizedAgentCall{value: 60 ether}(first, payload, firstSignature);
 
-        AkmenaExecutionAuthorization.ExecutionIntent memory second = _intent(41 ether, 1);
+        AkmenaExecutionAuthorization.ExecutionIntent memory second =
+            AkmenaExecutionAuthorization.ExecutionIntent({
+                operator: humanOperator,
+                agent: aiAgentHotWallet,
+                target: address(target),
+                selector: DummyTarget.ping.selector,
+                asset: address(0),
+                calldataHash: keccak256(payload),
+                amount: 41 ether,
+                value: 41 ether,
+                proofModuleKey: bytes32(0),
+                proofId: 0,
+                nonce: 1,
+                validAfter: block.timestamp,
+                deadline: block.timestamp + 1 hours
+            });
 
         bytes memory secondSignature = _sign(second);
 
@@ -164,7 +199,7 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
 
         vm.expectRevert(AkmenaPolicyBoundary.PolicyExceeded.selector);
 
-        boundary.executeAuthorizedAgentCall(second, payload, secondSignature);
+        boundary.executeAuthorizedAgentCall{value: 41 ether}(second, payload, secondSignature);
 
         assertEq(target.calls(), 1);
     }
