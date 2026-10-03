@@ -45,3 +45,9 @@ __pycache__/
 
 # Frontend build output
 frontend/dist/
+
+# Build/test artifacts (large, regenerable)
+crytic-export/
+fuzz-corpus/
+out/
+cache/
