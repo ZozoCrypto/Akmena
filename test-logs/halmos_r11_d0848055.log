@@ -1,0 +1,765 @@
+Halmos version: halmos 0.3.3
+Candidate: d0848055e0545f24c9bb3b32df4c96fe57447e10
+Started: 2026-10-03T19:38:30Z
+Command: halmos --match-contract 'BoundarySymbolicR11|R11Expansion' --function check_
+
+Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
+
+Compiling 375 files with Solc 0.8.28
+Solc 0.8.28 finished in 82.26s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/invariant/handlers/ModelDBoundaryHandlerMedusa.sol:488:5:
+    |
+488 |     function invariant_nativeAccounting() public view returns (bool) {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/attack/phase_p_execution_authorization/AKMAdmissionBattery.t.sol:147:5:
+    |
+147 |     function test_NonUpgradeable() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/attack/phase_p_execution_authorization/AKMAdmissionBattery.t.sol:164:5:
+    |
+164 |     function test_FixedSupply() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/attack/phase_p_execution_authorization/MaliciousTokenBattery.t.sol:36:5:
+   |
+36 |     function transferFrom(address, address, uint256)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/attack/phase_p_execution_authorization/MaliciousTokenBattery.t.sol:44:5:
+   |
+44 |     function transfer(address, uint256) public override returns (bool) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/attack/phase_p_execution_authorization/MaliciousTokenBattery.t.sol:154:5:
+    |
+154 |     function onTransfer(address to, uint256 amount) external {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/fork/EIP712V2Fork.t.sol:154:5:
+    |
+154 |     function test_V2SignatureRecoversAgent() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/privacy/GrokReviewInvariants.t.sol:12:5:
+   |
+12 |     function verifyProof(uint256[2] calldata, uint256[2][2] calldata, uint256[2] calldata, uint256[5] calldata)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/privacy/GrokReviewInvariants.t.sol:82:5:
+   |
+82 |     function test_VerifierImmutableNoAdmin() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/privacy/PolicyBypassHazard.t.sol:80:5:
+   |
+80 |     function verifyProof(uint256[2] calldata, uint256[2][2] calldata, uint256[2] calldata, uint256[5] calldata)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/AttestationEngine.sol:25:9
+   │
+25 │         emit AttestationRecorded(subject, msg.sender, attestationHash);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/AttestationEngine.sol:53:9
+   │
+53 │         emit AttestationRecorded(subject, attester, attestationHash);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/CapabilityEngine.sol:25:9
+   │
+25 │         emit CapabilityGranted(identity, capability);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/CapabilityEngine.sol:42:9
+   │
+42 │         emit CapabilityRevoked(identity, capability);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/DelegationEngine.sol:54:13
+   │
+54 │             emit DelegateSet(identity, delegate, capability, deadline, true);
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/authorization/DelegationEngine.sol:60:13
+   │
+60 │             emit DelegateSet(identity, delegate, capability, deadline, false);
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/authorization/DelegationEngine.sol:108:9
+    │
+108 │         emit DelegateSet(identity, delegate, capability, deadline, status);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/authorization/DelegationEngine.sol:131:9
+    │
+131 │         IIdentity(identity).identityId();
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/authorization/AkmenaPolicyBoundary.sol:320:46
+    │
+320 │         (address moduleAddr, bool active,) = core.getModule(intent.proofModuleKey);
+    │                                              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/authorization/AkmenaPolicyBoundary.sol:487:55
+    │
+487 │             (bool success, bytes memory returnData) = intent.target.call{value: msg.value}(payload);
+    │                                                       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/authorization/AkmenaPolicyBoundary.sol:484:9
+    │
+484 │         executionAuthorization.verifyAndConsume(intent, payload, msg.value, signature);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/authorization/AkmenaPolicyBoundary.sol:547:60
+    │
+547 │             (address moduleAddress, bool moduleEnabled,) = core.getModule(intent.proofModuleKey);
+    │                                                            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/AgreementEngine.sol:25:9
+   │
+25 │         emit AgreementCreated(agreementId, msg.sender, partyB);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/AgreementEngine.sol:40:9
+   │
+40 │         emit AgreementExecuted(agreementId);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/DiscoveryEngine.sol:15:9
+   │
+15 │         emit AgentRegistered(msg.sender, category, metadataURI);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/DiscoveryEngine.sol:22:9
+   │
+22 │         emit AgentStatusUpdated(msg.sender, isActive);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/MarketplaceEngine.sol:22:9
+   │
+22 │         emit TaskCreated(currentId, msg.sender, reward);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/MarketplaceEngine.sol:40:9
+   │
+40 │         emit TaskAssigned(taskId, assignee);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/autonomous/MarketplaceEngine.sol:53:9
+   │
+53 │         emit TaskCompleted(taskId);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[missing-events-access-control]: `pendingDeployer` is changed without an event but is used for access control
+   ╭▸ src/core/AkmenaCore.sol:70:9
+   │
+70 │         pendingDeployer = newDeployer;
+   │         ━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[missing-events-access-control]: `deployer` is changed without an event but is used for access control
+   ╭▸ src/core/AkmenaCore.sol:84:9
+   │
+84 │         deployer = pendingDeployer;
+   │         ━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[missing-events-access-control]: `pendingDeployer` is changed without an event but is used for access control
+   ╭▸ src/core/AkmenaCore.sol:85:9
+   │
+85 │         pendingDeployer = address(0);
+   │         ━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/core/AkmenaCore.sol:110:9
+    │
+110 │         emit ModuleRegistered(key, moduleAddress, version);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/core/AkmenaCore.sol:112:9
+    │
+112 │         emit ModuleEnabled(key, true);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/core/AkmenaCore.sol:120:9
+    │
+120 │         emit ModuleEnabled(key, status);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+    ╭▸ src/core/AkmenaCore.sol:146:31
+    │
+146 │     function setPauseGuardian(address guardian_) external onlyDeployer {
+    │                               ━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EconomicCommitmentEngine.sol:123:9
+    │
+123 │ ┏         emit EconomicCommitmentCreated(
+124 │ ┃             commitmentId, agreementId, agreementData.partyA, agreementData.partyB, asset_, amount
+125 │ ┃         );
+    │ ┗━━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EconomicCommitmentEngine.sol:172:9
+    │
+172 │         emit EconomicEscrowAttached(commitmentId, escrowId);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EconomicCommitmentEngine.sol:232:9
+    │
+232 │ ┏         emit EconomicSettlementRecorded(
+233 │ ┃             settlementId, commitmentId, commitment.escrowId, commitment.payer, commitment.payee, commitment.amount
+234 │ ┃         );
+    │ ┗━━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EconomicCommitmentEngine.sol:266:9
+    │
+266 │         emit EconomicRefundFinalized(commitmentId, commitment.escrowId);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EscrowEngine.sol:147:9
+    │
+147 │         emit EscrowCreated(escrowId, buyer, seller, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EscrowEngine.sol:148:9
+    │
+148 │         emit EscrowCreatedWithAsset(escrowId, buyer, seller, asset_, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EscrowEngine.sol:186:9
+    │
+186 │         emit EscrowReleased(escrowId);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/economics/EscrowEngine.sol:222:9
+    │
+222 │         emit EscrowRefunded(escrowId);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/economics/PaymentsEngine.sol:18:9
+   │
+18 │         emit PaymentExecuted(from, to, amount);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/economics/SettlementEngine.sol:21:9
+   │
+21 │         emit SettlementRecorded(settlementId, payer, payee, amount);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/identity/IdentityBase.sol:30:9
+   │
+30 │         emit IdentityActivated(identityId_);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+   ╭▸ src/identity/IdentityClone.sol:19:58
+   │
+19 │     function initialize(uint256 id_, IdentityType type_, address owner_) external {
+   │                                                          ━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/identity/IdentityFactory.sol:59:9
+   │
+59 │         emit IdentityCreated(clone, newId, identityType);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/marketplace/TaskMarketplace.sol:34:24
+   │
+34 │             createdAt: uint64(block.timestamp),
+   │                        ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/marketplace/TaskMarketplace.sol:73:28
+   │
+73 │         task.completedAt = uint64(block.timestamp);
+   │                            ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/memory/MemoryEngine.sol:14:9
+   │
+14 │         emit RootCommitted(key, rootHash);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/orchestration/WorkflowEngine.sol:84:9
+   │
+84 │         emit WorkflowInitialized(workflowId, identityId, msg.sender);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/orchestration/WorkflowEngine.sol:86:9
+   │
+86 │         emit WorkflowAdvanced(workflowId, WorkflowStep.Initialized);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/orchestration/WorkflowEngine.sol:123:9
+    │
+123 │         emit WorkflowAdvanced(workflowId, WorkflowStep.SettlementComplete);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/orchestration/WorkflowEngine.sol:131:9
+    │
+131 │         emit WorkflowAdvanced(workflowId, WorkflowStep.MemoryCommitted);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/orchestration/WorkflowEngine.sol:139:9
+    │
+139 │         emit WorkflowAdvanced(workflowId, WorkflowStep.ReputationUpdated);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/orchestration/WorkflowEngine.sol:143:49
+    │
+143 │         (address moduleAddr, bool isEnabled,) = IAkmenaCoreRegistry(akmenaCore).getModule(key);
+    │                                                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+   ╭▸ src/privacy/PrivacyEngine.sol:56:27
+   │
+56 │         (bool success,) = stealthRecipient.call{value: amount}("");
+   │                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:115:17
+    │
+115 │                 PoseidonT3.hash([uint256(currentZero), uint256(currentZero)])
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:139:9
+    │
+139 │         emit Deposit(_commitment, leafIndex, block.timestamp);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:151:21
+    │
+151 │                     PoseidonT3.hash([uint256(currentHash), uint256(zeros[i])])
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:155:21
+    │
+155 │                     PoseidonT3.hash([uint256(filledSubtrees[i]), uint256(currentHash)])
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:162:53
+    │
+162 │         currentRootIndex = (currentRootIndex + 1) % uint32(ROOT_HISTORY_SIZE);
+    │                                                     ━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:223:27
+    │
+223 │             (bool okR,) = _recipient.call{value: recipientAmount}("");
+    │                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:227:27
+    │
+227 │             (bool okF,) = _relayer.call{value: _fee}("");
+    │                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-no-eth]: external call can be reentered before `nullifierHashes` is updated
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:214:14
+    │
+214 │         if (!VERIFIER.verifyProof(_pA, _pB, _pC, pubSignals)) revert InvalidProof();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:197:9
+    │
+197 │         address payable _relayer,
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:196:9
+    │
+196 │         address payable _recipient,
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/privacy/v2/AkmenaPrivatePool.sol:218:9
+    │
+218 │         emit Withdrawal(_recipient, _nullifierHash, _relayer, _fee);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/registry/AgentRegistry.sol:86:24
+   │
+86 │             createdAt: uint64(block.timestamp),
+   │                        ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/registry/AgentRegistry.sol:87:24
+   │
+87 │             updatedAt: uint64(block.timestamp),
+   │                        ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/registry/AgentRegistry.sol:123:27
+    │
+123 │         agent.updatedAt = uint64(block.timestamp);
+    │                           ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/registry/AgentRegistry.sol:145:27
+    │
+145 │         agent.updatedAt = uint64(block.timestamp);
+    │                           ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[missing-events-access-control]: `identityFactory` is changed without an event but is used for access control
+   ╭▸ src/registry/Registry.sol:44:9
+   │
+44 │         identityFactory = factory;
+   │         ━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/reputation/ReputationEngine.sol:14:9
+   │
+14 │         emit ReputationUpdated(agent, score);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/token/extensions/AKMAuthorization.sol:94:13
+   │
+94 │         if (timestamp <= validAfter) {
+   │             ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/token/extensions/AKMAuthorization.sol:98:13
+   │
+98 │         if (timestamp >= validBefore) {
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/token/extensions/AKMAuthorization.sol:80:9
+   │
+80 │         emit AuthorizationUsed(authorizer, nonce);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/token/extensions/AKMPayments.sol:104:9
+    │
+104 │         emit AuthorizationTransfer(from, to, value, nonce);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_AuthorizationReplayLifecycle.t.sol:128:63
+    │
+128 │             agent: agent, lane: lane, nonce: nonce, deadline: block.timestamp + lifetime
+    │                                                               ━━━━━━━━━━━━━━━
+    ‡
+306 │         vm.warp(expired.deadline + 1);
+    │         ───────────────────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_AuthorizationReplayLifecycle.t.sol:128:63
+    │
+128 │             agent: agent, lane: lane, nonce: nonce, deadline: block.timestamp + lifetime
+    │                                                               ━━━━━━━━━━━━━━━
+    ‡
+404 │         vm.warp(authorization.deadline + 1);
+    │         ─────────────────────────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_PolicyDailyReset.t.sol:77:25
+    │
+ 77 │             validAfter: block.timestamp,
+    │                         ━━━━━━━━━━━━━━━
+    ‡
+164 │         vm.warp(block.timestamp + 1 days + 1);
+    │         ───────────────────────────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_PolicyDailyReset.t.sol:78:23
+    │
+ 78 │             deadline: block.timestamp + 1 days
+    │                       ━━━━━━━━━━━━━━━
+    ‡
+164 │         vm.warp(block.timestamp + 1 days + 1);
+    │         ───────────────────────────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_PolicyDailyReset.t.sol:164:17
+    │
+164 │         vm.warp(block.timestamp + 1 days + 1);
+    │         ────────━━━━━━━━━━━━━━━────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+    ╭▸ test/attack/phase_p_execution_authorization/Attack_SignedDelegationIntegrity.t.sol:120:28
+    │
+120 │         uint256 deadline = block.timestamp + 1 hours;
+    │                            ━━━━━━━━━━━━━━━
+    ‡
+124 │         vm.warp(deadline + 1);
+    │         ───────────────────── `vm.warp` changes this environment here
+    │
+    ├ help: capture it with `vm.getBlockTimestamp()` instead
+    ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+
+Running 3 tests for test/symbolic/BoundarySymbolicR11.t.sol:BoundarySymbolicR11
+[32m[PASS][0m check_NonceReplayReverts(address,uint256,address,address,address,uint256,bytes,bytes) (paths: 175, time: 2.91s, bounds: [payload=[0, 65, 1024], signature=[0, 65, 1024]])
+[32m[PASS][0m check_PauseBlocksExecution(address,address,address,uint256,uint256,bytes,bytes) (paths: 12, time: 0.21s, bounds: [payload=[0, 65, 1024], signature=[0, 65, 1024]])
+[32m[PASS][0m check_ZeroOperatorReverts(address,address,uint256,uint256,bytes,bytes) (paths: 47, time: 0.40s, bounds: [payload=[0, 65, 1024], signature=[0, 65, 1024]])
+Symbolic test result: 3 passed; 0 failed; time: 3.79s
+
+Running 10 tests for test/symbolic/R11Expansion.t.sol:R11Expansion
+[32m[PASS][0m check_OnlyAllowlistAdminCanAddAdapter(address) (paths: 2, time: 0.02s, bounds: [])
+[32m[PASS][0m check_OnlyAllowlistAdminCanSetStandardDebit(address) (paths: 2, time: 0.02s, bounds: [])
+[32m[PASS][0m check_OnlyAllowlistAdminCanTransferAdmin(address,address) (paths: 3, time: 0.03s, bounds: [])
+[32m[PASS][0m check_OnlyEmergencyAdminCanRemoveAdapter(address) (paths: 2, time: 0.02s, bounds: [])
+[32m[PASS][0m check_OnlyEmergencyAdminCanTransferAdmin(address,address) (paths: 3, time: 0.03s, bounds: [])
+[32m[PASS][0m check_RefundOnlyBySeller(address,uint256) (paths: 6, time: 0.35s, bounds: [])
+[32m[PASS][0m check_ReleaseNonexistentReverts(uint256,address) (paths: 2, time: 0.02s, bounds: [])
+[32m[PASS][0m check_ReleaseOnlyByBuyer(address,uint256) (paths: 6, time: 0.20s, bounds: [])
+[32m[PASS][0m check_ZeroValueNativeHeadroomGate(uint256,uint256,uint256,bytes,bytes) (paths: 9, time: 0.37s, bounds: [payload=[0, 65, 1024], signature=[0, 65, 1024]])
+[32m[PASS][0m check_ZeroValueNativeHeadroomPreSpent(uint256,uint256,uint256,uint256,bytes,bytes) (paths: 27, time: 1.03s, bounds: [payload=[0, 65, 1024], signature=[0, 65, 1024]])
+Symbolic test result: 10 passed; 0 failed; time: 2.20s
+EXIT:0
