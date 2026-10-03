@@ -181,12 +181,61 @@ When the contract candidate is frozen:
 
 ---
 
-## 9. Open Questions for Elijah/Aegis
+## 9. Open Questions — Answered (2026-10-03)
 
-1. Should the frontend support multiple assets or start with AKM only?
-2. Should the policy dashboard allow setting policies for other operators' agents (admin view) or only the connected wallet's agents?
-3. For the Agent Commerce Playground demo: what specific commerce task should the agent execute?
-4. Should escrow creation be in the MVP frontend or deferred?
+### Q1: Multiple assets or AKM only?
+**Recommendation: AKM only for MVP.**
+
+Rationale: `setAgentAssetPolicy` supports per-asset policies, but multi-asset UI
+adds significant complexity (per-asset allowance tracking, per-asset spend views).
+AKM is the canonical asset with a 9/9 admission battery. Get the single-asset
+flow right, then generalize. The interface matrix already structures policies
+per-asset, so the extension point is clean.
+
+### Q2: Admin view or own agents only?
+**Recommendation: Connected wallet's agents only for MVP.**
+
+Rationale: In Model D, the operator sets policy for their own agents. The
+`setAgentPolicy` function technically allows setting policy for any agent address,
+but the UI should scope to the connected wallet to avoid confusion about authority.
+An admin view (for allowlistAdmin/emergencyAdmin roles) is a separate privileged
+interface and should not be in the operator-facing MVP.
+
+### Q3: Agent Commerce Playground demo task?
+**Recommendation: Bounded token purchase via allowlisted adapter.**
+
+Specific flow:
+1. Operator sets a 0.1 ETH (or equivalent AKM) policy for the agent
+2. Operator approves the boundary allowance
+3. Agent discovers a simple commerce task (e.g., purchase a test NFT or swap tokens via the allowlisted adapter)
+4. UI shows the EIP-712 intent, the settlement transaction, and the exact amounts
+5. Operator revokes the allowance — subsequent agent attempts fail closed
+6. UI shows the failed attempt and explains why (allowance = 0)
+
+This demonstrates the full Model D loop: policy → allowance → execution → revocation → fail-closed.
+
+### Q4: Escrow in MVP?
+**Recommendation: Defer to Phase 2.**
+
+Rationale: Escrow is a separate workflow from the core agent execution loop.
+The MVP should nail the allowance manager, policy dashboard, and intent execution.
+Escrow UI (create/release/refund) adds significant scope without being on the
+critical path for the grant demo or Model D validation.
+
+---
+
+## 10. CI Acceptance Criterion (Per Aegis)
+
+> **No frontend configuration may reference a contract marked deprecated, dead, deferred, or out-of-scope.**
+
+This is implemented as `frontend/src/config.check.ts` — a CI script that fails
+if any address in `config.ts` matches the denylist.
+
+**Denylist (auto-generated from decisions):**
+- `0xdC3fC3e840b14Ce345638549D0d4617b75cD89b9` — DEPRECATED (G-5)
+- `0x7e5095d10a4B71220938b816398918239981030a` — DEAD (PrivacyEngine deferred)
+
+Run: `npx tsx src/config.check.ts` (or integrate into `npm run build`)
 
 ---
 
