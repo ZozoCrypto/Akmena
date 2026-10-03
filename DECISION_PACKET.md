@@ -95,11 +95,11 @@ Safe (2-of-3)
 
 ---
 
-## Outstanding Items Needing Elijah
+## Outstanding Items
 
-| Item | What's needed |
-|------|---------------|
-| 2B | Designate 2 additional Safe owners |
-| 2C | Designate pause guardian address |
-| D-4 | EIP-712 metadata fix (MUSE can do — `deployment.json` version "1" → "2") |
-| G-7 | Execute timelock + Safe deployment (after owners designated) |
+| Item | Status |
+|------|--------|
+| 2B | **Temporary build/rehearsal addresses designated** (2026-10-03); final production addresses pending |
+| 2C | **Temporary pause guardian designated** (2026-10-03); final production address pending |
+| D-4 | ✅ FIXED (deployment.json EIP-712 version 1→2) |
+| G-7 | ⏳ Awaiting clean contract candidate; verify topology on fork before live execution |
