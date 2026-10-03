@@ -1,0 +1,1396 @@
+Candidate: d0848055e0545f24c9bb3b32df4c96fe57447e10
+Started: 2026-10-03T18:46:51Z
+No files changed, compilation skipped
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_PolicyDailyReset.t.sol:AttackPolicyDailyResetTest
+[PASS] test_DailyLimitIsConsumed() (gas: 176174)
+[PASS] test_DailyLimitShouldResetAfterOneDay() (gas: 305227)
+[PASS] test_SpendAboveDailyLimitIsRejectedSameDay() (gas: 332667)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 46.01ms (19.99ms CPU time)
+
+Ran 9 tests for test/attack/phase_p_execution_authorization/AKMAdmissionBattery.t.sol:AKMAdmissionBatteryTest
+[PASS] test_C1_ExactTransfer() (gas: 268545)
+[PASS] test_C2_AmountHonestPull() (gas: 248977)
+[PASS] test_C3_ExactAllowanceAccounting() (gas: 493402)
+[PASS] test_C4_NoSilentSuccess() (gas: 197227)
+[PASS] test_C5_NoSenderHooks() (gas: 232404)
+[PASS] test_ERC3009_DoesNotAffectStandardPath() (gas: 76803)
+[PASS] test_FixedSupply() (gas: 27762)
+[PASS] test_NoPauseNoBlacklist() (gas: 61579)
+[PASS] test_NonUpgradeable() (gas: 5059)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 58.15ms (22.91ms CPU time)
+
+Ran 1 test for test/unit/AKMAuthorization.t.sol:AKMAuthorizationTest
+[PASS] testAuthorizationStartsUnused() (gas: 7876)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 580.00µs (22.56µs CPU time)
+
+Ran 1 test for test/unit/AKMPayments.t.sol:AKMPaymentsTest
+[PASS] testPaymentEngineCompiles() (gas: 207)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 462.56µs (9.12µs CPU time)
+
+Ran 8 tests for test/unit/AgentAnalyticsEngine.t.sol:AgentAnalyticsEngineTest
+[PASS] testAnalyticsCanBeUpdated() (gas: 224408)
+[PASS] testAnalyticsStoredCorrectly() (gas: 177370)
+[PASS] testDifferentAgentsHaveSeparateAnalytics() (gas: 353980)
+[PASS] testHasAnalyticsReturnsTrue() (gas: 165851)
+[PASS] testTimestampSet() (gas: 177082)
+[PASS] testUnknownAgentReturnsDefaultStruct() (gas: 19017)
+[PASS] testUnknownAgentReturnsFalse() (gas: 7677)
+[PASS] testUpdateAnalytics() (gas: 165861)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 979.00µs (396.96µs CPU time)
+
+Ran 8 tests for test/unit/AgentAvailabilityEngine.t.sol:AgentAvailabilityEngineTest
+[PASS] testAvailabilityCanChange() (gas: 136950)
+[PASS] testAvailableReturnsTrue() (gas: 98409)
+[PASS] testBusyReturnsFalse() (gas: 98433)
+[PASS] testOfflineReturnsFalse() (gas: 78498)
+[PASS] testSetAvailability() (gas: 98430)
+[PASS] testStatusPersists() (gas: 103173)
+[PASS] testTimestampUpdates() (gas: 103145)
+[PASS] testUnknownAgentReturnsDefaultStruct() (gas: 12624)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 792.97µs (227.93µs CPU time)
+
+Ran 8 tests for test/unit/AgentCredentialEngine.t.sol:AgentCredentialEngineTest
+[PASS] testAddCredential() (gas: 153227)
+[PASS] testCannotAddEmptyCredential() (gas: 31140)
+[PASS] testCredentialStoredCorrectly() (gas: 156650)
+[PASS] testDifferentAgentsHaveSeparateCredentials() (gas: 310384)
+[PASS] testHasCredentialReturnsTrue() (gas: 144863)
+[PASS] testIssuedTimestampSet() (gas: 153303)
+[PASS] testMultipleCredentialsAccumulate() (gas: 408766)
+[PASS] testUnknownCredentialReturnsFalse() (gas: 7900)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 5.77ms (5.21ms CPU time)
+
+Ran 8 tests for test/unit/AgentDiscovery.t.sol:AgentDiscoveryTest
+[PASS] testCannotIndexEmptyCategory() (gas: 32612)
+[PASS] testCannotIndexTwice() (gas: 125149)
+[PASS] testCategoryContainsIndexedAgent() (gas: 103383)
+[PASS] testGetAgentsByCategory() (gas: 103295)
+[PASS] testIndexAgent() (gas: 99849)
+[PASS] testIsIndexedReturnsTrue() (gas: 99871)
+[PASS] testMultipleAgentsSameCategory() (gas: 180914)
+[PASS] testUnknownCategoryReturnsEmptyArray() (gas: 8747)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 878.33µs (300.83µs CPU time)
+
+Ran 8 tests for test/unit/AgentEarningsEngine.t.sol:AgentEarningsEngineTest
+[PASS] testCannotRecordZeroAmount() (gas: 30781)
+[PASS] testDifferentAgentsHaveSeparateEarnings() (gas: 240357)
+[PASS] testGetEarningsReturnsCorrectData() (gas: 127289)
+[PASS] testRecordEarnings() (gas: 120269)
+[PASS] testTimestampSet() (gas: 127157)
+[PASS] testTotalEarnedAccumulates() (gas: 158958)
+[PASS] testTransactionCountAccumulates() (gas: 158968)
+[PASS] testUnknownAgentReturnsZeroTotals() (gas: 15094)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.33ms (258.12µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_PolicyMutationAuthority.t.sol:AttackPolicyMutationAuthorityTest
+[PASS] test_AttackerCannotModifyVictimOperatorsPolicy() (gas: 239177)
+[PASS] test_AttackerPolicyDoesNotBecomeVictimPolicy() (gas: 259668)
+[PASS] test_OperatorCannotOverwriteAnotherOperatorsPolicy() (gas: 259959)
+[PASS] test_PoliciesAreIsolatedByOperatorAndAgent() (gas: 255468)
+[PASS] test_ZeroPolicyIsStillNotImplicitAuthorization() (gas: 21022)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 19.92ms (832.35µs CPU time)
+
+Ran 9 tests for test/unit/AgentGovernanceEngine.t.sol:AgentGovernanceEngineTest
+[PASS] testCannotCreateDuplicateProposal() (gas: 149667)
+[PASS] testCannotCreateEmptyDescription() (gas: 32558)
+[PASS] testCannotExecuteTwice() (gas: 199187)
+[PASS] testCreateProposal() (gas: 124770)
+[PASS] testExecuteProposal() (gas: 183004)
+[PASS] testProposalStoredCorrectly() (gas: 138282)
+[PASS] testRejectProposal() (gas: 182953)
+[PASS] testTimestampSet() (gas: 135003)
+[PASS] testUnknownProposalReturnsFalse() (gas: 7713)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.83ms (390.34µs CPU time)
+
+Ran 2 tests for test/attack/phase_k_privacy/Attack_PrivacyEngine.t.sol:Attack_PrivacyEngineTest
+[PASS] test_Attack_DoubleSpendNullifier() (gas: 197331)
+[PASS] test_Attack_InvalidCommitment() (gas: 37736)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 766.27µs (143.90µs CPU time)
+
+Ran 9 tests for test/unit/AgentMatchingEngine.t.sol:AgentMatchingEngineTest
+[PASS] testCannotScoreAgentTwice() (gas: 100596)
+[PASS] testCannotUseZeroScore() (gas: 32259)
+[PASS] testDifferentAgentsCanExist() (gas: 156245)
+[PASS] testExistsReturnsTrue() (gas: 76054)
+[PASS] testGetUnknownMatchReverts() (gas: 11562)
+[PASS] testGetUnknownScoreReverts() (gas: 10449)
+[PASS] testMatchStoredCorrectly() (gas: 78724)
+[PASS] testSetScore() (gas: 78257)
+[PASS] testUnknownAgentReturnsFalse() (gas: 7692)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 836.08µs (266.02µs CPU time)
+
+Ran 1 test for test/attack/phase_k_privacy/Attack_PrivacyProofCallback.t.sol:Attack_PrivacyProofCallbackTest
+[PASS] test_RecipientCallbackCannotObservePrivacyProof() (gas: 273809)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.59ms (141.06µs CPU time)
+
+Ran 6 tests for test/attack/phase_k_privacy/Attack_PrivacyRecipientBinding.t.sol:Attack_PrivacyRecipientBindingTest
+[PASS] test_Attack_RecipientSubstitutionFails() (gas: 134622)
+[PASS] test_LegitimateSettlementToCommittedRecipient() (gas: 187233)
+[PASS] test_OldUnboundCommitmentCannotBeUsed() (gas: 118867)
+[PASS] test_ReplayStillFails() (gas: 197079)
+[PASS] test_WrongAmountFails() (gas: 119005)
+[PASS] test_WrongSecretFails() (gas: 119037)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.76ms (881.62µs CPU time)
+
+Ran 8 tests for test/unit/AgentPortfolioEngine.t.sol:AgentPortfolioEngineTest
+[PASS] testAddPortfolioItem() (gas: 146871)
+[PASS] testCannotAddEmptyTitle() (gas: 32829)
+[PASS] testCannotAddEmptyURI() (gas: 32664)
+[PASS] testDifferentAgentsHaveSeparatePortfolios() (gas: 293102)
+[PASS] testPortfolioCountAccumulates() (gas: 268488)
+[PASS] testPortfolioStoredCorrectly() (gas: 163390)
+[PASS] testTimestampSet() (gas: 158906)
+[PASS] testUnknownAgentReturnsEmptyPortfolio() (gas: 7652)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 4.12ms (3.56ms CPU time)
+
+Ran 2 tests for test/attack/phase_k_privacy/Attack_PrivacyValueBinding.t.sol:AttackPrivacyValueBindingTest
+[PASS] test_ExactDepositAmountCanBeSettled() (gas: 174584)
+[PASS] test_UndercollateralizedCommitmentCannotRedeemPooledBalance() (gas: 199616)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.18ms (171.38µs CPU time)
+
+Ran 9 tests for test/unit/AgentRatingEngine.t.sol:AgentRatingEngineTest
+[PASS] testAverageRating() (gas: 161702)
+[PASS] testCannotRateTwice() (gas: 124343)
+[PASS] testCannotUseScoreAboveFive() (gas: 31150)
+[PASS] testCannotUseZeroScore() (gas: 31152)
+[PASS] testHasRatedReturnsTrue() (gas: 102042)
+[PASS] testRatingCountAccumulates() (gas: 159369)
+[PASS] testSubmitRating() (gas: 101908)
+[PASS] testUnknownAgentAverageReturnsZero() (gas: 7730)
+[PASS] testUnknownAgentCountReturnsZero() (gas: 7672)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 2.07ms (311.06µs CPU time)
+
+Ran 11 tests for test/unit/AgentRegistry.t.sol:AgentRegistryTest
+[PASS] testCannotUpdateUnknownAgent() (gas: 33121)
+[PASS] testCannotUpdateWithEmptyMetadata() (gas: 192625)
+[PASS] testCannotVerifyUnknownAgent() (gas: 32281)
+[PASS] testInitialAgentCountIsZero() (gas: 7622)
+[PASS] testNonOwnerCannotVerifyAgent() (gas: 197292)
+[PASS] testOwnerOfReturnsCorrectOwner() (gas: 175155)
+[PASS] testOwnerOfUnknownAgentReverts() (gas: 10554)
+[PASS] testRegisterAgent() (gas: 182804)
+[PASS] testRegistryOwnerCanVerifyAgent() (gas: 206324)
+[PASS] testUpdateMetadata() (gas: 219568)
+[PASS] testVerificationStateUpdates() (gas: 247360)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 1.59ms (897.60µs CPU time)
+
+Ran 7 tests for test/attack/phase_p_execution_authorization/Attack_ProductionAuthorizationBoundary.t.sol:Attack_ProductionAuthorizationBoundaryTest
+[PASS] test_AmountFieldMutationInvalidatesSignature() (gas: 77743)
+[PASS] test_CalldataMutationRejectedAtProductionBoundary() (gas: 85054)
+[PASS] test_ReplayRejectedAtProductionBoundary() (gas: 224261)
+[PASS] test_TargetFieldMutationInvalidatesSignature() (gas: 85970)
+[PASS] test_TargetMutationRejectedAtProductionBoundary() (gas: 15129)
+[PASS] test_ValidProductionAuthorizationExecutes() (gas: 162910)
+[PASS] test_ValueFieldMutationInvalidatesSignature() (gas: 63269)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 8.07ms (4.49ms CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_ProductionEconomicBinding.t.sol:AttackProductionEconomicBindingTest
+[PASS] test_ProductionBoundaryAcceptsMatchingEconomicPayload() (gas: 196648)
+[PASS] test_ProductionBoundaryBindsEconomicPayload() (gas: 88715)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.88ms (601.20µs CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_ProductionEconomicSemanticBinding.t.sol:AttackProductionEconomicSemanticBindingTest
+[PASS] test_DeclaredAmountAndPayloadAmountCanDiffer() (gas: 163164)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.83ms (339.74µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_ProductionExecutionSemantics.t.sol:AttackProductionExecutionSemanticsTest
+[PASS] test_CalldataActuallyExecutedMatchesAuthorizedHash() (gas: 242593)
+[PASS] test_DownstreamTargetReceivesExactAuthorizedValue() (gas: 291124)
+[PASS] test_DownstreamTargetSeesPolicyBoundaryAsSender() (gas: 293401)
+[PASS] test_MutatedPayloadCannotReachTarget() (gas: 90869)
+[PASS] test_UnauthorizedValueCannotBeForwarded() (gas: 75456)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 4.61ms (1.54ms CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_ProductionReentrancy.t.sol:AttackProductionReentrancyTest
+[PASS] test_DifferentNonceReentryMustNotBypassDailyPolicy() (gas: 559933)
+[PASS] test_SameNonceReentryMustFail() (gas: 520125)
+[PASS] test_SequentialAuthorizedSpendsRespectDailyPolicy() (gas: 276102)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.34ms (1.80ms CPU time)
+
+Ran 7 tests for test/attack/phase_l_proof_domain/Attack_ProofDomainConfusion.t.sol:Attack_ProofDomainConfusionTest
+[PASS] test_EscrowProofBindsAmount() (gas: 1170)
+[PASS] test_EscrowProofBindsSubject() (gas: 1192)
+[PASS] test_EscrowProofCannotValidateAsPrivacyProof() (gas: 1749)
+[PASS] test_PrivacyProofBindsAmount() (gas: 1147)
+[PASS] test_PrivacyProofBindsSubject() (gas: 1171)
+[PASS] test_PrivacyProofCannotValidateAsEscrowProof() (gas: 1695)
+[PASS] test_SameProofIdRemainsDomainSeparated() (gas: 2007)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 4.02ms (3.47ms CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_PythonEIP712Components.t.sol:Attack_PythonEIP712ComponentsTest
+[PASS] test_EIP712ComponentVector() (gas: 1070463)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.10ms (419.99µs CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_PythonEIP712Parity.t.sol:Attack_PythonEIP712ParityTest
+[PASS] test_DefinitivePythonParityVector() (gas: 1078079)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.07ms (3.47ms CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_SelfAdapterRejected.t.sol:Attack_SelfAdapterRejected
+[PASS] test_distinctAdapterEnableDisable() (gas: 112013)
+[PASS] test_enableSelfAdapterReverts() (gas: 41116)
+[PASS] test_revokeNonExistentSelfAdapterAllowed() (gas: 42435)
+[PASS] test_revokeSelfAdapterAllowed() (gas: 51345)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.49ms (269.60µs CPU time)
+
+Ran 9 tests for test/attack/phase_p_execution_authorization/Attack_SemanticIntentBinding.t.sol:Attack_SemanticIntentBindingTest
+[PASS] test_ContextMutationChangesIdentity() (gas: 17228)
+[PASS] test_ContextMutationInvalidatesOriginalSignature() (gas: 52560)
+[PASS] test_InvoiceAndRecipientCannotBothChange() (gas: 52507)
+[PASS] test_InvoiceSwapChangesContextIdentity() (gas: 17170)
+[PASS] test_OriginalSemanticIntentExecutes() (gas: 78299)
+[PASS] test_PurposeMutationChangesIdentity() (gas: 17227)
+[PASS] test_PurposeMutationInvalidatesOriginalSignature() (gas: 52247)
+[PASS] test_RecipientSwapChangesContextIdentity() (gas: 17191)
+[PASS] test_SemanticMutationCannotBypassReplayProtection() (gas: 124754)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 8.44ms (4.54ms CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_SemanticMemoryCopy.t.sol:Attack_SemanticMemoryCopyTest
+[PASS] test_MemoryStructCopyIsIndependent() (gas: 6109)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 542.80µs (35.03µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_SemanticSignatureInvalidation.t.sol:Attack_SemanticSignatureInvalidationTest
+[PASS] test_ContextAndPurposeMutationTogetherInvalidatesSignature() (gas: 74723)
+[PASS] test_ContextMutationInvalidatesOriginalSignature() (gas: 75135)
+[PASS] test_OriginalSignatureStillExecutesOriginalIntent() (gas: 78254)
+[PASS] test_PurposeMutationInvalidatesOriginalSignature() (gas: 75049)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 4.16ms (1.19ms CPU time)
+
+Ran 3 tests for test/attack/phase_b_money/Attack_SettlementFabrication.t.sol:Attack_SettlementFabricationTest
+[PASS] test_Attack_AnyoneCanFabricateSettlement() (gas: 140602)
+[PASS] test_Attack_AttackerCanChooseVictimAsPayer() (gas: 140547)
+[PASS] test_Attack_SettlementRequiresNoEconomicProof() (gas: 128953)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 842.88µs (243.16µs CPU time)
+
+Ran 6 tests for test/attack/phase_p_execution_authorization/Attack_SignatureIntegrity.t.sol:Attack_SignatureIntegrityTest
+[PASS] test_ExpandedSignatureFails() (gas: 60595)
+[PASS] test_OriginalSignatureExecutes() (gas: 74919)
+[PASS] test_RMutationFails() (gas: 49349)
+[PASS] test_SMutationFails() (gas: 49539)
+[PASS] test_TruncatedSignatureFails() (gas: 56646)
+[PASS] test_VMutationFails() (gas: 49351)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.20ms (1.26ms CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_SignatureIntentReplay.t.sol:Attack_SignatureIntentReplayTest
+[PASS] test_DifferentIntentProducesDifferentDigest() (gas: 15409)
+[PASS] test_OriginalAuthorizationExecutes() (gas: 74970)
+[PASS] test_SignatureCannotReplayWithDifferentDeadline() (gas: 49742)
+[PASS] test_SignatureCannotReplayWithDifferentLane() (gas: 49634)
+[PASS] test_SignatureCannotReplayWithDifferentNonce() (gas: 49677)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.01ms (1.09ms CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_SignatureIntentReplayDebug.t.sol:Attack_SignatureIntentReplayDebugTest
+[PASS] test_DifferentNonceProducesDifferentDigest() (gas: 21067)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 837.57µs (42.59µs CPU time)
+
+Ran 10 tests for test/attack/phase_p_execution_authorization/Attack_SignedDelegationIntegrity.t.sol:AttackSignedDelegationIntegrityTest
+[PASS] test_AttackerSignatureCannotAuthorizeOwnerIdentity() (gas: 81067)
+[PASS] test_ChangedCapabilityInvalidatesSignature() (gas: 68877)
+[PASS] test_ChangedDelegateInvalidatesSignature() (gas: 76820)
+[PASS] test_ChangedIdentityInvalidatesSignature() (gas: 68833)
+[PASS] test_DigestIsNonZero() (gas: 10579)
+[PASS] test_ExpiredSignatureCannotExecute() (gas: 69428)
+[PASS] test_NextNonceStartsAtZero() (gas: 9887)
+[PASS] test_OldOwnerCannotAuthorizeAfterOwnershipRotation() (gas: 107552)
+[PASS] test_SignedDelegationCannotReplay() (gas: 171105)
+[PASS] test_ValidOwnerSignatureCanSetDelegate() (gas: 123720)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 3.08ms (1.84ms CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_SmartAgentReentrancy.t.sol:AttackSmartAgentReentrancyTest
+[PASS] test_RedTeam_SmartAgentReentrancyCannotBypassDailyLimit() (gas: 460719)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.64ms (252.18µs CPU time)
+
+Ran 6 tests for test/attack/phase_p_execution_authorization/Attack_StructCalldataDifferential.t.sol:Attack_StructCalldataDifferentialTest
+[PASS] test_CancelledStructCannotExecute() (gas: 82497)
+[PASS] test_DifferentNonceWithSameStructShape() (gas: 114038)
+[PASS] test_ExecuteConsumesStructNonce() (gas: 57162)
+[PASS] test_ExecutedStructCannotCancel() (gas: 85030)
+[PASS] test_LowLevelStructReplay() (gas: 82536)
+[PASS] test_SeparateStructInstances() (gas: 85396)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.08ms (377.89µs CPU time)
+
+Ran 3 tests for test/attack/phase_b_money/Attack_TreasuryAccountingSpoof.t.sol:Attack_TreasuryAccountingSpoofTest
+[PASS] test_Attack_CannotFabricateTreasuryBalance() (gas: 55136)
+[PASS] test_Attack_NonOwnerCannotDisburse() (gas: 163818)
+[PASS] test_OwnerDisbursementMovesRealAKM() (gas: 214992)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.12ms (270.88µs CPU time)
+
+Ran 2 tests for test/attack/phase_b_money/Attack_TreasurySupplySpoof.t.sol:Attack_TreasurySupplySpoofTest
+[PASS] test_TreasuryHasNoIndependentSupplyState() (gas: 7611)
+[PASS] test_TreasuryReportsTokenSupply() (gas: 18397)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.01ms (42.96µs CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_UnauthorizedCapabilityMutation.t.sol:AttackUnauthorizedCapabilityMutationTest
+[PASS] test_AttackerCannotGrantCapabilityToVictim() (gas: 43396)
+[PASS] test_AttackerCannotRevokeVictimCapability() (gas: 97916)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 856.54µs (95.98µs CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_VMSignKeyBinding.t.sol:Attack_VMSignKeyBindingTest
+[PASS] test_DifferentKeysProduceDifferentAddresses() (gas: 3529)
+[PASS] test_DirectVmSignUsesRequestedKey() (gas: 20349)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.44ms (815.57µs CPU time)
+
+Ran 2 tests for test/attack/phase_b_money/Attack_ValueConservation.t.sol:Attack_ValueConservationTest
+[PASS] test_Attack_DoubleSpendViaRepeatedRelease() (gas: 114356)
+[PASS] test_Attack_ZeroValueEscrowGriefing() (gas: 38843)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.13ms (113.05µs CPU time)
+
+Ran 15 tests for test/authorization/AuthorizationResolver.t.sol:AuthorizationResolverTest
+[PASS] test_CapabilityAloneDoesNotAuthorizeDelegate() (gas: 101984)
+[PASS] test_DelegateAuthorizedOnlyWithCapabilityAndDelegation() (gas: 205989)
+[PASS] test_DelegationAloneDoesNotAuthorizeWithoutCapability() (gas: 100043)
+[PASS] test_ExpiredDelegationRejected() (gas: 166965)
+[PASS] test_OwnerAuthorizedOnlyWithCapability() (gas: 120386)
+[PASS] test_OwnerCanUseCapabilityWithoutDelegation() (gas: 94099)
+[PASS] test_OwnershipRotationRemovesOldOwnerAuthority() (gas: 161808)
+[PASS] test_RequireAuthorizedRevertsForUnauthorized() (gas: 31632)
+[PASS] test_RequireAuthorizedSucceedsForDelegate() (gas: 166380)
+[PASS] test_RequireAuthorizedSucceedsForOwner() (gas: 93933)
+[PASS] test_ThirdPartyRejected() (gas: 168518)
+[PASS] test_UnknownIdentityRejected() (gas: 15493)
+[PASS] test_WrongCapabilityRejected() (gas: 159819)
+[PASS] test_ZeroActorRejected() (gas: 7896)
+[PASS] test_ZeroCapabilityRejected() (gas: 10013)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 4.36ms (2.98ms CPU time)
+
+Ran 1 test for test/fuzz/AgentRegistryFuzz.t.sol:AgentRegistryFuzzTest
+[PASS] testFuzzRegisterAgent(bytes32,string) (runs: 1000, μ: 222984, ~: 199042)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 165.49ms (164.34ms CPU time)
+
+Ran 8 tests for test/unit/AgentReviewEngine.t.sol:AgentReviewEngineTest
+[PASS] testCannotUseEmptyComment() (gas: 32429)
+[PASS] testCannotUseEmptyReviewer() (gas: 32495)
+[PASS] testDifferentAgentsHaveSeparateReviews() (gas: 292935)
+[PASS] testMultipleReviewsAccumulate() (gas: 268468)
+[PASS] testReviewStoredCorrectly() (gas: 163245)
+[PASS] testSubmitReview() (gas: 146659)
+[PASS] testTimestampSet() (gas: 159005)
+[PASS] testUnknownAgentReturnsEmptyReviews() (gas: 7653)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.32ms (497.05µs CPU time)
+
+Ran 8 tests for test/unit/AgentRewardEngine.t.sol:AgentRewardEngineTest
+[PASS] testCannotGrantZeroReward() (gas: 30780)
+[PASS] testDifferentAgentsHaveSeparateRewards() (gas: 240456)
+[PASS] testGetRewardsReturnsCorrectData() (gas: 127266)
+[PASS] testGrantReward() (gas: 120313)
+[PASS] testRewardEventsAccumulate() (gas: 158903)
+[PASS] testRewardsAccumulate() (gas: 158904)
+[PASS] testTimestampSet() (gas: 127091)
+[PASS] testUnknownAgentReturnsZeroTotals() (gas: 15182)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 945.77µs (315.17µs CPU time)
+
+Ran 8 tests for test/unit/AgentSkillEngine.t.sol:AgentSkillEngineTest
+[PASS] testAddSkill() (gas: 153249)
+[PASS] testCannotAddEmptySkill() (gas: 31139)
+[PASS] testDifferentAgentsHaveSeparateSkills() (gas: 306231)
+[PASS] testHasSkillReturnsTrue() (gas: 144612)
+[PASS] testMultipleSkillsAccumulate() (gas: 408750)
+[PASS] testSkillStoredCorrectly() (gas: 156607)
+[PASS] testTimestampSet() (gas: 153281)
+[PASS] testUnknownSkillReturnsFalse() (gas: 7915)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.18ms (587.46µs CPU time)
+
+Ran 8 tests for test/unit/AgentSlashingEngine.t.sol:AgentSlashingEngineTest
+[PASS] testCannotSlashZero() (gas: 30760)
+[PASS] testDifferentAgentsHaveSeparateRecords() (gas: 240456)
+[PASS] testMultipleSlashesAccumulate() (gas: 158925)
+[PASS] testSlash() (gas: 120335)
+[PASS] testSlashCountAccumulates() (gas: 197507)
+[PASS] testSlashRecordStoredCorrectly() (gas: 127234)
+[PASS] testTimestampSet() (gas: 127090)
+[PASS] testUnknownAgentReturnsZeroTotals() (gas: 15204)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.01ms (299.09µs CPU time)
+
+Ran 9 tests for test/unit/AgentStakingEngine.t.sol:AgentStakingEngineTest
+[PASS] testCannotStakeZero() (gas: 30760)
+[PASS] testCannotUnstakeTooMuch() (gas: 122683)
+[PASS] testDifferentAgentsHaveSeparateStakes() (gas: 196127)
+[PASS] testGetStakeReturnsCorrectData() (gas: 102813)
+[PASS] testStake() (gas: 98177)
+[PASS] testStakeAccumulates() (gas: 131596)
+[PASS] testTimestampSetOnFirstStake() (gas: 102748)
+[PASS] testUnknownAgentReturnsZeroBalance() (gas: 7716)
+[PASS] testUnstake() (gas: 127322)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.05ms (324.46µs CPU time)
+
+Ran 9 tests for test/unit/AgentTreasuryEngine.t.sol:AgentTreasuryEngineTest
+[PASS] testCannotDepositZero() (gas: 29505)
+[PASS] testCannotWithdrawMoreThanBalance() (gas: 98889)
+[PASS] testCannotWithdrawZero() (gas: 96840)
+[PASS] testDeposit() (gas: 74912)
+[PASS] testDepositsAccumulate() (gas: 105213)
+[PASS] testNewTreasuryStartsEmpty() (gas: 7608)
+[PASS] testTimestampUpdates() (gas: 77263)
+[PASS] testTreasuryStoredCorrectly() (gas: 77254)
+[PASS] testWithdraw() (gas: 105316)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 987.23µs (247.80µs CPU time)
+
+Ran 4 tests for test/autonomous/AgreementEngine.t.sol:AgreementEngineTest
+[PASS] test_CreateAgreement() (gas: 153890)
+[PASS] test_ExecuteAgreement() (gas: 196951)
+[PASS] test_RevertWhen_AgreementExpired() (gas: 160332)
+[PASS] test_RevertWhen_UnauthorizedExecution() (gas: 157685)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.22ms (353.57µs CPU time)
+
+Ran 5 tests for test/AkmenaChaos.t.sol:AkmenaChaosTest
+[PASS] testFuzz_AgentRegistrationIntegrity(bytes32,string) (runs: 1000, μ: 207715, ~: 183833)
+[PASS] testFuzz_CannotDoubleRelease(address,address,uint256) (runs: 1000, μ: 406522, ~: 406503)
+[PASS] testFuzz_CannotRefundUnlessSeller(address,address,uint256,address) (runs: 1000, μ: 344205, ~: 344170)
+[PASS] testFuzz_CannotReleaseUnlessBuyer(address,address,uint256,address) (runs: 1000, μ: 342250, ~: 342216)
+[PASS] testFuzz_CannotUpdateMetadataUnlessOwner(bytes32,address) (runs: 1000, μ: 193565, ~: 193731)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 579.96ms (578.74ms CPU time)
+
+Ran 6 tests for test/core/AkmenaCore.t.sol:AkmenaCoreTest
+[PASS] test_DeployerIsSet() (gas: 9817)
+[PASS] test_RegisterModules() (gas: 221986)
+[PASS] test_RevertWhen_HackerTriesToRegister() (gas: 37838)
+[PASS] test_RevertWhen_RegisteringDuplicateModule() (gas: 134343)
+[PASS] test_RevertWhen_ZeroAddressModule() (gas: 33014)
+[PASS] test_SetModuleStatus() (gas: 138724)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.35ms (294.88µs CPU time)
+
+Ran 2 tests for test/e2e/AkmenaEndToEnd.t.sol:AkmenaEndToEndTest
+[PASS] test_AttackerCannotAdvance() (gas: 243192)
+[PASS] test_MasterScenario_FullLifecycle() (gas: 313093)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.34ms (1.79ms CPU time)
+
+Ran 11 tests for test/authorization/AkmenaExecutionAuthorization.t.sol:AkmenaExecutionAuthorizationTest
+[PASS] test_ActualValueMustMatchSignedValue() (gas: 56666)
+[PASS] test_AmountMutationRejected() (gas: 61526)
+[PASS] test_AttackerSignatureRejected() (gas: 61478)
+[PASS] test_CalldataMutationRejected() (gas: 56643)
+[PASS] test_ExpiredAuthorizationRejected() (gas: 56878)
+[PASS] test_NotYetValidRejected() (gas: 56611)
+[PASS] test_ReplayRejected() (gas: 117527)
+[PASS] test_SelectorMutationRejected() (gas: 56466)
+[PASS] test_TargetMutationRejected() (gas: 61546)
+[PASS] test_ValidAuthorizationAccepted() (gas: 87352)
+[PASS] test_ValueMutationRejected() (gas: 56691)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 3.06ms (2.13ms CPU time)
+
+Ran 1 test for test/fork/BaseFork.t.sol:BaseForkTest
+[PASS] test_BaseL2DeploymentIntegrity() (gas: 8028)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.24s (646.42µs CPU time)
+
+Ran 3 tests for test/authorization/CanonicalPrivacyExecution.t.sol:CanonicalPrivacyExecutionTest
+[PASS] test_CanonicalPrivacyProofAuthorizesExactExecution() (gas: 229930)
+[PASS] test_CanonicalPrivacyProofCannotChangeProofId() (gas: 229947)
+[PASS] test_CanonicalPrivacyProofCannotChangeProofModule() (gas: 225661)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 10.36ms (7.67ms CPU time)
+
+Ran 7 tests for test/authorization/CapabilityEngine.t.sol:CapabilityEngineTest
+[PASS] test_GrantCapability() (gas: 69204)
+[PASS] test_NonControllerCannotMutateCapability() (gas: 41275)
+[PASS] test_OwnershipRotationChangesCapabilityAuthority() (gas: 158197)
+[PASS] test_RevertWhen_GrantingCapabilityTwice() (gas: 94965)
+[PASS] test_RevertWhen_RevokingNonExistentCapability() (gas: 42342)
+[PASS] test_RevertWhen_UsingZeroAddress() (gas: 54299)
+[PASS] test_RevokeCapability() (gas: 99818)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.22ms (468.94µs CPU time)
+
+Ran 1 test for test/authorization/DelegationEIP712Domain.t.sol:DelegationEIP712DomainTest
+[PASS] test_EIP712DomainIsCanonical() (gas: 14851)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 677.88µs (54.49µs CPU time)
+
+Ran 9 tests for test/authorization/DelegationEngine.t.sol:DelegationEngineTest
+[PASS] test_ExpiredDelegationIsInactive() (gas: 89341)
+[PASS] test_NonOwnerCannotCreateDelegation() (gas: 45984)
+[PASS] test_OwnerCanCreateScopedDelegation() (gas: 86425)
+[PASS] test_OwnershipRotationInvalidatesOldSignedAuthority() (gas: 80210)
+[PASS] test_RevertWhen_GrantingExpiredDelegation() (gas: 45900)
+[PASS] test_RevokedDelegationIsInactive() (gas: 126109)
+[PASS] test_UnknownIdentityRejected() (gas: 38193)
+[PASS] test_ZeroCapabilityRejected() (gas: 42845)
+[PASS] test_ZeroDelegateRejected() (gas: 41048)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.26ms (388.23µs CPU time)
+
+Ran 11 tests for test/core/DeployerTransfer.t.sol:DeployerTransferTest
+[PASS] test_AcceptDeployer() (gas: 101650)
+[PASS] test_AcceptDeployerRevertsForNonProposed() (gas: 86504)
+[PASS] test_AcceptDeployerRevertsWithNoPending() (gas: 34004)
+[PASS] test_CancelDeployerTransfer() (gas: 136761)
+[PASS] test_CancelDeployerTransferRevertsForNonDeployer() (gas: 86400)
+[PASS] test_DeployerCanTransferToTimelock() (gas: 89783)
+[PASS] test_DeployerSetAtConstruction() (gas: 9879)
+[PASS] test_OldDeployerLosesPowersAfterTransfer() (gas: 168921)
+[PASS] test_ProposeDeployer() (gas: 74554)
+[PASS] test_ProposeDeployerRevertsForNonDeployer() (gas: 36262)
+[PASS] test_ProposeDeployerRevertsForZeroAddress() (gas: 34152)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 1.01ms (356.48µs CPU time)
+
+Ran 3 tests for test/autonomous/DiscoveryEngine.t.sol:DiscoveryEngineTest
+[PASS] test_RegisterProfile() (gas: 118047)
+[PASS] test_RevertWhen_EmptyCategory() (gas: 31337)
+[PASS] test_UpdateStatus() (gas: 137547)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 698.04µs (162.02µs CPU time)
+
+Ran 10 tests for test/unit/DisputeEngine.t.sol:DisputeEngineTest
+[PASS] testCannotCreateDuplicateDispute() (gas: 173264)
+[PASS] testCannotResolveTwice() (gas: 221954)
+[PASS] testCannotUseEmptyEvidence() (gas: 33101)
+[PASS] testDisputeStartsOpen() (gas: 160300)
+[PASS] testDisputeStoredCorrectly() (gas: 160372)
+[PASS] testEvidencePersisted() (gas: 163488)
+[PASS] testGetUnknownDisputeReverts() (gas: 12992)
+[PASS] testOpenDispute() (gas: 147369)
+[PASS] testRejectDispute() (gas: 208280)
+[PASS] testResolveDispute() (gas: 208302)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 1.14ms (471.88µs CPU time)
+
+Ran 5 tests for test/authorization/EIP712ByteCompat.t.sol:EIP712ByteCompatTest
+[PASS] test_12FieldSignatureRejected() (gas: 54198)
+[PASS] test_DomainIsV2() (gas: 13854)
+[PASS] test_TypehashIs13Field() (gas: 10885)
+[PASS] test_V1SignatureRejected() (gas: 54733)
+[PASS] test_V2_13FieldSignatureVerifies() (gas: 84436)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.68ms (804.52µs CPU time)
+
+Ran 3 tests for test/fork/EIP712V2Fork.t.sol:EIP712V2ForkTest
+[PASS] test_HashIntentUsesV2Domain() (gas: 18897)
+[PASS] test_V1DigestDiffers() (gas: 16867)
+[PASS] test_V2SignatureRecoversAgent() (gas: 18734)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.45s (85.45ms CPU time)
+
+Ran 3 tests for test/authorization/ERC1271ExecutionAuthorization.t.sol:ERC1271ExecutionAuthorizationTest
+[PASS] test_RevokedERC1271AuthorizationCannotExecute() (gas: 230794)
+[PASS] test_ThirdPartyCannotRelaySmartAgentAuthorization() (gas: 183217)
+[PASS] test_ValidERC1271AgentAuthorizationExecutes() (gas: 253532)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.91ms (581.30µs CPU time)
+
+Ran 13 tests for test/economics/EconomicCommitmentEngine.t.sol:EconomicCommitmentEngineTest
+[PASS] test_CompleteEconomicLifecycle() (gas: 1219805)
+[PASS] test_DuplicateEscrowReferenceRejected() (gas: 707607)
+[PASS] test_FabricatedSettlementRejected() (gas: 32539)
+[PASS] test_FinalizeWrongEscrowRejected() (gas: 830397)
+[PASS] test_RefundedBeforeAttachRejected() (gas: 773187)
+[PASS] test_ReleasedBeforeAttachRejected() (gas: 788277)
+[PASS] test_SettlementBeforeReleaseRejected() (gas: 845082)
+[PASS] test_UnexecutedAgreementRejected() (gas: 188329)
+[PASS] test_WrongAmountRejected() (gas: 729692)
+[PASS] test_WrongAssetRejected() (gas: 1388719)
+[PASS] test_WrongEscrowRejected() (gas: 722971)
+[PASS] test_WrongPayeeRejected() (gas: 725317)
+[PASS] test_WrongPayerRejected() (gas: 725213)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 7.54ms (5.01ms CPU time)
+
+Ran 3 tests for test/economics/EconomicTruthInvariant.t.sol:EconomicTruthInvariantTest
+[PASS] test_PaymentRecordDoesNotMoveNativeValue() (gas: 61415)
+[PASS] test_SettlementRecordDoesNotMoveNativeValue() (gas: 131846)
+[PASS] test_TreasuryBookkeepingIsNotNativeCustody() (gas: 119196)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.15ms (153.08µs CPU time)
+
+Ran 8 tests for test/unit/EscrowEngine.t.sol:EscrowEngineGapTest
+[PASS] test_CannotCreateDuplicateReference() (gas: 295241)
+[PASS] test_CannotReleaseTwice() (gas: 315785)
+[PASS] test_CannotUseZeroAmount() (gas: 37644)
+[PASS] test_CannotUseZeroBuyer() (gas: 37029)
+[PASS] test_CreateEscrow() (gas: 237785)
+[PASS] test_EscrowStoredCorrectly() (gas: 244402)
+[PASS] test_GetUnknownEscrowReverts() (gas: 11985)
+[PASS] test_ReleaseEscrow() (gas: 327013)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 4.34ms (1.83ms CPU time)
+
+Ran 12 tests for test/economics/EscrowEngine.t.sol:EscrowEngineTest
+[PASS] test_CreateEscrow_InsufficientBalanceReverts() (gas: 99099)
+[PASS] test_CreateEscrow_TransfersActualAKMIntoCustody() (gas: 329655)
+[PASS] test_CreateEscrow_WithoutApprovalReverts() (gas: 43987)
+[PASS] test_RefundEscrowTransfersToBuyer() (gas: 384342)
+[PASS] test_ReleaseEscrowTransfersToSeller() (gas: 399361)
+[PASS] test_RevertWhen_DoubleRelease() (gas: 360943)
+[PASS] test_RevertWhen_EscrowNotFound() (gas: 12020)
+[PASS] test_RevertWhen_RefundAfterRelease() (gas: 360878)
+[PASS] test_RevertWhen_RefundByWrongCaller() (gas: 297692)
+[PASS] test_RevertWhen_ReleaseAfterRefund() (gas: 345868)
+[PASS] test_RevertWhen_ReleaseByWrongCaller() (gas: 295727)
+[PASS] test_RevertWhen_ZeroAmount() (gas: 37636)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 4.29ms (1.67ms CPU time)
+
+Ran 6 tests for test/economics/EscrowEngineMultiAsset.t.sol:EscrowEngineMultiAssetTest
+[PASS] test_CreateEURC_EscrowAndReleaseUsesEURC_NotDefaultAKM() (gas: 369653)
+[PASS] test_CreateUSDC_EscrowUsesExplicitAssetAndIndependentAccounting() (gas: 328781)
+[PASS] test_ExplicitAKM_EscrowPreservesLegacyTotalLocked() (gas: 366064)
+[PASS] test_FeeOnTransferTokenCannotCreateUnderfundedEscrow() (gas: 149297)
+[PASS] test_RevertWhen_ExplicitAssetIsNotAContract() (gas: 38025)
+[PASS] test_USDCAndAKM_AccountingRemainIndependent() (gas: 707901)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 3.93ms (834.80µs CPU time)
+
+Ran 11 tests for test/attack/phase_p_execution_authorization/ExecutionAuthorizationHarness.t.sol:PhaseP6EIP712Test
+[PASS] test_AmountMutationInvalidatesSignature() (gas: 56462)
+[PASS] test_AttackerSignatureIsRejected() (gas: 56412)
+[PASS] test_CalldataMutationInvalidatesSignature() (gas: 56594)
+[PASS] test_DifferentNonceCreatesIndependentAuthorization() (gas: 19209)
+[PASS] test_EIP712_DigestIsDeterministic() (gas: 19232)
+[PASS] test_ExpiredAuthorizationIsRejected() (gas: 54470)
+[PASS] test_OperatorMutationInvalidatesSignature() (gas: 56443)
+[PASS] test_ProofDomainMutationInvalidatesSignature() (gas: 56449)
+[PASS] test_ReplayIsRejected() (gas: 110123)
+[PASS] test_TargetMutationInvalidatesSignature() (gas: 56482)
+[PASS] test_ValidAgentSignatureIsAccepted() (gas: 82080)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 6.17ms (2.93ms CPU time)
+
+Ran 7 tests for test/attack/GAP1_RegressionVerify.t.sol:GAP1IndependentVerifyTest
+[PASS] test_GAP1_DeclaredAmountWithoutValueNotCharged() (gas: 142009)
+[PASS] test_GAP1_ERC20WithAmountStillCharged() (gas: 238389)
+[PASS] test_GAP1_ERC20ZeroAmountNoCharge() (gas: 142240)
+[PASS] test_GAP1_NativeOverLimitReverts() (gas: 1555149)
+[PASS] test_GAP1_NativeValueMismatchReverts() (gas: 71384)
+[PASS] test_GAP1_NativeWithValueStillCharged() (gas: 194632)
+[PASS] test_GAP1_ZeroValueNativeSpamDoesNotChargeLimit() (gas: 1132077)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 16.71ms (13.93ms CPU time)
+
+Ran 19 tests for test/authorization/Governance_Phase7.t.sol:Governance_Phase7Test
+[PASS] test_AdminTransferEmitsEvents() (gas: 69406)
+[PASS] test_AdminTransferToZeroReverts() (gas: 56200)
+[PASS] test_AllowlistAdminStartsAsDeployer() (gas: 15116)
+[PASS] test_DeployerCanPauseAndUnpause() (gas: 139457)
+[PASS] test_EmergencyAdminCanRemoveButNotAdd() (gas: 111935)
+[PASS] test_EmergencyRemoveIsFailClosed() (gas: 149771)
+[PASS] test_EmergencyTokenRemovalIsFailClosed() (gas: 138930)
+[PASS] test_G7Migration_TimelockAddCancellable() (gas: 2243868)
+[PASS] test_G7Migration_TimelockAdd_EmergencyRemove() (gas: 2379649)
+[PASS] test_GuardianCanPauseImmediately() (gas: 107468)
+[PASS] test_GuardianCannotUnpause() (gas: 132390)
+[PASS] test_GuardianRotation() (gas: 164811)
+[PASS] test_NonAdminCannotAddAdapter() (gas: 181581)
+[PASS] test_NonAdminCannotEmergencyRemove() (gas: 39092)
+[PASS] test_NonAdminCannotTransferAdmin() (gas: 34312)
+[PASS] test_NonGuardianCannotPause() (gas: 88690)
+[PASS] test_OnlyDeployerSetsGuardian() (gas: 34340)
+[PASS] test_PauseBlocksExecution() (gas: 169453)
+[PASS] test_UnpauseRestoresExecution() (gas: 341903)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 6.86ms (3.24ms CPU time)
+
+Ran 2 tests for test/privacy/GrokReviewInvariants.t.sol:GrokReviewInvariantsTest
+[PASS] test_FailedProofDoesNotBurnNullifier() (gas: 897660)
+[PASS] test_VerifierImmutableNoAdmin() (gas: 13086)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 37.59ms (5.57ms CPU time)
+
+Ran 9 tests for test/identity/IdentityFactory.t.sol:IdentityFactoryTest
+[PASS] test_CreateHumanIdentity() (gas: 302477)
+[PASS] test_CreateMachineIdentity() (gas: 290382)
+[PASS] test_CreateMultipleIdentitiesUseUniqueMonotonicIds() (gas: 768572)
+[PASS] test_CreateOrganizationIdentity() (gas: 262350)
+[PASS] test_RevertWhen_ImplementationIsEOA() (gas: 117447)
+[PASS] test_RevertWhen_ImplementationIsZero() (gas: 117257)
+[PASS] test_RevertWhen_RegistryIsEOA() (gas: 120020)
+[PASS] test_RevertWhen_RegistryIsZero() (gas: 117361)
+[PASS] test_RevertWhen_ReinitializingClone() (gas: 260308)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 2.97ms (2.17ms CPU time)
+
+Ran 1 test for test/attack/phase_k_privacy/Integration_PrivateWorkflow.t.sol:Integration_PrivateWorkflowTest
+[PASS] test_AgentPrivateSettlementFlow() (gas: 199627)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.00ms (191.40µs CPU time)
+
+Ran 3 tests for test/attack/phase_k_privacy/Integration_TransientBoundary.t.sol:IntegrationTransientBoundaryTest
+[PASS] test_ProofSuccessfullyPassesBoundary() (gas: 227105)
+[PASS] test_TransientProofCanBackMultipleSeparatelyAuthorizedIntentsInSameTransaction() (gas: 309867)
+[PASS] test_TransientProofCanBackSeparatelyAuthorizedDifferentTarget() (gas: 455761)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.36ms (1.87ms CPU time)
+
+Ran 1 test for test/authorization/LegacyExecutionRetirement.t.sol:LegacyExecutionRetirementTest
+[PASS] test_LegacyExecutionPathIsPermanentlyDisabled() (gas: 10807)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.46ms (40.64µs CPU time)
+
+Ran 3 tests for test/authorization/LegacyExecutionRetirementCanonical.t.sol:AttackLegacyExecutionRetirementCanonicalTest
+[PASS] test_LegacyExecutionCannotBeUsedWithArbitraryCalldata() (gas: 15998)
+[PASS] test_LegacyExecutionCannotBecomeCanonicalViaZeroProof() (gas: 15826)
+[PASS] test_LegacyExecutionEntrypointIsPermanentlyDisabled() (gas: 15519)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.43ms (409.44µs CPU time)
+
+Ran 12 tests for test/attack/phase_p_execution_authorization/MaliciousTokenBattery.t.sol:MaliciousTokenBatteryTest
+[PASS] test_BlacklistedAdapter_FailsClosedAtomically() (gas: 1370187)
+[PASS] test_BlacklistedBoundary_RevertsCleanly() (gas: 1314091)
+[PASS] test_NonAdmittedToken_RevertsDespiteAllowlistedAdapter() (gas: 1039056)
+[PASS] test_OverPull_DemonstratesF7TrustAssumption() (gas: 1355538)
+[PASS] test_PausedThenUnpaused_SettlesNormally() (gas: 1352507)
+[PASS] test_PausedToken_RevertsCleanly() (gas: 1280548)
+[PASS] test_RebaseDown_FailsClosed() (gas: 1336665)
+[PASS] test_SenderHook_CannotReenterBoundary() (gas: 1482331)
+[PASS] test_ShortDelivery_SucceedsWithShortfall() (gas: 1318457)
+[PASS] test_SilentSuccess_SucceedsWithZeroFundsMoved() (gas: 1128735)
+[PASS] test_UpgradeableToken_UpgradeInvalidatesAdmission() (gas: 1696144)
+[PASS] test_ZeroAmount_NonAdmittedToken_AdapterGateStillApplies() (gas: 978738)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 20.42ms (16.40ms CPU time)
+
+Ran 5 tests for test/autonomous/MarketplaceEngine.t.sol:MarketplaceEngineTest
+[PASS] test_AssignTask() (gas: 194817)
+[PASS] test_CompleteTask() (gas: 225622)
+[PASS] test_CreateTask() (gas: 139403)
+[PASS] test_RevertWhen_AssigningUnopenTask() (gas: 207490)
+[PASS] test_RevertWhen_UnauthorizedComplete() (gas: 210099)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 968.35µs (312.15µs CPU time)
+
+Ran 2 tests for test/memory/MemoryEngine.t.sol:MemoryEngineTest
+[PASS] test_CommitAndGetRoot() (gas: 65166)
+[PASS] test_RevertWhen_EmptyKey() (gas: 32872)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 597.69µs (79.12µs CPU time)
+
+Ran 4 tests for test/fork/ModelDBaseSepoliaFork.t.sol:ModelDBaseSepoliaForkTest
+[PASS] test_ForkChainIdIsBaseSepolia() (gas: 350)
+[PASS] test_ModelDSettlementOnBaseSepoliaFork() (gas: 293389)
+[PASS] test_PauseBlocksSettlementOnFork() (gas: 138812)
+[PASS] test_RealUSDCIsDeployed() (gas: 2933)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.79s (1.09s CPU time)
+
+Ran 6 tests for test/fork/ModelDBaseSepoliaForkExpanded.t.sol:ModelDBaseSepoliaForkExpandedTest
+[PASS] test_ForkAllowlistAdminTransfer() (gas: 114297)
+[PASS] test_ForkFeeTokenSettlement() (gas: 273487)
+[PASS] test_ForkNativeSettlement() (gas: 196549)
+[PASS] test_ForkNonAdminCannotSetAdapter() (gas: 37216)
+[PASS] test_ForkOverLimitReverts() (gas: 98072)
+[PASS] test_ForkReplayReverts() (gas: 305584)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 3.39s (231.91ms CPU time)
+
+Ran 23 tests for test/attack/phase_p_execution_authorization/ModelD_OperatorCustodySettlement.t.sol:ModelDOperatorCustodySettlementTest
+[PASS] test_AR3_AllowanceRevokedMidFlightRevertsCleanly() (gas: 186853)
+[PASS] test_AR4_ConcurrentIntentsRaceAllowanceSafely() (gas: 459916)
+[PASS] test_AR5_ReentrantAdapterBlockedAtomically() (gas: 1397915)
+[PASS] test_AdapterRevertRollsBackAtomically() (gas: 264523)
+[PASS] test_Admission_NonAdmittedTokenRevertsOnEconomicPath() (gas: 1043163)
+[PASS] test_Admission_NonDeployerCannotAdmit() (gas: 63755)
+[PASS] test_Admission_RemovalIsFailClosed() (gas: 168119)
+[PASS] test_Admission_StandardDebitUpdatedEmitted() (gas: 755818)
+[PASS] test_Admission_ZeroAmountExemptFromAdmission() (gas: 999083)
+[PASS] test_AmountToNonAdapterTargetReverts() (gas: 265970)
+[PASS] test_DailyLimitExhaustionIsCleanNotPanic() (gas: 611075)
+[PASS] test_EmitsAgentAssetPolicyConfigured() (gas: 83341)
+[PASS] test_EmitsAgentPolicyConfigured() (gas: 131081)
+[PASS] test_EmitsERC20Settled() (gas: 241939)
+[PASS] test_EmitsEconomicAdapterUpdated() (gas: 270824)
+[PASS] test_HappyPath_PullPushCallExact() (gas: 304978)
+[PASS] test_InsufficientAllowanceRevertsCleanly() (gas: 196789)
+[PASS] test_OperatorMismatch_CannotSpendVictimFunds() (gas: 469186)
+[PASS] test_PartialAllowanceReverts() (gas: 172463)
+[PASS] test_ReconfigureResetsCounters() (gas: 517097)
+[PASS] test_ResetBoundary_StrictlyGreaterThanOneDay() (gas: 608758)
+[PASS] test_ZeroAmount_GenericCallNoCharge() (gas: 288850)
+[PASS] test_ZeroAmount_ToProofModuleSucceedsNoCharge() (gas: 454877)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 12.41ms (9.70ms CPU time)
+
+Ran 2 tests for test/attack/NativeGapTest.t.sol:NativeGapTest
+[PASS] test_GAP1_NativeZeroValueFillsDailyLimit() (gas: 1275210)
+[PASS] test_GAP2_NativeBypassesAllowlistWithPolicy() (gas: 175872)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 4.68ms (3.45ms CPU time)
+
+Ran 4 tests for test/economics/PaymentsEngine.t.sol:PaymentsEngineTest
+[PASS] test_ExecutePayment() (gas: 63178)
+[PASS] test_MultiplePaymentsIncreaseVolume() (gas: 87862)
+[PASS] test_RevertWhen_ZeroAddress() (gas: 32342)
+[PASS] test_RevertWhen_ZeroAmount() (gas: 34430)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 668.73µs (129.00µs CPU time)
+
+Ran 1 test for test/privacy/PolicyBypassHazard.t.sol:PolicyBypassHazardTest
+[PASS] test_HAZARD_OverLimitDepositThenThirdPartyWithdraw() (gas: 783893)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.50ms (4.76ms CPU time)
+
+Ran 1 test for test/fork/PrivacyEngineDeploySim.t.sol:PrivacyEngineDeploySimTest
+[PASS] test_SimulatePrivacyEngineDeployment() (gas: 609442)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.29s (363.46ms CPU time)
+
+Ran 1 test for test/attack/phase_k_privacy/PrivacyEngineInvariant.t.sol:PrivacyEngineInvariantTest
+[PASS] invariant_BalanceMatchesExpectedTotal() (runs: 1000, calls: 500000, reverts: 0)
+
+╭----------------+----------+--------+---------+----------╮
+| Contract       | Selector | Calls  | Reverts | Discards |
++=========================================================+
+| PrivacyHandler | deposit  | 500000 | 0       | 0        |
+╰----------------+----------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 36.65s (36.64s CPU time)
+
+Ran 1 test for test/authorization/ProofSubjectIdentity.t.sol:ProofSubjectIdentityTest
+[PASS] test_PrivacySettlementUsesRecipientAsCurrentProofSubject() (gas: 171810)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 682.34µs (98.88µs CPU time)
+
+Ran 5 tests for test/unit/R10_MutantGapTests.t.sol:R10MutantGapTests
+[PASS] test_NativeSettlementHeadroomCalculation() (gas: 545024)
+[PASS] test_RequireActiveEscrowEnforced() (gas: 201437)
+[PASS] test_ZeroAmountSelfAdapterReverts() (gas: 610476)
+[PASS] test_ZeroValueNativeHeadroomCalculation() (gas: 264054)
+[PASS] test_ZeroValueNativeRespectsDailyLimit() (gas: 327648)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 3.88ms (2.52ms CPU time)
+
+Ran 16 tests for test/registry/Registry.t.sol:RegistryTest
+[PASS] test_AllocateIdentityId() (gas: 73837)
+[PASS] test_BoundFactoryIsRecorded() (gas: 7699)
+[PASS] test_HistoricalIdentityResolutionIsPermanent() (gas: 370703)
+[PASS] test_InitialNextIdentityId() (gas: 7702)
+[PASS] test_RegisterIdentity() (gas: 353072)
+[PASS] test_RevertWhen_BindingEOAFactory() (gas: 617372)
+[PASS] test_RevertWhen_BindingZeroFactory() (gas: 614766)
+[PASS] test_RevertWhen_RegisteringDuplicateAddress() (gas: 362287)
+[PASS] test_RevertWhen_RegisteringDuplicateId() (gas: 613383)
+[PASS] test_RevertWhen_RegisteringNonContractIdentity() (gas: 34536)
+[PASS] test_RevertWhen_RegisteringZeroIdentity() (gas: 31830)
+[PASS] test_RevertWhen_RegisteringZeroIdentityId() (gas: 265988)
+[PASS] test_RevertWhen_SecondFactoryBindingAttempted() (gas: 130913)
+[PASS] test_RevertWhen_UnauthorizedCallerAllocates() (gas: 31971)
+[PASS] test_RevertWhen_UnauthorizedCallerBindsFactory() (gas: 712430)
+[PASS] test_RevertWhen_UnauthorizedCallerRegisters() (gas: 278746)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 1.42ms (775.47µs CPU time)
+
+Ran 2 tests for test/reputation/ReputationEngine.t.sol:ReputationEngineTest
+[PASS] test_RevertWhen_ZeroAddress() (gas: 29877)
+[PASS] test_UpdateAndGetScore() (gas: 60189)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 554.69µs (53.62µs CPU time)
+
+Ran 6 tests for test/attack/SecurityGapTest.t.sol:SecurityGapTest
+[PASS] test_GAP1_ZeroValueIntentFillsDailyLimit() (gas: 1481098)
+[PASS] test_GAP2_NativeIntentBypassesAllowlist() (gas: 67940)
+[PASS] test_GAP3_ZeroAmountBypassesAllowlist() (gas: 121490)
+[PASS] test_GAP3_ZeroAmountToDisabledModuleReverts() (gas: 257088)
+[PASS] test_GAP3_ZeroAmountToProofModuleSucceeds() (gas: 283681)
+[PASS] test_GAP4_ERC777HookCannotReenter() (gas: 1573512)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 7.13ms (5.66ms CPU time)
+
+Ran 5 tests for test/unit/SettlementEngine.t.sol:SettlementEngineGapTest
+[PASS] test_CannotUseZeroAmount() (gas: 37922)
+[PASS] test_CannotUseZeroPayee() (gas: 35959)
+[PASS] test_CannotUseZeroPayer() (gas: 35948)
+[PASS] test_DifferentIdsCanExist() (gas: 254237)
+[PASS] test_ExistsReturnsFalseForUnknown() (gas: 7651)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 812.43µs (154.14µs CPU time)
+
+Ran 3 tests for test/economics/SettlementEngine.t.sol:SettlementEngineTest
+[PASS] test_RecordSettlement() (gas: 154824)
+[PASS] test_RevertWhen_DuplicateSettlement() (gas: 153498)
+[PASS] test_RevertWhen_SettlementNotFound() (gas: 13903)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 630.73µs (122.25µs CPU time)
+
+Ran 2 tests for test/attack/phase_k_privacy/StealthRegistry.t.sol:StealthRegistryTest
+[PASS] test_AnnounceStealthTransaction() (gas: 42815)
+[PASS] test_RegisterAndRetrieveStealthMetaAddress() (gas: 117848)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 676.56µs (114.38µs CPU time)
+
+Ran 8 tests for test/unit/TaskMarketplace.t.sol:TaskMarketplaceTest
+[PASS] testAssignTask() (gas: 237176)
+[PASS] testCannotCompleteBeforeAssign() (gas: 177304)
+[PASS] testCannotCreateDuplicateTask() (gas: 176750)
+[PASS] testCompleteTask() (gas: 271106)
+[PASS] testCreateTask() (gas: 150744)
+[PASS] testTaskStartsOpen() (gas: 166153)
+[PASS] testTaskStoredCorrectly() (gas: 169452)
+[PASS] testUnknownTaskReverts() (gas: 13268)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.60ms (553.72µs CPU time)
+
+Ran 3 tests for test/authorization/TransientProofDomainIsolation.t.sol:TransientProofDomainIsolationTest
+[PASS] test_EscrowAndPrivacyDomainsAreIndependent() (gas: 30955)
+[PASS] test_PrivacyAndEscrowDomainsAreIndependent() (gas: 30935)
+[PASS] test_SameIdDifferentDomainCannotCrossAuthenticate() (gas: 31318)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 716.42µs (122.00µs CPU time)
+
+Ran 6 tests for test/economics/TreasuryEngine.t.sol:TreasuryEngineTest
+[PASS] test_DisbursementMovesActualAKM() (gas: 160180)
+[PASS] test_FundingMovesActualAKM() (gas: 108328)
+[PASS] test_NonOwnerCannotDisburse() (gas: 96837)
+[PASS] test_SupplyComesFromToken() (gas: 18398)
+[PASS] test_TreasuryBalanceMatchesActualCustody() (gas: 87545)
+[PASS] test_TreasuryCannotFabricateBalance() (gas: 19618)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.24ms (337.73µs CPU time)
+
+Ran 2 tests for test/authorization/VerificationAndAttestation.t.sol:VerificationAndAttestationTest
+[PASS] test_RecordAndCheckAttestation() (gas: 67071)
+[PASS] test_RevertWhen_RecordingEmptyAttestation() (gas: 34438)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 771.89µs (85.99µs CPU time)
+
+Ran 6 tests for test/orchestration/WorkflowEconomicSettlementAdapter.t.sol:WorkflowEconomicSettlementAdapterTest
+[PASS] test_ExecuteSettlement_Idempotent() (gas: 406193)
+[PASS] test_ExecuteSettlement_Success() (gas: 345599)
+[PASS] test_Revert_ExecuteSettlement_CommitmentNotFound() (gas: 43985)
+[PASS] test_Revert_ExecuteSettlement_EscrowMismatch() (gas: 50670)
+[PASS] test_Revert_ExecuteSettlement_InvalidCaller() (gas: 40327)
+[PASS] test_Revert_ExecuteSettlement_InvalidData() (gas: 39261)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.92ms (480.42µs CPU time)
+
+Ran 3 tests for test/orchestration/WorkflowEngine.t.sol:WorkflowEngineTest
+[PASS] test_DelegateCanAdvanceWhenScoped() (gas: 366143)
+[PASS] test_InitializeAndAdvanceWithContext() (gas: 297296)
+[PASS] test_RevertWhen_AttackerCallsAdvance() (gas: 243249)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.22ms (651.99µs CPU time)
+
+Ran 5 tests for test/orchestration/WorkflowProductionAdapters.t.sol:WorkflowProductionAdaptersTest
+[PASS] test_CanonicalModuleRegistrationShape() (gas: 549983)
+[PASS] test_MemoryAdapterRejectsDirectCaller() (gas: 35687)
+[PASS] test_MemoryAdapterTranslatesWorkflowCall() (gas: 69026)
+[PASS] test_ReputationAdapterRejectsDirectCaller() (gas: 34717)
+[PASS] test_ReputationAdapterUsesWorkflowActor() (gas: 68939)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.80ms (344.34µs CPU time)
+
+Ran 2 tests for test/e2e/WorkflowProductionFullStack.t.sol:WorkflowProductionFullStackTest
+[PASS] test_CanonicalCoreSettlementModuleIsAdapter() (gas: 21175)
+[PASS] test_RealWorkflowCompletesThroughAllProductionAdapters() (gas: 716841)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.09ms (413.02µs CPU time)
+
+Ran 13 tests for test/orchestration/WorkflowSecurity.t.sol:WorkflowSecurityTest
+[PASS] test_DeactivatedIdentityBlocksAdvance() (gas: 264167)
+[PASS] test_OwnershipRotationChangesWorkflowAuthority() (gas: 272989)
+[PASS] test_ReentrantSettlementIsRejected() (gas: 681856)
+[PASS] test_RepeatedInitializationDoesNotResetExistingWorkflow() (gas: 685166)
+[PASS] test_RevertWhen_AuthorizationResolverIsEOA() (gas: 229996)
+[PASS] test_RevertWhen_AuthorizationResolverIsZero() (gas: 229957)
+[PASS] test_RevertWhen_CoreIsEOA() (gas: 229950)
+[PASS] test_RevertWhen_CoreIsZero() (gas: 229846)
+[PASS] test_RevokedWorkflowCapabilityBlocksAdvance() (gas: 271786)
+[PASS] test_ScopedDelegateCanAdvanceWorkflow() (gas: 442799)
+[PASS] test_UnauthorizedCallerCannotAdvanceWorkflow() (gas: 243257)
+[PASS] test_UnauthorizedCallerCannotInitializeWorkflow() (gas: 64140)
+[PASS] test_WorkflowIdsAreUniqueForIdenticalSameBlockInputs() (gas: 349486)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 3.22ms (1.76ms CPU time)
+
+Ran 8 tests for test/attack/archive/phase_p_legacy/Attack_AuthorizationLifecycle.t.sol:Attack_AuthorizationLifecycleTest
+[PASS] test_CancelledCannotExecute() (gas: 80322)
+[PASS] test_DoubleCancelRejected() (gas: 80332)
+[PASS] test_DoubleExecuteRejected() (gas: 80239)
+[PASS] test_ExecutedCannotCancel() (gas: 80271)
+[PASS] test_ExpiredIntentTerminal() (gas: 58155)
+[PASS] test_LanesAreIndependent() (gas: 109463)
+[PASS] test_NoncesAreIndependent() (gas: 109544)
+[PASS] test_PendingExecutesOnce() (gas: 54879)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 935.83µs (386.68µs CPU time)
+
+Ran 3 tests for test/attack/phase_m_authorization_primitives/Attack_AuthorizationPrimitives.t.sol:Attack_AuthorizationPrimitivesTest
+[PASS] test_Attack_AnyoneCanCreateSelfAttestation() (gas: 62268)
+[PASS] test_Attack_AnyoneCanGrantCapabilityToVictim() (gas: 43471)
+[PASS] test_Attack_AnyoneCanRevokeVictimCapability() (gas: 98002)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 909.22µs (153.72µs CPU time)
+
+Ran 12 tests for test/attack/phase_p_execution_authorization/Attack_AuthorizationReplayLifecycle.t.sol:Attack_AuthorizationReplayLifecycleTest
+[PASS] test_AgentStateIsIndependent() (gas: 148865)
+[PASS] test_AttackerCannotReplayConsumedAuthorization() (gas: 101181)
+[PASS] test_CancelledAuthorizationCannotExecute() (gas: 104940)
+[PASS] test_ConsumedNonceDoesNotConsumeAnotherNonce() (gas: 148405)
+[PASS] test_ExecutedAuthorizationCannotBeCancelled() (gas: 104137)
+[PASS] test_ExpiredAuthorizationCannotExecute() (gas: 71942)
+[PASS] test_ExpiredAuthorizationNeverBecomesExecuted() (gas: 71892)
+[PASS] test_ExpiredSignatureCannotBeResurrected() (gas: 115487)
+[PASS] test_FreshNonceRemainsUsable() (gas: 139593)
+[PASS] test_LanesDoNotShareReplayState() (gas: 148459)
+[PASS] test_RawReplayCallFails() (gas: 98848)
+[PASS] test_SameSignatureCannotExecuteTwice() (gas: 105103)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 4.53ms (3.60ms CPU time)
+
+Ran 13 tests for test/attack/phase_p_execution_authorization/Attack_AuthorizationResolverComposition.t.sol:AttackAuthorizationResolverCompositionTest
+[PASS] test_AttackerCannotUseOwnerAddressAsIdentityId() (gas: 79734)
+[PASS] test_CapabilitySubstitutionRejectedAcrossSameIdentity() (gas: 122910)
+[PASS] test_DelegateCannotCrossIdentityBoundary() (gas: 195304)
+[PASS] test_DelegateCannotEscalateCapability() (gas: 195337)
+[PASS] test_DelegateDoesNotBecomeOwnerAfterOwnershipRotation() (gas: 299417)
+[PASS] test_IdentityAAuthorizationCannotBeUsedForIdentityB() (gas: 93244)
+[PASS] test_IdentityBCapabilityCannotAuthorizeIdentityA() (gas: 93267)
+[PASS] test_InactiveIdentityCannotAuthorizeDelegate() (gas: 187574)
+[PASS] test_InactiveIdentityCannotAuthorizeOwner() (gas: 120940)
+[PASS] test_OldOwnerLosesAuthorityAfterRotation() (gas: 161841)
+[PASS] test_RequireAuthorizedRejectsCapabilitySubstitution() (gas: 93456)
+[PASS] test_RequireAuthorizedRejectsInactiveIdentity() (gas: 121111)
+[PASS] test_UnknownIdentityCannotBeAuthorizedByCapabilityHolder() (gas: 79795)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 2.49ms (1.07ms CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_CalldataCanonicalization.t.sol:AttackCalldataCanonicalizationTest
+[PASS] test_EquivalentSemanticPayloadWithDifferentBytesIsRejected() (gas: 90138)
+[PASS] test_SelectorMutationIsRejected() (gas: 91942)
+[PASS] test_StandardABIEncodingExecutes() (gas: 199630)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.94ms (757.51µs CPU time)
+
+Ran 2 tests for test/attack/phase_i_base/Attack_CalldataSuffix.t.sol:Attack_CalldataSuffixTest
+[PASS] test_ERC8021SuffixDoesNotDoSAuthorizedExecution() (gas: 137449)
+[PASS] test_MutatingAuthorizedPayloadStillFails() (gas: 88836)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.88ms (733.16µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_CanonicalDelegationScope.t.sol:AttackCanonicalDelegationScopeTest
+[PASS] test_DelegateCannotSubstituteCapability() (gas: 86402)
+[PASS] test_DelegationDoesNotGrantAuthorityToAnotherDelegate() (gas: 86424)
+[PASS] test_ExpiredDelegateCannotBeUsedAsActiveAuthority() (gas: 74668)
+[PASS] test_IdentityCannotBeForgedByUsingOwnerAddress() (gas: 37364)
+[PASS] test_OwnerRotationChangesDirectDelegationAuthority() (gas: 197851)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.16ms (289.07µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_CanonicalEscrowSemantics.t.sol:AttackCanonicalEscrowSemanticsTest
+[PASS] test_CanonicalEscrowRequiresAgentAsSeller() (gas: 539973)
+[PASS] test_EscrowAmountMustMatchIntentAmount() (gas: 415325)
+[PASS] test_EscrowProofDoesNotAuthorizeWrongAgent() (gas: 380824)
+[PASS] test_SameEscrowCanBackDifferentSignedTargetIntent() (gas: 753642)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.87ms (1.97ms CPU time)
+
+Ran 9 tests for test/attack/phase_p_execution_authorization/Attack_CanonicalProofReplayMatrix.t.sol:AttackCanonicalProofReplayMatrixTest
+[PASS] test_ExactCanonicalProofExecutionSucceeds() (gas: 184996)
+[PASS] test_ProofCannotBeReusedAfterSuccessfulExecution() (gas: 246418)
+[PASS] test_SameProofCannotAuthorizeDifferentAgent() (gas: 75737)
+[PASS] test_SameProofCannotAuthorizeDifferentAmount() (gas: 94232)
+[PASS] test_SameProofCannotAuthorizeDifferentCalldata() (gas: 94339)
+[PASS] test_SameProofCannotAuthorizeDifferentNonce() (gas: 94171)
+[PASS] test_SameProofCannotAuthorizeDifferentOperator() (gas: 72916)
+[PASS] test_SameProofCannotAuthorizeDifferentSelector() (gas: 94299)
+[PASS] test_SameProofCannotAuthorizeDifferentTarget() (gas: 276052)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 3.88ms (2.62ms CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_CanonicalRegistryVerificationAuthority.t.sol:AttackCanonicalRegistryVerificationAuthorityTest
+[PASS] test_AgentOwnerCannotSelfVerify() (gas: 39982)
+[PASS] test_AttackerCannotForgeVerification() (gas: 39992)
+[PASS] test_RegistryOwnerCanRevokeVerification() (gas: 72638)
+[PASS] test_RegistryOwnerCanVerifyAgent() (gas: 41301)
+[PASS] test_UnknownAgentCannotBeVerified() (gas: 32312)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 797.62µs (157.69µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_CapabilityAuthorityMatrix.t.sol:AttackCapabilityAuthorityMatrixTest
+[PASS] test_AttackerCannotGrantCapability() (gas: 43376)
+[PASS] test_AttackerCannotRevokeCapability() (gas: 97950)
+[PASS] test_CapabilityStateIsIsolatedToCanonicalIdentity() (gas: 86678)
+[PASS] test_ControllerCanGrantCapability() (gas: 67116)
+[PASS] test_ControllerCanRevokeCapability() (gas: 97789)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 884.43µs (230.01µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_CapabilityControllerAuthority.t.sol:AttackCapabilityControllerAuthorityTest
+[PASS] test_AttackerCannotGrantCapability() (gas: 43406)
+[PASS] test_AttackerCannotRevokeCapability() (gas: 97935)
+[PASS] test_ControllerCanGrantCapability() (gas: 67104)
+[PASS] test_ControllerCanRevokeCapability() (gas: 97734)
+[PASS] test_OwnershipRotationMovesCapabilityAuthority() (gas: 158228)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 892.02µs (274.34µs CPU time)
+
+Ran 3 tests for test/attack/phase_a_core/Attack_CoreAuthority.t.sol:Attack_CoreAuthorityTest
+[PASS] test_Attack_ModuleAddressSpoofingViaStatePollution() (gas: 35239)
+[PASS] test_Attack_UnauthorizedModuleDisabling() (gas: 43238)
+[PASS] test_Attack_UnauthorizedModuleOverwrite() (gas: 46223)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.09ms (110.62µs CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_CriticalEconomicLimitBypass.t.sol:AttackCriticalEconomicLimitBypassAdapterExtension
+[PASS] test_RedTeam_AllowlistedAdapterCannotExceedIntentAmount() (gas: 303030)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.78ms (479.35µs CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_CriticalEconomicLimitBypass.t.sol:AttackCriticalEconomicLimitBypassTest
+[PASS] test_RedTeam_ERC20GenericExecutionReverts() (gas: 94456)
+[PASS] test_RedTeam_NativeValueExceedsPolicyReverts() (gas: 78486)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.73ms (399.25µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_CrossAgentSignatureSubstitution.t.sol:Attack_CrossAgentSignatureSubstitutionTest
+[PASS] test_AgentASignatureCannotExecuteAgentB() (gas: 51612)
+[PASS] test_AgentBSignatureCannotExecuteAgentA() (gas: 51666)
+[PASS] test_OriginalAgentASignatureStillWorks() (gas: 74995)
+[PASS] test_OriginalAgentBSignatureStillWorks() (gas: 74940)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.69ms (897.08µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_CrossContractDomainSubstitution.t.sol:Attack_CrossContractDomainSubstitutionTest
+[PASS] test_DomainAHashDiffersFromDomainB() (gas: 15092)
+[PASS] test_DomainASignatureCannotExecuteDomainB() (gas: 49372)
+[PASS] test_DomainASignatureExecutesOnA() (gas: 74949)
+[PASS] test_DomainBSignatureCannotExecuteDomainA() (gas: 49394)
+[PASS] test_DomainBSignatureExecutesOnB() (gas: 74886)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.68ms (877.22µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_CrossLaneSignatureSubstitution.t.sol:Attack_CrossLaneSignatureSubstitutionTest
+[PASS] test_EscrowAuthorizationExecutes() (gas: 74928)
+[PASS] test_EscrowSignatureCannotExecutePayment() (gas: 49519)
+[PASS] test_PaymentAuthorizationExecutes() (gas: 74938)
+[PASS] test_PaymentSignatureCannotExecuteEscrow() (gas: 49551)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.68ms (937.48µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_DelegationAmplification.t.sol:AttackDelegationAmplificationTest
+[PASS] test_AttackerCannotCreateDelegationForVictimIdentity() (gas: 49682)
+[PASS] test_DelegatedIdentityCannotBeConfusedWithOwner() (gas: 86423)
+[PASS] test_DelegationDoesNotImplicitlyAuthorizeThirdParty() (gas: 76182)
+[PASS] test_OwnerCanDelegateScopedCapability() (gas: 74211)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.04ms (218.48µs CPU time)
+
+Ran 5 tests for test/attack/phase_p_execution_authorization/Attack_DelegationCapabilityConfusion.t.sol:AttackDelegationCapabilityConfusionTest
+[PASS] test_AttackerCannotAlterVictimCapabilityStateThroughDelegation() (gas: 51776)
+[PASS] test_DelegateCannotMutateOwnersCapabilityByDelegationAlone() (gas: 103918)
+[PASS] test_DelegationDoesNotCreateCapability() (gas: 84000)
+[PASS] test_DelegationForPaymentDoesNotAuthorizeAdmin() (gas: 74214)
+[PASS] test_OwnerCapabilityDoesNotBecomeDelegateCapability() (gas: 140677)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.08ms (255.83µs CPU time)
+
+Ran 10 tests for test/attack/phase_p_execution_authorization/Attack_DelegationSignatureMalleability.t.sol:AttackDelegationSignatureMalleabilityTest
+[PASS] test_EmptySignatureRejected() (gas: 65154)
+[PASS] test_RandomGarbageSignatureRejected() (gas: 53322)
+[PASS] test_ShortSignatureRejected() (gas: 53239)
+[PASS] test_SignatureForDifferentCapabilityRejected() (gas: 68789)
+[PASS] test_SignatureForDifferentDelegateRejected() (gas: 76820)
+[PASS] test_SignatureForDifferentIdentityRejected() (gas: 1023198)
+[PASS] test_SignatureForDifferentStatusRejected() (gas: 68762)
+[PASS] test_SignatureFromAttackerRejected() (gas: 83133)
+[PASS] test_UnsupportedVRejected() (gas: 68675)
+[PASS] test_WrongStructHashSignatureRejected() (gas: 64145)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 2.85ms (1.86ms CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_DirectStateAssertion.t.sol:Attack_DirectStateAssertionTest
+[PASS] test_DirectCancelState() (gas: 111187)
+[PASS] test_DirectExecuteState() (gas: 112686)
+[PASS] test_StateCannotChangeAcrossRead() (gas: 99808)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.59ms (806.04µs CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_DownstreamAuthorityConfusion.t.sol:AttackDownstreamAuthorityConfusionTest
+[PASS] test_CanonicalBoundaryCallCannotPreserveMsgSender() (gas: 119756)
+[PASS] test_DirectAgentCallSucceeds() (gas: 58530)
+[PASS] test_ValidAgentAuthorizationDoesNotBecomeDownstreamAgentIdentity() (gas: 119733)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.98ms (759.95µs CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_DownstreamCallerConfusion.t.sol:AttackDownstreamCallerConfusionTest
+[PASS] test_CanonicalBoundaryCallChangesDownstreamMsgSender() (gas: 204430)
+[PASS] test_DirectCallUsesAgentAsMsgSender() (gas: 124933)
+[PASS] test_DownstreamCannotMistakeBoundaryForAgent() (gas: 202626)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.94ms (709.90µs CPU time)
+
+Ran 8 tests for test/attack/phase_p_execution_authorization/Attack_EIP712DomainSeparation.t.sol:Attack_EIP712DomainSeparationTest
+[PASS] test_ChainIdChangesDomainDigest() (gas: 19083)
+[PASS] test_ChainIdMutationInvalidatesExistingSignature() (gas: 50769)
+[PASS] test_DifferentNonceStillProducesDifferentDigest() (gas: 16439)
+[PASS] test_DifferentTargetStillProducesDifferentDigest() (gas: 16443)
+[PASS] test_DifferentVerifyingContractChangesDigest() (gas: 15978)
+[PASS] test_SameIntentSameDomainProducesSameDigest() (gas: 15928)
+[PASS] test_SignatureCannotCrossVerifyingContract() (gas: 50195)
+[PASS] test_SignatureWorksOnOriginalContract() (gas: 72622)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 16.02ms (15.20ms CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_ERC1271SignerBoundary.t.sol:ERC1271SignerBoundaryProbe
+[PASS] test_ContractSignatureMustNotBecomeEOAIdentity() (gas: 2407)
+[PASS] test_ERC1271MagicValueIsKnown() (gas: 224)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 543.14µs (22.06µs CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_EconomicAdapterBinding.t.sol:AttackEconomicAdapterBindingTest
+[PASS] test_CalldataMutationStillFailsBeforeAdapter() (gas: 84833)
+[PASS] test_MatchingEconomicSemanticsExecute() (gas: 162726)
+[PASS] test_MismatchedEconomicSemanticsFailAtAdapter() (gas: 122363)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.22ms (914.32µs CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_EconomicAtomicRollback.t.sol:AttackEconomicAtomicRollbackTest
+[PASS] test_FailedExecutionDoesNotConsumeNonce() (gas: 190588)
+[PASS] test_FailedExecutionRollsBackPolicySpend() (gas: 121649)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 2.16ms (925.36µs CPU time)
+
+Ran 2 tests for test/attack/phase_p_execution_authorization/Attack_EconomicBalanceIncrease.t.sol:Attack_EconomicBalanceIncrease
+[PASS] test_modelDSettlementHappyPath() (gas: 269082)
+[PASS] test_rebaseMintCannotDistortCharge() (gas: 285421)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 2.37ms (897.48µs CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_EconomicSemanticBoundary.t.sol:AttackEconomicSemanticBoundaryTest
+[PASS] test_ChangingPayloadRequiresNewAuthorization() (gas: 84540)
+[PASS] test_ExactEconomicAmountExecutes() (gas: 175801)
+[PASS] test_SignedIntentCanAuthorizeCalldataWithDifferentEconomicParameter() (gas: 175929)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.08ms (881.41µs CPU time)
+
+Ran 12 tests for test/attack/phase_p_execution_authorization/Attack_ExecutionIntentMutation.t.sol:Attack_ExecutionIntentMutationTest
+[PASS] test_Attack_MutateAgentChangesIntent() (gas: 5594)
+[PASS] test_Attack_MutateAmountChangesIntent() (gas: 5571)
+[PASS] test_Attack_MutateCalldataChangesIntent() (gas: 5740)
+[PASS] test_Attack_MutateDeadlineChangesIntent() (gas: 5660)
+[PASS] test_Attack_MutateNonceChangesIntent() (gas: 5549)
+[PASS] test_Attack_MutateOperatorChangesIntent() (gas: 5549)
+[PASS] test_Attack_MutateProofDomainChangesIntent() (gas: 5550)
+[PASS] test_Attack_MutateProofIdChangesIntent() (gas: 5549)
+[PASS] test_Attack_MutateSelectorChangesIntent() (gas: 5598)
+[PASS] test_Attack_MutateTargetChangesIntent() (gas: 7728)
+[PASS] test_Attack_MutateValueChangesIntent() (gas: 5594)
+[PASS] test_IntentHash_IsDeterministic() (gas: 6146)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 893.72µs (332.74µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_ExpectRevertIsolation.t.sol:Attack_ExpectRevertIsolationTest
+[PASS] test_ExpectRevertAfterStateMutation() (gas: 82618)
+[PASS] test_ExpectRevertAfterViewCall() (gas: 89963)
+[PASS] test_ExpectRevertInsideHelper() (gas: 75287)
+[PASS] test_LowLevelCallAfterStateMutation() (gas: 79993)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 662.47µs (127.17µs CPU time)
+
+Ran 3 tests for test/attack/phase_p_execution_authorization/Attack_ExplicitActorContextConfusion.t.sol:AttackExplicitActorContextConfusionTest
+[PASS] test_ChangingActorInvalidatesAuthorization() (gas: 85308)
+[PASS] test_ChangingWorkflowContextInvalidatesAuthorization() (gas: 83511)
+[PASS] test_ExplicitActorPayloadCanRepresentAuthorizedAgent() (gas: 204453)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.03ms (777.26µs CPU time)
+
+Ran 8 tests for test/attack/phase_p_execution_authorization/Attack_FeeTokenEconomicAccounting.t.sol:Attack_FeeTokenEconomicAccounting
+[PASS] test_a_feeTokenFailsClosedAtomically() (gas: 315820)
+[PASS] test_a_repeatedFeeTokenAttemptsConsumeNoBudget() (gas: 503264)
+[PASS] test_a_smallerIntentStillFailsClosed() (gas: 306071)
+[PASS] test_b_escrowFeeTokenRejected() (gas: 201016)
+[PASS] test_b_escrowFeeTokenRejectedWithReference() (gas: 189606)
+[PASS] test_b_escrowPlainTokenControl() (gas: 359684)
+[PASS] test_c_feeToBoundarySucceedsWithFeeStranded() (gas: 313009)
+[PASS] test_c_feeToThirdPartyFailsClosed() (gas: 343276)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 7.01ms (4.36ms CPU time)
+
+Ran 11 tests for test/attack/phase_p_execution_authorization/Attack_FullIntentSubstitution.t.sol:Attack_FullIntentSubstitutionTest
+[PASS] test_AgentSubstitutionFails() (gas: 54974)
+[PASS] test_AmountSubstitutionFails() (gas: 52975)
+[PASS] test_CapabilitySubstitutionFails() (gas: 52855)
+[PASS] test_ContextSubstitutionFails() (gas: 52910)
+[PASS] test_DeadlineSubstitutionFails() (gas: 52964)
+[PASS] test_MultipleFieldSubstitutionFails() (gas: 53022)
+[PASS] test_NonceSubstitutionFails() (gas: 52909)
+[PASS] test_OriginalIntentExecutes() (gas: 78232)
+[PASS] test_PurposeSubstitutionFails() (gas: 52886)
+[PASS] test_SelectorSubstitutionFails() (gas: 52859)
+[PASS] test_TargetSubstitutionFails() (gas: 52858)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 4.77ms (3.58ms CPU time)
+
+Ran 3 tests for test/attack/phase_k_privacy/Attack_HighSeverityFindings.t.sol:Attack_HighSeverityFindingsTest
+[PASS] test_Attack_EscrowCannotPullVictimFundsViaArbitraryBuyer() (gas: 197773)
+[PASS] test_Attack_PrivacySettlementRecipientRedirection() (gas: 134637)
+[PASS] test_Control_BuyerCanCreateEscrow() (gas: 358775)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.47ms (427.47µs CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_IntentHashFuzz.t.sol:Attack_IntentHashFuzzTest
+[PASS] testFuzz_FieldMutationAlwaysChangesHash(address,uint256,uint256,bytes32) (runs: 1000, μ: 2096, ~: 2196)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 15.61ms (14.88ms CPU time)
+
+Ran 6 tests for test/attack/phase_p_execution_authorization/Attack_IntentIdentityBinding.t.sol:Attack_IntentIdentityBindingTest
+[PASS] test_DataMutationChangesIdentity() (gas: 17016)
+[PASS] test_DomainMutationChangesIdentity() (gas: 17002)
+[PASS] test_OperatorMutationChangesIdentity() (gas: 16972)
+[PASS] test_SelectorMutationChangesIdentity() (gas: 17014)
+[PASS] test_TargetMutationChangesIdentity() (gas: 16967)
+[PASS] test_ValueMutationChangesIdentity() (gas: 17015)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.35ms (389.25µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_MinimalStateReproducer.t.sol:Attack_MinimalStateReproducerTest
+[PASS] test_CancellationConsumesState() (gas: 88043)
+[PASS] test_CancelledBlocksExecution() (gas: 85329)
+[PASS] test_ExecutionConsumesState() (gas: 90415)
+[PASS] test_UsedBlocksCancellation() (gas: 87627)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 984.41µs (269.72µs CPU time)
+
+Ran 8 tests for test/attack/phase_p_execution_authorization/Attack_NonceStateNoCrypto.t.sol:Attack_NonceStateNoCryptoTest
+[PASS] test_CancellationConsumesNonce() (gas: 55578)
+[PASS] test_CancelledBlocksExecution() (gas: 80294)
+[PASS] test_DoubleExecutionReverts() (gas: 82700)
+[PASS] test_ExecutionConsumesNonce() (gas: 55643)
+[PASS] test_LanesAreIndependent() (gas: 111007)
+[PASS] test_NoncesAreIndependent() (gas: 111026)
+[PASS] test_RawSecondExecutionReverts() (gas: 80209)
+[PASS] test_UsedBlocksCancellation() (gas: 82600)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.19ms (466.48µs CPU time)
+
+Ran 2 tests for test/attack/phase_b_money/Attack_PaymentsVolumeSpoof.t.sol:Attack_PaymentsVolumeSpoofTest
+[PASS] test_Attack_AnyoneCanFabricatePaymentVolume() (gas: 61333)
+[PASS] test_Attack_AttackerCanSpamVolume() (gas: 329340)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 931.39µs (240.82µs CPU time)
+
+Ran 6 tests for test/attack/phase_n_authorization_composition/Attack_PolicyComposition.t.sol:Attack_PolicyCompositionTest
+[PASS] test_Attack_AgentSubstitution() (gas: 70457)
+[PASS] test_Attack_OperatorSubstitution() (gas: 73814)
+[PASS] test_Attack_PolicyCannotAuthorizeDifferentCalldata() (gas: 91955)
+[PASS] test_Attack_PolicyCannotAuthorizeDifferentSelector() (gas: 91769)
+[PASS] test_Attack_PolicyCannotAuthorizeDifferentTarget() (gas: 291928)
+[PASS] test_ZeroSpendCanExecuteOnlyWhenExplicitlyAuthorized() (gas: 162090)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 3.68ms (2.01ms CPU time)
+
+Ran 1 test for test/attack/AttackWave1_TemporalState.t.sol:AttackWave1_TemporalStateTest
+[PASS] test_Attack_AgreementDoubleExecutionExploit() (gas: 207862)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 858.16µs (101.74µs CPU time)
+
+Ran 1 test for test/attack/AttackWave2_PhantomEscrow.t.sol:AttackWave2_PhantomEscrowTest
+[PASS] test_Attack_PhantomFundingSpoof() (gas: 82378)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.29ms (133.04µs CPU time)
+
+Ran 2 tests for test/attack/AttackWave2_PrivilegeEscalation.t.sol:AttackWave2_PrivilegeEscalationTest
+[PASS] test_Attack_CoreRouterModuleHijack() (gas: 35515)
+[PASS] test_Attack_DirectEscrowReleaseBypass() (gas: 34729)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.36ms (78.61µs CPU time)
+
+Ran 1 test for test/attack/AttackWave3_EscrowCallerConfusion.t.sol:AttackWave3_EscrowCallerConfusionTest
+[PASS] test_Attack_AttackerCannotSpoofBuyer() (gas: 36605)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.28ms (46.51µs CPU time)
+
+Ran 3 tests for test/attack/AttackWave3_PolicyBoundary.t.sol:AttackWave3_PolicyBoundaryTest
+[PASS] test_Attack_ArbitraryCallerCanSubmitVictimIdentity() (gas: 68764)
+[PASS] test_Attack_EscrowRequirementCannotBeSatisfiedByMissingEscrow() (gas: 155169)
+[PASS] test_Attack_UnauthorizedCallerCannotConsumeVictimDailyLimit() (gas: 89508)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.04ms (822.03µs CPU time)
+
+Ran 1 test for test/attack/phase_p_execution_authorization/Attack_AdapterAgentSourceBypass.t.sol:AttackAdapterAgentSourceBypassTest
+[PASS] test_RedTeam_AdapterCanSpendAgentFundsWithoutBoundaryDelta() (gas: 163906)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.10ms (518.06µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_AgentCapabilityFirewall.t.sol:Attack_AgentCapabilityFirewallTest
+[PASS] test_AllowedCapabilityPasses() (gas: 6051)
+[PASS] test_CapabilitySubstitutionFails() (gas: 8555)
+[PASS] test_SelectorSubstitutionFails() (gas: 8920)
+[PASS] test_TargetSubstitutionFails() (gas: 8786)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 819.74µs (89.22µs CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_AgentIntentFirewall.t.sol:Attack_AgentIntentFirewallTest
+[PASS] test_AgentCanExecuteWithinLimit() (gas: 63236)
+[PASS] test_AgentCannotExceedPerExecutionLimit() (gas: 34132)
+[PASS] test_DailyLimitCannotBeBypassed() (gas: 375700)
+[PASS] test_Fuzz_AmountAboveLimitAlwaysFails(uint256) (runs: 1000, μ: 34694, ~: 34712)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 51.77ms (51.05ms CPU time)
+
+Ran 9 tests for test/attack/phase_p_execution_authorization/Attack_AgentNonceArchitecture.t.sol:Attack_AgentNonceArchitectureTest
+[PASS] test_AgentMutationInvalidatesSignature() (gas: 52651)
+[PASS] test_AttackerCannotConsumeAgentsNonce() (gas: 56777)
+[PASS] test_DifferentLanesCanUseSameNonce() (gas: 150021)
+[PASS] test_LaneMutationInvalidatesSignature() (gas: 50518)
+[PASS] test_ParallelLanesDoNotBlockEachOther() (gas: 223882)
+[PASS] test_SameAgentSameLaneSameNonceReplays() (gas: 100502)
+[PASS] test_SameNonceDifferentAmountRequiresNewSignature() (gas: 50519)
+[PASS] test_SameNonceDifferentTargetStillRequiresNewSignature() (gas: 50550)
+[PASS] test_ZeroNonceIsStillAValidExplicitNonce() (gas: 76141)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 4.95ms (3.80ms CPU time)
+
+Ran 4 tests for test/attack/phase_p_execution_authorization/Attack_AttestationIssuerIntegrity.t.sol:AttackAttestationIssuerIntegrityTest
+[PASS] test_DirectAttestationAttributesIssuerToCaller() (gas: 74420)
+[PASS] test_TypedAttestationBindsClaimHash() (gas: 72416)
+[PASS] test_TypedAttestationBindsSubject() (gas: 72392)
+[PASS] test_TypedAttestationCannotReplay() (gas: 131750)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.25ms (1.14ms CPU time)
+
+Ran 2 tests for test/attack/phase_d_authorization/Attack_AuthorizationBypass.t.sol:AttackAuthorizationBypassTest
+[PASS] test_AttackerCannotDelegateOnVictimIdentity() (gas: 49637)
+[PASS] test_AttackerCannotUseOwnerAddressAsIdentity() (gas: 40302)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.12ms (120.10µs CPU time)
+
+Ran 2 tests for test/AkmenaInvariant.t.sol:AkmenaStatefulInvariantTest
+[PASS] invariant_ActiveVolumeMatchesState() (runs: 1000, calls: 500000, reverts: 0)
+
+╭---------------+---------------+--------+---------+----------╮
+| Contract      | Selector      | Calls  | Reverts | Discards |
++=============================================================+
+| EscrowHandler | createEscrow  | 166958 | 0       | 0        |
+|---------------+---------------+--------+---------+----------|
+| EscrowHandler | refundEscrow  | 166272 | 0       | 0        |
+|---------------+---------------+--------+---------+----------|
+| EscrowHandler | releaseEscrow | 166770 | 0       | 0        |
+╰---------------+---------------+--------+---------+----------╯
+
+[PASS] test_SanityCheck() (gas: 257)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1559.22s (1559.20s CPU time)
+
+Ran 7 tests for test/authorization/AkmenaPolicyBoundary.t.sol:AkmenaPolicyBoundaryUnitTest
+[PASS] test_AgentCannotExecuteWithoutPolicy() (gas: 71565)
+[PASS] test_ExecutionAboveDailyLimitReverts() (gas: 405214)
+[PASS] test_ExecutionAbovePerTransactionLimitReverts() (gas: 177875)
+[PASS] test_PausedCoreBlocksAuthorizedExecution() (gas: 236488)
+[PASS] test_RevertWhen_CoreHasNoCode() (gas: 662949)
+[PASS] test_RevertWhen_CoreIsZero() (gas: 662911)
+[PASS] test_SetAndExecutePolicy() (gas: 257554)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 35.39ms (35.93ms CPU time)
+
+Ran 11 tests for test/privacy/AkmenaPrivatePool.t.sol:AkmenaPrivatePoolTest
+[PASS] test_DepositEmitsAndIncrementsLeaf() (gas: 658254)
+[PASS] test_DepositWrongAmountReverts() (gas: 61142)
+[PASS] test_DepositZeroReverts() (gas: 54351)
+[PASS] test_MultipleDepositsTreeConsistency() (gas: 3218995)
+[PASS] test_PubSignalsBinding() (gas: 811112)
+[PASS] test_WithdrawDoubleSpendReverts() (gas: 804608)
+[PASS] test_WithdrawFeeExceedsDenominationReverts() (gas: 707814)
+[PASS] test_WithdrawHappyPath() (gas: 819359)
+[PASS] test_WithdrawInvalidProofReverts() (gas: 743383)
+[PASS] test_WithdrawUnknownRootReverts() (gas: 915279)
+[PASS] test_WithdrawZeroFeeSelfRelay() (gas: 773904)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 54.92ms (91.62ms CPU time)
+
+Ran 7 tests for test/unit/AkmenaToken.t.sol:AkmenaTokenTest
+[PASS] testCannotDeployWithZeroAddress() (gas: 394175)
+[PASS] testDecimals() (gas: 5594)
+[PASS] testMaxSupplyConstant() (gas: 5550)
+[PASS] testName() (gas: 12030)
+[PASS] testSymbol() (gas: 12029)
+[PASS] testTotalSupply() (gas: 7613)
+[PASS] testTreasuryOwnsEntireSupply() (gas: 7784)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.06ms (402.02µs CPU time)
+
+Ran 2 tests for test/unit/AkmenaTokenOwnership.t.sol:AkmenaTokenOwnershipTest
+[PASS] test_InitialHolderCanTransferOwnership() (gas: 77500)
+[PASS] test_InitialHolderReceivesEntireInitialSupply() (gas: 15228)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.04ms (121.10µs CPU time)
+
+Ran 167 test suites in 1560.28s (1608.48s CPU time): 871 tests passed, 0 failed, 0 skipped (871 total tests)
+EXIT:0

@@ -1,0 +1,522 @@
+======================================================================
+AKMENA INVARIANT CAMPAIGN — IMMUTABLE HEADER
+======================================================================
+Candidate revision: d0848055e0545f24c9bb3b32df4c96fe57447e10 (d0848055)
+Working tree: DIRTY
+Working tree changes:
+ M crytic-export/combined_solc.json
+ M fuzz-corpus/.medusa-artifact-hash
+ M fuzz-corpus/coverage/coverage_report.html
+ M fuzz-corpus/coverage/lcov.info
+?? fuzz-corpus/call_sequences/1790947190677787917-d10899f8-ba05-47ea-981a-c01d0e3fbaf9.json
+Invariant suite: 17 suites (test/invariant/*)
+Started: 2026-10-03T17:57:03Z (UTC)
+
+Relevant security patches included:
+  - GAP-1 (zero-value native DoS fix): 0c3c38c2
+  - GAP-3 (confused-deputy hardening): 0c3c38c2
+  - GAP-3 isEnabled (disabled module rejection): 0c3c38c2
+
+Command: forge test --match-path "test/invariant/*"
+======================================================================
+
+No files changed, compilation skipped
+
+Ran 1 test for test/invariant/CoreRouterInvariant.t.sol:CoreRouterInvariant
+[PASS]
+CoreRouterInvariant invariants:
+[PASS] invariant_deployerNeverChanges
+[PASS] invariant_getModuleNeverReturnsEnabledZeroAddress
+[PASS] invariant_protocolVersionConstant
+ CoreRouterInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-------------------+----------------+--------+---------+----------╮
+| Contract          | Selector       | Calls  | Reverts | Discards |
++==================================================================+
+| CoreRouterHandler | pause          | 166630 | 0       | 0        |
+|-------------------+----------------+--------+---------+----------|
+| CoreRouterHandler | registerModule | 166269 | 0       | 0        |
+|-------------------+----------------+--------+---------+----------|
+| CoreRouterHandler | toggleModule   | 167101 | 0       | 0        |
+╰-------------------+----------------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 55.14s (55.13s CPU time)
+
+Ran 1 test for test/invariant/EconomicLayerInvariant.t.sol:EconomicLayerInvariantTest
+[PASS]
+EconomicLayerInvariantTest invariants:
+[PASS] invariant_InitialSupplyIsOwned
+[PASS] invariant_TokenSupplyNeverExceedsMaximum
+[PASS] invariant_TokenSupplyRemainsConserved
+ EconomicLayerInvariantTest invariants (runs: 1000, calls: 500000, reverts: 437145)
+
+╭-------------+---------------------------+--------+---------+----------╮
+| Contract    | Selector                  | Calls  | Reverts | Discards |
++=======================================================================+
+| AkmenaToken | approve                   | 62563  | 355     | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | cancelAuthorization       | 62372  | 62372   | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | permit                    | 62158  | 62158   | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | receiveWithAuthorization  | 62527  | 62527   | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | transfer                  | 62887  | 62544   | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | transferFrom              | 63108  | 62804   | 0        |
+|-------------+---------------------------+--------+---------+----------|
+| AkmenaToken | transferWithAuthorization | 124385 | 124385  | 0        |
+╰-------------+---------------------------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 18.57s (18.56s CPU time)
+
+Ran 1 test for test/invariant/ModelDBoundaryInvariantV2.t.sol:ModelDBoundaryInvariantV2
+[PASS]
+ModelDBoundaryInvariantV2 invariants:
+[PASS] invariant_adapterReceiptsHonest
+[PASS] invariant_boundaryBalanceZeroHonest
+[PASS] invariant_chargeCoversDelivery
+[PASS] invariant_crossOperatorIsolation
+[PASS] invariant_dailyLimitRespected
+[PASS] invariant_exactConservationHonest
+[PASS] invariant_noReentrySuccess
+[PASS] invariant_nonceUniqueness
+[PASS] invariant_operatorOnlyFunding
+[PASS] invariant_revertAtomicity
+ ModelDBoundaryInvariantV2 invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-------------------------+----------------------+-------+---------+----------╮
+| Contract                | Selector             | Calls | Reverts | Discards |
++=============================================================================+
+| ModelDBoundaryHandlerV2 | govAddAdapter        | 55677 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | govAddToken          | 55702 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | govReconfigurePolicy | 55577 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | govRemoveAdapter     | 56041 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | govRemoveToken       | 55261 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | setTokenMode         | 54943 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | settle               | 55798 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | settleReentrant      | 55381 | 0       | 0        |
+|-------------------------+----------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV2 | warpTime             | 55620 | 0       | 0        |
+╰-------------------------+----------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 442.75s (442.75s CPU time)
+
+Ran 1 test for test/invariant/ModelDBoundaryInvariantV3.t.sol:ModelDBoundaryInvariantV3Honest
+[PASS]
+ModelDBoundaryInvariantV3Honest invariants:
+[PASS] invariant_adapterReceipts
+[PASS] invariant_allowanceSync
+[PASS] invariant_boundaryBalanceZero
+[PASS] invariant_chargeCoversDelivery
+[PASS] invariant_crossOperatorIsolation
+[PASS] invariant_dailyLimitRespected
+[PASS] invariant_exactConservation
+[PASS] invariant_governanceAdminSync
+[PASS] invariant_noReentrySuccess
+[PASS] invariant_nonceUniqueness
+[PASS] invariant_operatorOnlyFunding
+[PASS] invariant_replayAlwaysReverts
+[PASS] invariant_revertAtomicity
+[PASS] invariant_tokenIsolation
+[PASS] invariant_tokenStaysHonest
+ ModelDBoundaryInvariantV3Honest invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-------------------------------+--------------------------------+-------+---------+----------╮
+| Contract                      | Selector                       | Calls | Reverts | Discards |
++=============================================================================================+
+| ModelDBoundaryHandlerV3Honest | allowanceReduce                | 21546 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | allowanceRestore               | 21674 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | allowanceRevoke                | 21647 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govAddAdapter                  | 21749 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govAddToken                    | 21920 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govPause                       | 21619 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govReconfigurePolicy           | 21945 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govRemoveAdapter               | 21716 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govRemoveToken                 | 21878 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govRotateGuardian              | 21809 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govStaleAdminAttempt           | 21441 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govTransferAllowlistAdmin      | 21711 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govTransferEmergencyAdmin      | 21929 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govUnauthorizedEmergencyRemove | 21647 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | govUnpause                     | 21838 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | replayStoredIntent             | 21694 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | setTokenMode                   | 22007 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | settle                         | 21878 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | settleReentrant                | 21453 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | settleToken2                   | 21810 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | tokenBlacklist                 | 21604 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | tokenPause                     | 21882 | 0       | 0        |
+|-------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Honest | warpTime                       | 21603 | 0       | 0        |
+╰-------------------------------+--------------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 580.93s (580.92s CPU time)
+
+Ran 1 test for test/invariant/ModelDBoundaryInvariantV3.t.sol:ModelDBoundaryInvariantV3Malicious
+[PASS]
+ModelDBoundaryInvariantV3Malicious invariants:
+[PASS] invariant_allowanceSync
+[PASS] invariant_chargeCoversDelivery
+[PASS] invariant_crossOperatorIsolation
+[PASS] invariant_dailyLimitRespected
+[PASS] invariant_governanceAdminSync
+[PASS] invariant_noPhantomFunds
+[PASS] invariant_noReentrySuccess
+[PASS] invariant_nonceUniqueness
+[PASS] invariant_operatorOnlyFunding
+[PASS] invariant_replayAlwaysReverts
+[PASS] invariant_revertAtomicity
+[PASS] invariant_tokenIsolation
+ ModelDBoundaryInvariantV3Malicious invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭----------------------------------+--------------------------------+-------+---------+----------╮
+| Contract                         | Selector                       | Calls | Reverts | Discards |
++================================================================================================+
+| ModelDBoundaryHandlerV3Malicious | allowanceReduce                | 21546 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | allowanceRestore               | 21674 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | allowanceRevoke                | 21647 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govAddAdapter                  | 21749 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govAddToken                    | 21920 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govPause                       | 21619 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govReconfigurePolicy           | 21945 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govRemoveAdapter               | 21716 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govRemoveToken                 | 21878 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govRotateGuardian              | 21809 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govStaleAdminAttempt           | 21441 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govTransferAllowlistAdmin      | 21711 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govTransferEmergencyAdmin      | 21929 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govUnauthorizedEmergencyRemove | 21647 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | govUnpause                     | 21838 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | replayStoredIntent             | 21694 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | setTokenMode                   | 22007 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | settle                         | 21878 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | settleReentrant                | 21453 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | settleToken2                   | 21810 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | tokenBlacklist                 | 21604 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | tokenPause                     | 21882 | 0       | 0        |
+|----------------------------------+--------------------------------+-------+---------+----------|
+| ModelDBoundaryHandlerV3Malicious | warpTime                       | 21603 | 0       | 0        |
+╰----------------------------------+--------------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 512.93s (512.91s CPU time)
+
+Ran 1 test for test/invariant/RegistryInvariant.t.sol:RegistryInvariant
+[PASS]
+RegistryInvariant invariants:
+[PASS] invariant_identityCounterMatchesSuccessfulAllocations
+[PASS] invariant_identityZeroReserved
+[PASS] invariant_lastAllocatedIdIsImmediatelyBeforeNext
+ RegistryInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-----------------+------------------+--------+---------+----------╮
+| Contract        | Selector         | Calls  | Reverts | Discards |
++==================================================================+
+| RegistryHandler | allocateIdentity | 500000 | 0       | 0        |
+╰-----------------+------------------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 54.74s (54.73s CPU time)
+
+Ran 2 tests for test/invariant/SettlementInvariant.t.sol:SettlementInvariant
+[PASS]
+SettlementInvariant invariants:
+[PASS] invariant_noDuplicateSettlementSuccesses
+[PASS] invariant_settlementDataIntegrity
+[PASS] invariant_unknownSettlementReverts
+ SettlementInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-------------------+------------------+--------+---------+----------╮
+| Contract          | Selector         | Calls  | Reverts | Discards |
++====================================================================+
+| SettlementHandler | recordSettlement | 500000 | 0       | 0        |
+╰-------------------+------------------+--------+---------+----------╯
+
+[PASS] test_SanityCheck() (gas: 235)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 81.98s (81.98s CPU time)
+
+Ran 1 test for test/invariant/TokenEconomicInvariant.t.sol:TokenEconomicInvariant
+[PASS]
+TokenEconomicInvariant invariants:
+[PASS] invariant_HolderBalancesCannotExceedSupply
+[PASS] invariant_MaxSupplyIsNeverExceeded
+[PASS] invariant_TokenMetadataIsStable
+[PASS] invariant_TotalSupplyRemainsFixed
+ TokenEconomicInvariant invariants (runs: 1000, calls: 500000, reverts: 496380)
+
+╭-------------+--------------+--------+---------+----------╮
+| Contract    | Selector     | Calls  | Reverts | Discards |
++==========================================================+
+| AkmenaToken | transfer     | 250661 | 248559  | 0        |
+|-------------+--------------+--------+---------+----------|
+| AkmenaToken | transferFrom | 249339 | 247821  | 0        |
+╰-------------+--------------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 12.26s (12.25s CPU time)
+
+Ran 2 tests for test/invariant/TokenInvariant.t.sol:TokenInvariant
+[PASS]
+TokenInvariant invariants:
+[PASS] invariant_tokenConservation
+[PASS] invariant_tokenMetadataImmutable
+[PASS] invariant_totalSupplyNeverExceedsMax
+ TokenInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭--------------+----------+--------+---------+----------╮
+| Contract     | Selector | Calls  | Reverts | Discards |
++=======================================================+
+| TokenHandler | transfer | 500000 | 0       | 0        |
+╰--------------+----------+--------+---------+----------╯
+
+[PASS] test_SanityCheck() (gas: 257)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 84.79s (84.78s CPU time)
+
+Ran 3 tests for test/invariant/TreasuryInvariant.t.sol:TreasuryInvariantTest
+[PASS] test_DisbursementPreservesCustodyAccounting() (gas: 146310)
+[PASS] test_TreasuryBalanceEqualsActualTokenCustody() (gas: 84277)
+[PASS] test_TreasurySupplyEqualsTokenSupply() (gas: 18443)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 7.96ms (238.30µs CPU time)
+
+Ran 2 tests for test/invariant/WorkflowInvariant.t.sol:WorkflowInvariant
+[PASS]
+WorkflowInvariant invariants:
+[PASS] invariant_initializeCountMatchesRecords
+[PASS] invariant_unauthorizedAdvancesNeverSucceed
+[PASS] invariant_workflowIdsAreNeverZero
+ WorkflowInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-----------------+-------------------------+--------+---------+----------╮
+| Contract        | Selector                | Calls  | Reverts | Discards |
++=========================================================================+
+| WorkflowHandler | advanceWorkflow         | 166448 | 0       | 0        |
+|-----------------+-------------------------+--------+---------+----------|
+| WorkflowHandler | initializeValidWorkflow | 167292 | 0       | 0        |
+|-----------------+-------------------------+--------+---------+----------|
+| WorkflowHandler | initializeWorkflow      | 166260 | 0       | 0        |
+╰-----------------+-------------------------+--------+---------+----------╯
+
+[PASS] test_SanityCheck() (gas: 235)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 444.40s (444.38s CPU time)
+
+Ran 1 test for test/invariant/IdentityInvariant.t.sol:IdentityInvariant
+[PASS]
+IdentityInvariant invariants:
+[PASS] invariant_identityIdNeverChanges
+[PASS] invariant_metadataAlwaysValid
+[PASS] invariant_ownerNeverZero
+[PASS] invariant_protocolVersionConstant
+ IdentityInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-----------------+-------------------+--------+---------+----------╮
+| Contract        | Selector          | Calls  | Reverts | Discards |
++===================================================================+
+| IdentityHandler | deactivate        | 166298 | 0       | 0        |
+|-----------------+-------------------+--------+---------+----------|
+| IdentityHandler | transferOwnership | 166507 | 0       | 0        |
+|-----------------+-------------------+--------+---------+----------|
+| IdentityHandler | updateMetadata    | 167195 | 0       | 0        |
+╰-----------------+-------------------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 62.99s (62.96s CPU time)
+
+Ran 5 tests for test/invariant/MedusaSettlementProof.t.sol:MedusaSettlementProofTest
+[PASS] test_InvariantsHoldAfterSettlement() (gas: 581847)
+[PASS] test_RegisterPresignedIsOneShot() (gas: 33751)
+[PASS] test_ReplayRevertsNonceConsumed() (gas: 483448)
+[PASS] test_SecondIntentSucceeds() (gas: 556759)
+[PASS] test_SettlementSucceeds() (gas: 425246)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 35.37ms (21.59ms CPU time)
+
+Warning: Invariant function `invariant_boundaryClean()` returns `bool`, but its return value is ignored; use assertions or revert to indicate failure.
+Warning: Invariant function `invariant_boundaryCleanNative()` returns `bool`, but its return value is ignored; use assertions or revert to indicate failure.
+Warning: Invariant function `invariant_conservation()` returns `bool`, but its return value is ignored; use assertions or revert to indicate failure.
+Warning: Invariant function `invariant_nativeAccounting()` returns `bool`, but its return value is ignored; use assertions or revert to indicate failure.
+Ran 1 test for test/invariant/handlers/ModelDBoundaryHandlerMedusa.sol:ModelDBoundaryHandlerMedusa
+[PASS]
+ModelDBoundaryHandlerMedusa invariants:
+[PASS] invariant_boundaryClean
+[PASS] invariant_boundaryCleanNative
+[PASS] invariant_conservation
+[PASS] invariant_nativeAccounting
+ ModelDBoundaryHandlerMedusa invariants (runs: 1000, calls: 500000, reverts: 343827)
+
+╭------------------------------+--------------------------------+-------+---------+----------╮
+| Contract                     | Selector                       | Calls | Reverts | Discards |
++============================================================================================+
+| AkmenaExecutionAuthorization | verifyAndConsume               | 18448 | 18448   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | emergencyRemoveEconomicAdapter | 18633 | 18631   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | emergencyRemoveStandardDebit   | 18416 | 18411   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | executeAuthorizedAgentCall     | 18301 | 18301   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setAgentAssetPolicy            | 18810 | 18801   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setAgentPolicy                 | 18612 | 0       | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setAllowlistAdmin              | 18490 | 18487   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setEconomicAdapter             | 18725 | 18725   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setEmergencyAdmin              | 18358 | 18357   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaPolicyBoundary         | setStandardDebit               | 18653 | 18653   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | acceptDeployer                 | 18569 | 18569   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | cancelDeployerTransfer         | 18552 | 18550   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | proposeDeployer                | 18504 | 18504   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | registerModule                 | 18653 | 18649   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | setModuleStatus                | 18184 | 18183   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | setPauseGuardian               | 18332 | 18331   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| AkmenaCore                   | setPaused                      | 18469 | 18467   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzAdapter            | execute                        | 18555 | 1591    | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | approve                        | 18467 | 139     | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | mint                           | 18585 | 1508    | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | setBlacklisted                 | 18773 | 0       | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | setMode                        | 18698 | 11844   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | setPaused                      | 18410 | 0       | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | transfer                       | 18436 | 16351   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaFuzzToken              | transferFrom                   | 18326 | 16327   | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaReentrantAdapter       | execute                        | 18582 | 0       | 0        |
+|------------------------------+--------------------------------+-------+---------+----------|
+| MedusaReentrantAdapter       | setReentry                     | 18459 | 0       | 0        |
+╰------------------------------+--------------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 24.81s (24.80s CPU time)
+
+Ran 1 test for test/invariant/ModelDBoundaryInvariant.t.sol:ModelDBoundaryInvariant
+[PASS]
+ModelDBoundaryInvariant invariants:
+[PASS] invariant_boundaryBalanceZero
+[PASS] invariant_chargeEqualsDelivery
+[PASS] invariant_dailyLimitRespected
+[PASS] invariant_nonceUniqueness
+[PASS] invariant_operatorOnlyFunding
+ ModelDBoundaryInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-----------------------+----------+--------+---------+----------╮
+| Contract              | Selector | Calls  | Reverts | Discards |
++================================================================+
+| ModelDBoundaryHandler | settle   | 500000 | 0       | 0        |
+╰-----------------------+----------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 347.55s (347.52s CPU time)
+
+Ran 2 tests for test/invariant/GovernanceInvariant.t.sol:GovernanceInvariant
+[PASS]
+GovernanceInvariant invariants:
+[PASS] invariant_noDuplicateProposalSuccesses
+[PASS] invariant_proposalCountConsistency
+ GovernanceInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭-------------------+-----------------+--------+---------+----------╮
+| Contract          | Selector        | Calls  | Reverts | Discards |
++===================================================================+
+| GovernanceHandler | createProposal  | 166652 | 0       | 0        |
+|-------------------+-----------------+--------+---------+----------|
+| GovernanceHandler | executeProposal | 166118 | 0       | 0        |
+|-------------------+-----------------+--------+---------+----------|
+| GovernanceHandler | rejectProposal  | 167230 | 0       | 0        |
+╰-------------------+-----------------+--------+---------+----------╯
+
+[PASS] test_SanityCheck() (gas: 235)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 46.09s (46.07s CPU time)
+
+Ran 4 tests for test/invariant/EscrowInvariant.t.sol:EscrowInvariant
+[PASS]
+EscrowInvariant invariants:
+[PASS] invariant_createdEscrowsAreValid
+[PASS] invariant_onlyBuyerCanRelease
+[PASS] invariant_onlySellerCanRefund
+[PASS] invariant_successfulCreateCountMatchesRecordedIds
+[PASS] invariant_terminalStatesAreMutuallyExclusive
+ EscrowInvariant invariants (runs: 1000, calls: 500000, reverts: 0)
+
+╭---------------+---------------+--------+---------+----------╮
+| Contract      | Selector      | Calls  | Reverts | Discards |
++=============================================================+
+| EscrowHandler | createEscrow  | 167004 | 0       | 0        |
+|---------------+---------------+--------+---------+----------|
+| EscrowHandler | refundEscrow  | 166872 | 0       | 0        |
+|---------------+---------------+--------+---------+----------|
+| EscrowHandler | releaseEscrow | 166124 | 0       | 0        |
+╰---------------+---------------+--------+---------+----------╯
+
+[PASS] test_HandlerCanSuccessfullyCreateEscrow() (gas: 465060)
+[PASS] test_RevertWhen_QueryingEscrowZero() (gas: 11983)
+[PASS] test_SanityCheck() (gas: 258)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2904.20s (2904.19s CPU time)
+
+Ran 17 test suites in 2977.95s (5674.16s CPU time): 30 tests passed, 0 failed, 0 skipped (30 total tests)
+EXIT:0
+
+======================================================================
+CAMPAIGN COMPLETE
+Finished: 2026-10-03T18:46:42Z (UTC)
+Exit code: 0
+Candidate revision: d0848055e0545f24c9bb3b32df4c96fe57447e10
+======================================================================
