@@ -219,4 +219,48 @@ contract AkmenaExecutionAuthorizationTest is Test {
 
         auth.verifyAndConsume(intent, payload, 0, signature);
     }
+
+    /// @notice R10 mutant-2 regression: zero-agent intents must revert
+    /// InvalidAgent before signature verification. Defense-in-depth:
+    /// address(0) cannot sign, but the explicit check gives a clear error.
+    function test_R10_ZeroAgentReverts() public {
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(1, 1 ether);
+        intent.agent = address(0);
+
+        bytes memory payload = _payload(1 ether);
+        // Sign with the real key; the agent check fires before sig verification.
+        bytes memory signature = _sign(intent, agentPrivateKey);
+
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidAgent.selector);
+        auth.verifyAndConsume(intent, payload, 0, signature);
+    }
+
+    /// @notice R10 mutant-4 regression: zero-target intents must revert
+    /// InvalidTarget. Calling address(0) is a silent no-op that would
+    /// burn the agent's nonce for nothing.
+    function test_R10_ZeroTargetReverts() public {
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(1, 1 ether);
+        intent.target = address(0);
+
+        bytes memory payload = _payload(1 ether);
+        bytes memory signature = _sign(intent, agentPrivateKey);
+
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidTarget.selector);
+        auth.verifyAndConsume(intent, payload, 0, signature);
+    }
+
+    /// @notice R10 mutant-14 regression: payloads shorter than 4 bytes
+    /// (cannot contain a selector) must revert InvalidSelector.
+    function test_R10_ShortPayloadReverts() public {
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent = _intent(1, 1 ether);
+
+        bytes memory fullPayload = hex"1234";
+        bytes memory shortPayload = new bytes(2);
+        shortPayload[0] = fullPayload[0];
+        shortPayload[1] = fullPayload[1];
+        bytes memory signature = _sign(intent, agentPrivateKey);
+
+        vm.expectRevert(AkmenaExecutionAuthorization.InvalidSelector.selector);
+        auth.verifyAndConsume(intent, shortPayload, 0, signature);
+    }
 }

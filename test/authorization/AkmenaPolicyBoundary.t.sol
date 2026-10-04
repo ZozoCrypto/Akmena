@@ -239,4 +239,39 @@ contract AkmenaPolicyBoundaryUnitTest is Test {
 
         new AkmenaPolicyBoundary(address(0xBEEF));
     }
+
+    /// @notice R10 mutant-8 regression: a non-zero asset address with no
+    /// contract code must revert InvalidAsset(). Pins the asset-validity
+    /// gate in executeAuthorizedAgentCall.
+    function test_R10_InvalidAssetReverts() public {
+        address fakeAsset = address(0x1234);
+        assertEq(fakeAsset.code.length, 0, "test setup: fake asset must have no code");
+
+        bytes memory payload = abi.encodeWithSelector(DummyTarget.ping.selector);
+
+        AkmenaExecutionAuthorization.ExecutionIntent memory intent =
+            AkmenaExecutionAuthorization.ExecutionIntent({
+                operator: humanOperator,
+                agent: aiAgentHotWallet,
+                target: address(target),
+                selector: DummyTarget.ping.selector,
+                asset: fakeAsset,
+                calldataHash: keccak256(payload),
+                amount: 1 ether,
+                value: 0,
+                proofModuleKey: bytes32(0),
+                proofId: 0,
+                nonce: 0,
+                validAfter: block.timestamp,
+                deadline: block.timestamp + 1 hours
+            });
+
+        bytes memory signature = _sign(intent);
+
+        vm.prank(aiAgentHotWallet);
+        vm.expectRevert(AkmenaPolicyBoundary.InvalidAsset.selector);
+        boundary.executeAuthorizedAgentCall(intent, payload, signature);
+
+        assertEq(target.calls(), 0);
+    }
 }

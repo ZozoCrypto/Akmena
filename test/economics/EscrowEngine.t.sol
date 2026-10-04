@@ -182,4 +182,94 @@ contract EscrowEngineTest is Test {
 
         escrow.refundEscrow(id);
     }
+
+    /// @notice R10 mutant-7 regression: createEscrow must revert when
+    /// msg.sender != buyer. Without this check, anyone could create escrow
+    /// records pulling funds from a buyer's wallet (via their standing
+    /// approval) without the buyer's consent for that specific escrow.
+    function test_R10_RevertWhen_CreateEscrowByNonBuyer() public {
+        // Buyer approves the escrow (standing approval, as in normal use).
+        vm.prank(buyer);
+        token.approve(address(escrow), FUNDING);
+
+        // Attacker tries to create an escrow naming the buyer.
+        vm.prank(attacker);
+        vm.expectRevert(IEscrowEngine.UnauthorizedAccess.selector);
+        escrow.createEscrow(buyer, seller, FUNDING);
+
+        // No escrow was created, no funds moved.
+        assertEq(token.balanceOf(address(escrow)), 0);
+    }
+
+    /// @notice R10 mutant-1 regression: deploying with zero asset must revert.
+    function test_R10_RevertWhen_DeployWithZeroAsset() public {
+        vm.expectRevert(IEscrowEngine.InvalidAddress.selector);
+        new EscrowEngine(address(0));
+    }
+
+    /// @notice R10 mutant-16 regression: releasing a non-existent escrow
+    /// must revert EscrowNotFound (existing test only covers getEscrow).
+    function test_R10_RevertWhen_ReleaseNonexistentEscrow() public {
+        vm.prank(buyer);
+        vm.expectRevert(IEscrowEngine.EscrowNotFound.selector);
+        escrow.releaseEscrow(999);
+    }
+
+    /// @notice R10 mutant-17 regression: release must revert when escrow
+    /// token balance is below the locked amount (defense-in-depth).
+    function test_R10_RevertWhen_ReleaseInsufficientBalance() public {
+        uint256 id = _createFundedEscrow();
+
+        // Simulate unexpected balance deficit (e.g. fee-on-transfer edge).
+        vm.prank(address(escrow));
+        token.transfer(address(0x999), 1);
+
+        vm.prank(buyer);
+        vm.expectRevert(IEscrowEngine.InsufficientEscrowBalance.selector);
+        escrow.releaseEscrow(id);
+    }
+
+    /// @notice R10 mutant-26 regression: refund must revert on insufficient
+    /// balance (defense-in-depth, refund path).
+    function test_R10_RevertWhen_RefundInsufficientBalance() public {
+        uint256 id = _createFundedEscrow();
+
+        vm.prank(address(escrow));
+        token.transfer(address(0x999), 1);
+
+        vm.prank(seller);
+        vm.expectRevert(IEscrowEngine.InsufficientEscrowBalance.selector);
+        escrow.refundEscrow(id);
+    }
+
+    /// @notice R10 mutant-27 regression: the balance check must not be
+    /// inverted. With excess balance (donation), refund must still succeed.
+    /// Mutant 27 (`amount < balance`) would wrongly revert here.
+    function test_R10_RefundExcessBalanceSucceeds() public {
+        uint256 id = _createFundedEscrow();
+
+        // Donate 1 wei to the escrow: balance > amount.
+        vm.prank(buyer);
+        token.transfer(address(escrow), 1);
+
+        uint256 buyerBefore = token.balanceOf(buyer);
+
+        vm.prank(seller);
+        escrow.refundEscrow(id);
+
+        // Refund succeeds and returns exactly the locked amount.
+        assertEq(token.balanceOf(buyer), buyerBefore + FUNDING);
+    }
+
+    /// @notice R10 mutant-28 regression: refund must decrement
+    /// totalLockedByAsset by the full amount, not 1 wei.
+    function test_R10_RefundAccountingExact() public {
+        uint256 id = _createFundedEscrow();
+        assertEq(escrow.totalLockedByAsset(address(token)), FUNDING);
+
+        vm.prank(seller);
+        escrow.refundEscrow(id);
+
+        assertEq(escrow.totalLockedByAsset(address(token)), 0, "accounting must clear fully");
+    }
 }
